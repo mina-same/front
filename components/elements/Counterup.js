@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 
-export default function CounterUp ({ end, duration }) {
+export default function CounterUp({ end, duration }) {
   const [count, setCount] = useState(0)
   const countRef = useRef(null)
-  const increment = end / duration
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -26,6 +25,8 @@ export default function CounterUp ({ end, duration }) {
   }, [])
 
   useEffect(() => {
+    const increment = end / duration
+
     const interval = setInterval(() => {
       setCount((prevCount) => {
         const newCount = prevCount + increment
@@ -41,7 +42,7 @@ export default function CounterUp ({ end, duration }) {
     return () => {
       clearInterval(interval)
     }
-  }, [end, increment])
+  }, [end, duration])
 
   const startCount = () => {
     setCount(0)

@@ -195,7 +195,7 @@ const Login = () => {
 
 							<div className="w-full mt-12 mx-auto text-center">
 								<p>
-									Don't Have an Account?{" "}
+									Don&apos;t Have an Account?{" "}
 									<Link
 										href="/signup"
 										className="inline-block text-xs text-[#a78638] hover:text-[#C19733] font-semibold leading-none wow animate__animated animate__fadeIn animated"

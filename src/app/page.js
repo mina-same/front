@@ -28,7 +28,7 @@ function Home() {
 		return () => {
 			window.removeEventListener("scroll", handleScroll)
 		}
-	}, [])
+	}, [handleScroll])
 
 	return (
 		<>
