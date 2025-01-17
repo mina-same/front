@@ -435,7 +435,60 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
         about_en: '',
         serviceType: '',
         location: '',
-        // ... (reset all other fields)
+        country: '',
+        government: '',
+        city: '',
+        graduationDetails: {
+          graduationCertificate: '',
+          previousExperience: ''
+        },
+        competitions: {
+          level: '',
+          heightDistance: '',
+          organiserName: '',
+          mainReferee: '',
+          coReferee1: '',
+          coReferee2: '',
+          raceType: '',
+          prize: '',
+          sponsor: '',
+          sponsorshipValue: 0
+        },
+        horseTrainerDetails: {
+          trainerLevel: '',
+          accreditationCertificate: ''
+        },
+        hoofTrimmerDetails: {
+          hoofTrimmerDetails: ''
+        },
+        transportDetails: {
+          numberOfHorses: 0,
+          vehicleType: ''
+        },
+        contractorDetails: '',
+        supplierDetails: '',
+        cateringOptions: [],
+        tripCoordinator: {
+          locationOfHorses: '',
+          locationOfTent: '',
+          startDate: '',
+          endDate: '',
+          breakTimes: '',
+          meals: [],
+          containsAidBag: false,
+          activities: '',
+          priceForFamilyOf2: 0,
+          priceForFamilyOf3: 0,
+          priceForFamilyOf4: 0,
+          tripProgram: '',
+          levelOfHardship: '',
+          conditionsAndRequirements: '',
+          safetyAndEquipment: '',
+          cancellationAndRefundPolicy: '',
+          moreDetails: ''
+        },
+        statusAdminApproved: false,
+        statusProviderApproved: true
       });
       setImagePreview(null);
       setAgreedToTerms(false);

@@ -78,7 +78,6 @@ const ProfilePage = () => {
         verifyUser();
     }, [router]);
 
-
     // Fetch user data effect
     useEffect(() => {
         if (!userId) return;
@@ -115,7 +114,6 @@ const ProfilePage = () => {
         fetchUserData();
     }, [userId]);
 
-
     // Fetch services effect
     useEffect(() => {
         const fetchServices = async () => {
@@ -135,6 +133,7 @@ const ProfilePage = () => {
                 }`;
                 
                 const result = await client.fetch(query, { providerId: userId });
+                console.log(result);
                 setServices(result);
             } catch (error) {
                 console.error('Error fetching services:', error);
@@ -413,7 +412,7 @@ const ProfilePage = () => {
                                 <Card key={service._id} className="hover:shadow-lg transition-shadow">
                                     <div className="aspect-w-16 aspect-h-9 relative">
                                         <img
-                                            src={service.image ? urlFor(service.image).url() : '/placeholder-service.png'}
+                                            src={'/assets/imgs/placeholders'}
                                             alt={service.name_en}
                                             className="w-full h-48 object-cover rounded-t-lg"
                                         />
@@ -617,43 +616,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
-
-
-
-{/* {(user.socialLinks || []).map((social, index) => (
-<div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-<div className="flex items-center gap-3">
-<div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-<span className="text-gray-600">{social.platform.charAt(0)}</span>
-</div>
-<div>
-<p className="font-medium">{social.platform}</p>
-<p className="text-sm text-gray-500">{social.username}</p>
-</div>
-</div>
-<button className="text-red-600 hover:text-red-700 text-sm font-medium">
-Disconnect
-</button>
-</div>
-))} */}
-
-{/* <div className="flex items-center gap-3">
-<Briefcase className="text-gray-400" size={20} />
-<div>
-<p className="text-sm text-gray-500">Profession</p>
-<p className="font-medium">{user.profession || 'Not provided'}</p>
-</div>
-</div> */}
-{/* <div>
-<label className="block text-sm font-medium text-gray-700 mb-2">
-Profession
-</label>
-<input
-type="text"
-name="profession"
-value={formData.profession || ''}
-onChange={handleChange}
-className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500"
-/>
-</div> */}
