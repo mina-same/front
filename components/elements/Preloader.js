@@ -3,15 +3,17 @@ import Image from "next/image"
 const Preloader = () => {
 	return (
 		<>
-			<div id="preloader-active">
-				<div className="preloader flex-1 content-center">
-					<div className="logo absolute inset-y-2/4 jump">
+			<div id="preloader-active" className="flex items-center justify-center min-h-screen">
+				<div className="preloader flex flex-col items-center justify-center">
+					<div className="logo jump">
 						<Image
 							width="0"
 							height="0"
 							sizes="100vw"
-							style={{ width: "auto", height: "auto" }} src="/assets/imgs/logos/favicon.svg" alt="Monst" />
-						<h1 className="text-lg font-semibold">Monst</h1>
+							style={{ width: "auto", height: "auto" }} 
+							src="/assets/imgs/logos/logohorse.svg" 
+							alt="Monst" 
+						/>
 					</div>
 				</div>
 			</div>

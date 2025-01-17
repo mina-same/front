@@ -1,9 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { client, urlFor } from "../../src/lib/sanity";
 
 const Header = ({ handleHidden }) => {
+  const router = useRouter();
   const [scroll, setScroll] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [userImage, setUserImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     document.addEventListener("scroll", () => {
       const scrollCheck = window.scrollY > 100;
@@ -12,6 +21,79 @@ const Header = ({ handleHidden }) => {
       }
     });
   });
+
+  useEffect(() => {
+    const verifyUser = async () => {
+      try {
+        const response = await fetch("/api/auth/verify", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await response.json();
+  
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          setUserId(data.user.id);
+  
+          // Fetch user data after setting userId
+          const fetchUserData = async () => {
+            try {
+              const query = `*[_type == "user" && _id == $userId]{
+                image
+              }[0]`;
+              const params = { userId: data.user.id }; // Use data.user.id directly
+              const userData = await client.fetch(query, params);
+  
+              if (!userData) {
+                throw new Error('User not found.');
+              }
+
+              setUserImage(userData.image)
+
+              // Update state with user data (e.g., setUserImage(userData.image))
+            } catch (err) {
+              console.error('Error fetching user data:', err);
+              setError('Failed to load profile data.');
+            }
+          };
+  
+          await fetchUserData(); // Call fetchUserData after setting userId
+        }
+      } catch (error) {
+        console.error("Error verifying user:", error);
+        setError("Authentication failed.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    verifyUser();
+  }, [client]); // Add dependencies if needed (e.g., client)
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+  
+      if (response.ok) {
+        // Clear local state
+        setIsAuthenticated(false);
+        setUserId(null);
+        setUserImage(null);
+  
+        // Redirect to home page
+        router.push("/");
+  
+        // Force a full page refresh
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <>
       <header
@@ -85,10 +167,10 @@ const Header = ({ handleHidden }) => {
               </li>
               <li className="pt-4 pb-4">
                 <Link
-                  href="/about"
+                  href="/Stables"
                   className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
                 >
-                  About Us
+                  Stables
                 </Link>
               </li>
               <li className="pt-4 pb-4">
@@ -209,18 +291,36 @@ const Header = ({ handleHidden }) => {
               </li>
             </ul>
             <div className="hidden lg:block">
-              <Link
-                href="/login"
-                className="btn-accent hover-up-2"
-              >
-                Log In
-              </Link>
-              <Link
-                href="/signup"
-                className="btn-primary hover-up-2"
-              >
-                Sign Up
-              </Link>
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  {userImage && (
+                    <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
+                      <Image
+                        src={urlFor(userImage).url()}
+                        alt="User profile"
+                        width={40}
+                        height={40}
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="btn-primary hover-up-2"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              ) : (
+                <div className="hidden lg:block">
+                  <Link href="/login" className="btn-accent hover-up-2">
+                    Log In
+                  </Link>
+                  <Link href="/signup" className="btn-primary hover-up-2">
+                    Sign Up
+                  </Link>
+                </div>
+              )}
             </div>
             <div className="lg:hidden">
               <button

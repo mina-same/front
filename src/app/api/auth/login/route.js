@@ -44,7 +44,8 @@ export async function POST(req) {
     );
 
     // Create the response
-    const response = NextResponse.json({ message: 'Login successful' }, { status: 200 });
+    const response = NextResponse.json({ message: 'Login successful', userId: user._id }, { status: 200 });
+    console.log("user login id", user._id);
 
     // Set the token in the HTTP-only cookie
     response.cookies.set('token', token, {

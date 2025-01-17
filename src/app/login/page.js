@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../../../components/layout/Layout';
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +17,29 @@ const Login = () => {
 	const [error, setError] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		const verifyUser = async () => {
+			try {
+				const response = await fetch('/api/auth/verify', {
+					method: 'GET',
+					credentials: 'include',
+				});
+				const data = await response.json();
+
+				if (data.authenticated) {
+					router.push("/")
+				}
+			} catch (error) {
+				console.error('Error verifying user:', error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		verifyUser();
+	}, [router]);
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;

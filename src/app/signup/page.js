@@ -1,8 +1,9 @@
+
 "use client";
 
 import Layout from '../../../components/layout/Layout'
 import Link from "next/link"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image';
 
@@ -19,6 +20,29 @@ const Signup = () => {
 	const [isChecked, setIsChecked] = useState(false);
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [startLoading, setStartLoading] = useState(true);
+
+	useEffect(() => {
+		const verifyUser = async () => {
+			try {
+				const response = await fetch('/api/auth/verify', {
+					method: 'GET',
+					credentials: 'include',
+				});
+				const data = await response.json();
+
+				if (data.authenticated) {
+					router.push("/")
+				}
+			} catch (error) {
+				console.error('Error verifying user:', error);
+			} finally {
+				setStartLoading(false);
+			}
+		};
+
+		verifyUser();
+	}, [router]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -75,7 +99,8 @@ const Signup = () => {
 
 		setLoading(true);
 		try {
-			const response = await fetch('/api/signup', {
+			// Step 1: Register the user
+			const signupResponse = await fetch('/api/auth/register', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -87,20 +112,46 @@ const Signup = () => {
 				}),
 			});
 
-			const data = await response.json();
+			const signupData = await signupResponse.json();
 
-			if (!response.ok) {
-				throw new Error(data.message || 'Something went wrong');
+			if (!signupResponse.ok) {
+				throw new Error(signupData.message || 'Registration failed');
 			}
 
-			// Successful signup
-			router.push('/login');
+			// Step 2: Automatically log in the user
+			const loginResponse = await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					email: formData.email,
+					password: formData.password,
+				}),
+			});
+
+			const data = await loginResponse.json();
+
+			if (loginResponse.ok) {
+				console.log('User ID:', data.userId); // Here's your user ID
+				localStorage.setItem('userId', data.userId); // Optional: store it if needed
+				// Handle successful login (e.g., redirect)
+			} else {
+				console.error('Login failed:', data.message);
+			}
+
+			// Step 3: Navigate to user onboarding/profile completion page
+			router.push('/user');
+			// Optional: Force a router refresh to ensure the auth state is updated
+			router.refresh();
+
 		} catch (err) {
 			setError(err.message);
 		} finally {
 			setLoading(false);
 		}
 	};
+
 
 	return (
 		<Layout>
