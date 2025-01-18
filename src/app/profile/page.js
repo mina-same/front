@@ -10,13 +10,13 @@ import {
     Phone,
     User,
     MapPin,
-    Briefcase,
     Calendar,
     Edit3,
     Save,
     X,
     ChevronRight,
-    Plus
+    Plus,
+    Trash
 } from 'lucide-react';
 import {
     Card,
@@ -28,29 +28,29 @@ import ServiceForm from 'components/elements/ServiceForm';
 
 const ProfilePage = () => {
     const router = useRouter();
-    
+
     // User-related state
     const [user, setUser] = useState(null);
     const [userId, setUserId] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    
+
     // UI state
     const [isEditing, setIsEditing] = useState(false);
-    const [activeTab, setActiveTab] = useState('profile');
+    const [activeTab, setActiveTab] = useState(user?.userType === "provider" ? 'services' : `profile`);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [showAddService, setShowAddService] = useState(false);
-    
+
     // Data state
     const [formData, setFormData] = useState({});
     const [services, setServices] = useState([]);
-    
+
     // Loading and error states
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingServices, setIsLoadingServices] = useState(false);
     const [error, setError] = useState(null);
 
 
-   // Authentication effect
+    // Authentication effect
     useEffect(() => {
         const verifyUser = async () => {
             try {
@@ -117,11 +117,24 @@ const ProfilePage = () => {
     // Fetch services effect
     useEffect(() => {
         const fetchServices = async () => {
-            if (!userId || !user?.userType === 'provider') return;
-            
+            // Ensure the user is a provider and has a valid ID
+            if (!userId || user?.userType !== 'provider') return;
+
             setIsLoadingServices(true);
             try {
-                const query = `*[_type == "services" && providerRef._ref == $providerId]{
+                // Step 1: Fetch the provider document linked to the user
+                const providerQuery = `*[_type == "provider" && userRef._ref == $userId][0]{_id}`;
+                const provider = await client.fetch(providerQuery, { userId });
+
+                // If no provider is found, set services to an empty array and return
+                if (!provider?._id) {
+                    console.log('No provider found for this user.');
+                    setServices([]); // Set services to an empty array
+                    return;
+                }
+
+                // Step 2: Fetch services linked to the provider
+                const servicesQuery = `*[_type == "services" && providerRef._ref == $providerId]{
                     _id,
                     name_en,
                     name_ar,
@@ -131,9 +144,9 @@ const ProfilePage = () => {
                     statusAdminApproved,
                     statusProviderApproved
                 }`;
-                
-                const result = await client.fetch(query, { providerId: userId });
-                console.log(result);
+                const result = await client.fetch(servicesQuery, { providerId: provider._id });
+
+                console.log("Fetched services:", result);
                 setServices(result);
             } catch (error) {
                 console.error('Error fetching services:', error);
@@ -147,31 +160,6 @@ const ProfilePage = () => {
             fetchServices();
         }
     }, [userId, user?.userType, activeTab]);
-
-    const handleServiceSubmit = async (formData) => {
-        try {
-            setIsLoading(true);
-            
-            const service = await client.create({
-                _type: 'services',
-                ...formData,
-                providerRef: {
-                    _type: 'reference',
-                    _ref: userId
-                }
-            });
-
-            setServices(prev => [...prev, service]);
-            setShowAddService(false);
-            setShowSuccessAlert(true);
-            setTimeout(() => setShowSuccessAlert(false), 3000);
-        } catch (err) {
-            setError('Failed to create service.');
-            console.error('Error creating service:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -376,11 +364,10 @@ const ProfilePage = () => {
             </Card>
         ),
         services: showAddService ? (
-            <ServiceForm 
-                onSubmit={handleServiceSubmit}
+            <ServiceForm
                 onCancel={() => setShowAddService(false)}
                 currentUser={{
-                    providerId: userId,
+                    userId: userId,
                     userType: user?.userType
                 }}
             />
@@ -391,7 +378,7 @@ const ProfilePage = () => {
                         <h3 className="text-lg font-medium text-gray-900">My Services</h3>
                         <button
                             onClick={() => setShowAddService(true)}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-500 flex items-center gap-2"
                         >
                             <Plus size={16} />
                             Add New Service
@@ -412,7 +399,7 @@ const ProfilePage = () => {
                                 <Card key={service._id} className="hover:shadow-lg transition-shadow">
                                     <div className="aspect-w-16 aspect-h-9 relative">
                                         <img
-                                            src={'/assets/imgs/placeholders'}
+                                            src={service.image ? urlFor(service.image).url() : '/placeholder-service.png'}
                                             alt={service.name_en}
                                             className="w-full h-48 object-cover rounded-t-lg"
                                         />
@@ -424,11 +411,10 @@ const ProfilePage = () => {
                                             <span className="font-medium text-green-600">${service.price}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className={`px-2 py-1 rounded-full text-xs ${
-                                                service.statusAdminApproved 
-                                                    ? 'bg-green-100 text-green-800' 
-                                                    : 'bg-yellow-100 text-yellow-800'
-                                            }`}>
+                                            <span className={`px-2 py-1 rounded-full text-xs ${service.statusAdminApproved
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-yellow-100 text-yellow-800'
+                                                }`}>
                                                 {service.statusAdminApproved ? 'Approved' : 'Pending Approval'}
                                             </span>
                                         </div>
@@ -441,63 +427,6 @@ const ProfilePage = () => {
             </Card>
         )
     };
-
-    const renderServices = () => (
-        <Card className="bg-white shadow-none border-0">
-            <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-medium text-gray-900">My Services</h3>
-                    <button
-                        onClick={() => setShowAddService(true)}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
-                    >
-                        <Plus size={16} />
-                        Add New Service
-                    </button>
-                </div>
-
-                {isLoadingServices ? (
-                    <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
-                    </div>
-                ) : services.length === 0 ? (
-                    <div className="text-center py-8">
-                        <p className="text-gray-500">No services added yet.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {services.map(service => (
-                            <Card key={service._id} className="hover:shadow-lg transition-shadow">
-                                <div className="aspect-w-16 aspect-h-9 relative">
-                                    <img
-                                        src={service.image ? urlFor(service.image).url() : '/placeholder-service.png'}
-                                        alt={service.name_en}
-                                        className="w-full h-48 object-cover rounded-t-lg"
-                                    />
-                                </div>
-                                <CardContent className="p-4">
-                                    <h4 className="font-semibold text-lg mb-2">{service.name_en}</h4>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm text-gray-500">{service.serviceType}</span>
-                                        <span className="font-medium text-green-600">${service.price}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`px-2 py-1 rounded-full text-xs ${service.statusAdminApproved
-                                            ? 'bg-green-100 text-green-800'
-                                            : 'bg-yellow-100 text-yellow-800'
-                                            }`}>
-                                            {service.statusAdminApproved ? 'Approved' : 'Pending Approval'}
-                                        </span>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    );
-
 
     if (isLoading) {
         return (
@@ -526,7 +455,7 @@ const ProfilePage = () => {
                     <div className="absolute inset-0 bg-black/20"></div>
                 </div>
 
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="relative -mt-48">
                         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                             <div className="p-8">
@@ -574,7 +503,7 @@ const ProfilePage = () => {
                             <div className="border-t">
                                 <div className="px-8">
                                     <nav className="flex space-x-8">
-                                        {['Profile', user?.userType === "provider" ? 'Services' : null, 'Settings']
+                                        {[user?.userType === "provider" ? 'Services' : null, 'Profile', 'Settings', 'Reservation']
                                             .filter(Boolean)
                                             .map((tab) => {
                                                 const tabKey = tab?.toLowerCase();

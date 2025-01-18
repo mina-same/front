@@ -30,11 +30,11 @@ const Header = ({ handleHidden }) => {
           credentials: "include",
         });
         const data = await response.json();
-  
+
         if (data.authenticated) {
           setIsAuthenticated(true);
           setUserId(data.user.id);
-  
+
           // Fetch user data after setting userId
           const fetchUserData = async () => {
             try {
@@ -43,20 +43,20 @@ const Header = ({ handleHidden }) => {
               }[0]`;
               const params = { userId: data.user.id }; // Use data.user.id directly
               const userData = await client.fetch(query, params);
-  
+
               if (!userData) {
-                throw new Error('User not found.');
+                throw new Error("User not found.");
               }
 
-              setUserImage(userData.image)
+              setUserImage(userData.image);
 
               // Update state with user data (e.g., setUserImage(userData.image))
             } catch (err) {
-              console.error('Error fetching user data:', err);
-              setError('Failed to load profile data.');
+              console.error("Error fetching user data:", err);
+              setError("Failed to load profile data.");
             }
           };
-  
+
           await fetchUserData(); // Call fetchUserData after setting userId
         }
       } catch (error) {
@@ -66,7 +66,7 @@ const Header = ({ handleHidden }) => {
         setIsLoading(false);
       }
     };
-  
+
     verifyUser();
   }, [client]); // Add dependencies if needed (e.g., client)
 
@@ -76,16 +76,16 @@ const Header = ({ handleHidden }) => {
         method: "POST",
         credentials: "include",
       });
-  
+
       if (response.ok) {
         // Clear local state
         setIsAuthenticated(false);
         setUserId(null);
         setUserImage(null);
-  
+
         // Redirect to home page
         router.push("/");
-  
+
         // Force a full page refresh
         window.location.reload();
       }
@@ -114,57 +114,19 @@ const Header = ({ handleHidden }) => {
                 height={40}
               />
             </Link>
+
             <ul className="hidden lg:flex lg:items-center lg:w-auto lg:space-x-12">
-              <li className="group relative pt-4 pb-4 has-child">
+              {/* home */}
+              <li className="pt-4 pb-4">
                 <Link
                   href="/"
                   className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
                 >
                   Home
                 </Link>
-                <ul className="drop-down-menu min-w-200">
-                  <li>
-                    <Link
-                      href="/"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Landing page 1
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/index-2"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Landing page 2
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/index-3"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Landing page 3
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/index-4"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Landing page 4
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/index-5"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Landing page 5
-                    </Link>
-                  </li>
-                </ul>
               </li>
+
+              {/* Stables */}
               <li className="pt-4 pb-4">
                 <Link
                   href="/Stables"
@@ -173,114 +135,106 @@ const Header = ({ handleHidden }) => {
                   Stables
                 </Link>
               </li>
-              <li className="pt-4 pb-4">
+
+              {/* competitions   */}
+              <li className="group relative pt-4 pb-4">
                 <Link
-                  href="/services"
+                  href="/competitions"
                   className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
                 >
-                  Services
+                  competitions
                 </Link>
               </li>
+
+              {/* Bublic Services */}
               <li className="group relative pt-4 pb-4 has-child">
                 <Link
-                  href="#"
+                  href="/bublicServices"
                   className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
                 >
-                  Company
+                  Bublic Services
                 </Link>
                 <ul className="drop-down-menu min-w-200">
                   <li>
                     <Link
-                      href="/portfolio"
+                      href="/veterinarian"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Portfolio
+                      Veterinarian
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/team"
+                      href="/housing"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Team
+                      Housing
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/testimonials"
+                      href="/horseTrainer"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Testimonials
+                      horse trainer
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/pricing"
+                      href="/horseTrimmer"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Pricing
+                      horse hoof trimmer - FARRIER
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/faqs"
+                      href="/horseTransport"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Faqs
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/404"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      404
+                      Horse transport
                     </Link>
                   </li>
                 </ul>
               </li>
+
+              {/* publicMarket */}
               <li className="group relative pt-4 pb-4 has-child">
                 <Link
-                  href="#"
+                  href="publicMarket"
                   className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
                 >
-                  Blog
+                  Public market
                 </Link>
                 <ul className="drop-down-menu min-w-200">
                   <li>
                     <Link
-                      href="/blog"
+                      href="/contractors"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Category 1
+                      Contractors
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/blog-2"
+                      href="/suppliers"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Category 2
+                      Suppliers
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/blog-single"
+                      href="/horseCatering"
                       className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                     >
-                      Single 1
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/blog-single-2"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Single 2
+                      Horse Catering Services
                     </Link>
                   </li>
                 </ul>
               </li>
+
+              {/* contact */}
               <li className="pt-4 pb-4">
                 <Link
                   href="/contact"
@@ -290,6 +244,7 @@ const Header = ({ handleHidden }) => {
                 </Link>
               </li>
             </ul>
+
             <div className="hidden lg:block">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
@@ -301,6 +256,7 @@ const Header = ({ handleHidden }) => {
                         width={40}
                         height={40}
                         className="object-cover w-full h-full"
+                        onClick={() => router.push("/profile")}
                       />
                     </div>
                   )}

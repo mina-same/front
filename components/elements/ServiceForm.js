@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@sanity/client';
 import {
-  Camera,
   Upload,
   X,
   Home,
@@ -15,20 +14,16 @@ import {
   HardHat,
   Package,
   Dumbbell,
-  Scissors
+  Scissors,
+  Plus,
+  Trash
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import toast from 'react-hot-toast';
+import { client, urlFor } from '../../src/lib/sanity';
 
-const client = createClient({
-  projectId: '5dt0594k', // Replace with your project ID
-  dataset: 'production', // Replace with your dataset name
-  apiVersion: '2023-01-01', // Use the latest API version
-  useCdn: false, // Set to true if you want to use the CDN
-  token: process.env.SANITY_API_TOKEN, // Add your API token if required
-});
-
-const ServiceForm = ({ currentUser, onSubmit }) => {
+const ServiceForm = ({ currentUser }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -42,21 +37,23 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
   const [selectedGovernorate, setSelectedGovernorate] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
 
-  const [formData, setFormData] = useState({
+  // Initialize all form fields with empty values
+  const initialFormState = {
     name_ar: '',
     name_en: '',
     price: '',
     image: null,
     servicePhone: '',
     serviceEmail: '',
-    links: '',
+    links: [],
     about_ar: '',
     about_en: '',
     serviceType: '',
+    providerRef: null,
+    country: null,
+    government: null,
+    city: null,
     location: '',
-    country: '',
-    government: '',
-    city: '',
     graduationDetails: {
       graduationCertificate: '',
       previousExperience: ''
@@ -71,7 +68,11 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
       raceType: '',
       prize: '',
       sponsor: '',
+      sponsorLogo: null,
       sponsorshipValue: 0
+    },
+    housingDetails: {
+      housingDetails: ''
     },
     horseTrainerDetails: {
       trainerLevel: '',
@@ -90,8 +91,8 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
     tripCoordinator: {
       locationOfHorses: '',
       locationOfTent: '',
-      startDate: '',
-      endDate: '',
+      startDate: null,  // Changed from empty string to null
+      endDate: null,
       breakTimes: '',
       meals: [],
       containsAidBag: false,
@@ -108,7 +109,9 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
     },
     statusAdminApproved: false,
     statusProviderApproved: true
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
     client.fetch('*[_type == "country"]{_id, name_en}')
@@ -250,6 +253,207 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
           </div>
         );
 
+      case 'trip_coordinator':
+        return (
+          <div className="space-y-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold mb-2">Location of Horses</label>
+                <input
+                  type="text"
+                  value={formData.tripCoordinator.locationOfHorses}
+                  onChange={(e) => handleNestedChange('tripCoordinator', 'locationOfHorses', e.target.value)}
+                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                  placeholder="Enter horses location"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Location of Tent</label>
+                <input
+                  type="text"
+                  value={formData.tripCoordinator.locationOfTent}
+                  onChange={(e) => handleNestedChange('tripCoordinator', 'locationOfTent', e.target.value)}
+                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                  placeholder="Enter tent location"
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold mb-2">Start Date</label>
+                <input
+                  type="datetime-local"
+                  value={formData.tripCoordinator.startDate}
+                  onChange={(e) => handleNestedChange('tripCoordinator', 'startDate', e.target.value)}
+                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">End Date</label>
+                <input
+                  type="datetime-local"
+                  value={formData.tripCoordinator.endDate}
+                  onChange={(e) => handleNestedChange('tripCoordinator', 'endDate', e.target.value)}
+                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Break Times</label>
+              <input
+                type="text"
+                value={formData.tripCoordinator.breakTimes}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'breakTimes', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter break times"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Meals</label>
+              {formData.tripCoordinator.meals.map((meal, index) => (
+                <div key={index} className="flex mb-2">
+                  <input
+                    type="text"
+                    value={meal.mealType}
+                    onChange={(e) => handleNestedMealChange(index, 'mealType', e.target.value)}
+                    placeholder="Meal Type"
+                    className="w-1/2 p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none mr-2"
+                  />
+                  <input
+                    type="text"
+                    value={meal.mealDescription}
+                    onChange={(e) => handleNestedMealChange(index, 'mealDescription', e.target.value)}
+                    placeholder="Meal Description"
+                    className="w-1/2 p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                  />
+                </div>
+              ))}
+              <div className='flex justify-center items-center' style={{ backgroundColor: "#64748B" }}>
+                <Plus size={16} />
+                <button
+                  onClick={() => addMeal()}
+                  className="text-sm font-semibold bg-primary text-white px-4 py-2 rounded"
+                >
+                  Add Meal
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="flex items-center">
+                <span className="text-sm font-semibold mr-2">Contains Aid Bag</span>
+                <input
+                  type="checkbox"
+                  checked={formData.tripCoordinator.containsAidBag}
+                  onChange={(e) => handleNestedChange('tripCoordinator', 'containsAidBag', e.target.checked)}
+                  className="mr-2"
+                />
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Activities</label>
+              <input
+                type="text"
+                value={formData.tripCoordinator.activities}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'activities', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter activities"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Price for Family of 2</label>
+              <input
+                type="number"
+                value={formData.tripCoordinator.priceForFamilyOf2}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'priceForFamilyOf2', parseFloat(e.target.value))}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter price for family of 2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Price for Family of 3</label>
+              <input
+                type="number"
+                value={formData.tripCoordinator.priceForFamilyOf3}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'priceForFamilyOf3', parseFloat(e.target.value))}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter price for family of 3"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Price for Family of 4</label>
+              <input
+                type="number"
+                value={formData.tripCoordinator.priceForFamilyOf4}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'priceForFamilyOf4', parseFloat(e.target.value))}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter price for family of 4"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Trip Program</label>
+              <textarea
+                value={formData.tripCoordinator.tripProgram}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'tripProgram', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter trip program"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Level of Hardship</label>
+              <select
+                value={formData.tripCoordinator.levelOfHardship}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'levelOfHardship', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+              >
+                <option value="">Select Level</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Conditions & Requirements</label>
+              <textarea
+                value={formData.tripCoordinator.conditionsAndRequirements}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'conditionsAndRequirements', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter conditions and requirements"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Safety & Equipment</label>
+              <textarea
+                value={formData.tripCoordinator.safetyAndEquipment}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'safetyAndEquipment', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter safety and equipment details"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Cancellation & Refund Policy</label>
+              <textarea
+                value={formData.tripCoordinator.cancellationAndRefundPolicy}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'cancellationAndRefundPolicy', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter cancellation and refund policy"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">More Details</label>
+              <textarea
+                value={formData.tripCoordinator.moreDetails}
+                onChange={(e) => handleNestedChange('tripCoordinator', 'moreDetails', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter more details"
+              />
+            </div>
+          </div>
+        );
+
       case 'competitions':
         return (
           <div className="space-y-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
@@ -284,8 +488,7 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
                 </select>
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold mb-2">Organiser Name</label>
                 <input
@@ -308,68 +511,96 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
                   required
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Sponsor</label>
-                <input
-                  type="text"
-                  value={formData.competitions.sponsor}
-                  onChange={(e) => handleNestedChange('competitions', 'sponsor', e.target.value)}
-                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Enter sponsor name"
-                />
-              </div>
             </div>
-          </div>
-        );
-
-      case 'trip_coordinator':
-        return (
-          <div className="space-y-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Location of Horses</label>
-                <input
-                  type="text"
-                  value={formData.tripCoordinator.locationOfHorses}
-                  onChange={(e) => handleNestedChange('tripCoordinator', 'locationOfHorses', e.target.value)}
-                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Enter horses location"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Location of Tent</label>
-                <input
-                  type="text"
-                  value={formData.tripCoordinator.locationOfTent}
-                  onChange={(e) => handleNestedChange('tripCoordinator', 'locationOfTent', e.target.value)}
-                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Enter tent location"
-                  required
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Sponsor</label>
+              <input
+                type="text"
+                value={formData.competitions.sponsor}
+                onChange={(e) => handleNestedChange('competitions', 'sponsor', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter sponsor name"
+              />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Start Date</label>
+            <div className="mb-4 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
+              <label className="flex items-center justify-between px-2 bg-blueGray-50 rounded" htmlFor="sponsor-logo-input">
                 <input
-                  type="date"
-                  value={formData.tripCoordinator.startDate}
-                  onChange={(e) => handleNestedChange('tripCoordinator', 'startDate', e.target.value)}
-                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  required
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleNestedChange('competitions', 'sponsorLogo', e.target.files[0])}
+                  name="Choose file"
+                  id="sponsor-logo-input"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">End Date</label>
-                <input
-                  type="date"
-                  value={formData.tripCoordinator.endDate}
-                  onChange={(e) => handleNestedChange('tripCoordinator', 'endDate', e.target.value)}
-                  className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  required
-                />
-              </div>
+                {formData.competitions.sponsorLogo ? (
+                  <span className="ml-2 text-blueGray-600">
+                    {formData.competitions.sponsorLogo.name}
+                  </span>
+                ) : (
+                  <span className="ml-2 text-blueGray-600">No file selected</span>
+                )}
+                <div className='py-2'>
+                  {formData.competitions.sponsorLogo && (
+                    <button
+                      type="button"
+                      className="mr-4 justify-center items-center text-red-500" // Assuming text-red-500 is defined
+                      onClick={() => handleNestedChange('competitions', 'sponsorLogo', null)}
+                    >
+                      <Trash size={16} style={{ color: "red" }} />
+                    </button>
+                  )}
+                  <span className="px-4 py-3 text-xs text-white font-semibold leading-none bg-blueGray-500 hover:bg-blueGray-600 rounded cursor-pointer">Browse</span>
+                </div>
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Sponsorship Value</label>
+              <input
+                type="number"
+                value={formData.competitions.sponsorshipValue}
+                onChange={(e) => handleNestedChange('competitions', 'sponsorshipValue', parseFloat(e.target.value))}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter sponsorship value"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Height Distance</label>
+              <input
+                type="text"
+                value={formData.competitions.heightDistance}
+                onChange={(e) => handleNestedChange('competitions', 'heightDistance', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter height distance"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Main Referee</label>
+              <input
+                type="text"
+                value={formData.competitions.mainReferee}
+                onChange={(e) => handleNestedChange('competitions', 'mainReferee', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter main referee"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Co-Referee 1</label>
+              <input
+                type="text"
+                value={formData.competitions.coReferee1}
+                onChange={(e) => handleNestedChange('competitions', 'coReferee1', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter co-referee 1"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Co-Referee 2</label>
+              <input
+                type="text"
+                value={formData.competitions.coReferee2}
+                onChange={(e) => handleNestedChange('competitions', 'coReferee2', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter co-referee 2"
+              />
             </div>
           </div>
         );
@@ -403,100 +634,345 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
           </div>
         );
 
+      case 'housing':
+        return (
+          <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Housing Details</label>
+              <textarea
+                name="housingDetails"
+                value={formData.housingDetails.housingDetails}
+                onChange={(e) => handleNestedChange('housingDetails', 'housingDetails', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter housing details"
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 'horse_catering':
+        return (
+          <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Catering Options</label>
+              <input
+                type="text"
+                value={formData.cateringOptions.join(', ')}
+                onChange={(e) => handleChange({ target: { name: 'cateringOptions', value: e.target.value.split(', ') } })}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter catering options"
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 'contractors':
+        return (
+          <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Contractor Details</label>
+              <textarea
+                name="contractorDetails"
+                value={formData.contractorDetails}
+                onChange={handleChange}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter contractor details"
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 'suppliers':
+        return (
+          <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Supplier Details</label>
+              <textarea
+                name="supplierDetails"
+                value={formData.supplierDetails}
+                onChange={handleChange}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter supplier details"
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 'horse_trainer':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Trainer Level</label>
+              <select
+                value={formData.horseTrainerDetails.trainerLevel}
+                onChange={(e) => handleNestedChange('horseTrainerDetails', 'trainerLevel', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                required
+              >
+                <option value="">Select Level</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Accreditation Certificate</label>
+              <input
+                type="text"
+                value={formData.horseTrainerDetails.accreditationCertificate}
+                onChange={(e) => handleNestedChange('horseTrainerDetails', 'accreditationCertificate', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter accreditation certificate"
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 'hoof_trimmer':
+        return (
+          <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Hoof Trimmer Details</label>
+              <textarea
+                name="hoofTrimmerDetails"
+                value={formData.hoofTrimmerDetails.hoofTrimmerDetails}
+                onChange={(e) => handleNestedChange('hoofTrimmerDetails', 'hoofTrimmerDetails', e.target.value)}
+                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
+                placeholder="Enter hoof trimmer details"
+                required
+              />
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
   };
 
+
+
+  // Add a function to prepare the form data before submission
+  const prepareFormData = (data) => {
+    const preparedData = { ...data };
+
+    // Only include tripCoordinator fields if the service type is 'trip_coordinator'
+    if (data.serviceType !== 'trip_coordinator') {
+      delete preparedData.tripCoordinator;
+    } else {
+      // Ensure dates are in ISO format for trip coordinator
+      if (preparedData.tripCoordinator) {
+        // Format start date
+        if (preparedData.tripCoordinator.startDate) {
+          preparedData.tripCoordinator.startDate = new Date(preparedData.tripCoordinator.startDate).toISOString();
+        }
+
+        // Format end date
+        if (preparedData.tripCoordinator.endDate) {
+          preparedData.tripCoordinator.endDate = new Date(preparedData.tripCoordinator.endDate).toISOString();
+        }
+      }
+    }
+
+    // Remove any undefined or null fields
+    Object.keys(preparedData).forEach(key => {
+      if (preparedData[key] === undefined || preparedData[key] === null) {
+        delete preparedData[key];
+      }
+    });
+
+    return preparedData;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!agreedToTerms) {
-      setError('Please agree to the terms and conditions');
+  
+    // Step 1: Validate form inputs
+    if (!agreedToTerms || !confirmDataAccuracy) {
+      setError('Please agree to the terms and confirm data accuracy.');
       return;
     }
+  
+    // Additional validation for trip coordinator dates
+    if (formData.serviceType === 'trip_coordinator') {
+      if (!formData.tripCoordinator.startDate || !formData.tripCoordinator.endDate) {
+        setError('Start date and end date are required for trip coordinator services.');
+        return;
+      }
+    }
+  
     setIsSubmitting(true);
     setError(null);
-
+  
     try {
-      await onSubmit({
-        ...formData,
-        providerRef: currentUser?.providerId
-      });
-      // Reset form
-      setFormData({
-        name_ar: '',
-        name_en: '',
-        price: '',
-        image: null,
-        servicePhone: '',
-        serviceEmail: '',
-        links: '',
-        about_ar: '',
-        about_en: '',
-        serviceType: '',
-        location: '',
-        country: '',
-        government: '',
-        city: '',
-        graduationDetails: {
-          graduationCertificate: '',
-          previousExperience: ''
+      // Step 2: Create provider document if it doesn't exist
+      let providerId;
+  
+      // Check if provider already exists for this user
+      const existingProvider = await client.fetch(
+        `*[_type == "provider" && userRef._ref == $userId][0]`,
+        { userId: currentUser.userId }
+      );
+  
+      if (!existingProvider) {
+        // Create new provider with unique _key for userRef
+        const providerDoc = {
+          _type: 'provider',
+          userRef: {
+            _type: 'reference',
+            _ref: currentUser.userId,
+            _key: `provider-user-${new Date().getTime()}`
+          },
+          servicesRef: [], // Initialize empty services array
+        };
+  
+        const createdProvider = await client.create(providerDoc);
+        providerId = createdProvider._id;
+  
+        // Update user document to include provider reference with unique _key
+        await client.patch(currentUser.userId)
+          .set({
+            provider: [{
+              _type: 'reference',
+              _ref: providerId,
+              _key: `user-provider-${new Date().getTime()}`
+            }],
+          })
+          .commit();
+      } else {
+        providerId = existingProvider._id;
+      }
+  
+      // Step 3: Upload image to Sanity (if provided)
+      let imageAsset;
+      if (formData.image) {
+        const imageFile = formData.image;
+        const imageAssetResponse = await client.assets.upload('image', imageFile);
+        imageAsset = imageAssetResponse;
+      }
+  
+      // Step 4: Prepare the service document with the cleaned data
+      const preparedFormData = prepareFormData(formData);
+  
+      // Step 5: Create the service document with unique keys for all references
+      const serviceDoc = {
+        _type: 'services',
+        ...preparedFormData,
+        image: imageAsset ? {
+          _type: 'image',
+          asset: {
+            _type: 'reference',
+            _ref: imageAsset._id,
+            _key: `service-image-${new Date().getTime()}`
+          }
+        } : null,
+        providerRef: {
+          _type: 'reference',
+          _ref: providerId,
+          _key: `service-provider-${new Date().getTime()}`
         },
-        competitions: {
-          level: '',
-          heightDistance: '',
-          organiserName: '',
-          mainReferee: '',
-          coReferee1: '',
-          coReferee2: '',
-          raceType: '',
-          prize: '',
-          sponsor: '',
-          sponsorshipValue: 0
-        },
-        horseTrainerDetails: {
-          trainerLevel: '',
-          accreditationCertificate: ''
-        },
-        hoofTrimmerDetails: {
-          hoofTrimmerDetails: ''
-        },
-        transportDetails: {
-          numberOfHorses: 0,
-          vehicleType: ''
-        },
-        contractorDetails: '',
-        supplierDetails: '',
-        cateringOptions: [],
-        tripCoordinator: {
-          locationOfHorses: '',
-          locationOfTent: '',
-          startDate: '',
-          endDate: '',
-          breakTimes: '',
-          meals: [],
-          containsAidBag: false,
-          activities: '',
-          priceForFamilyOf2: 0,
-          priceForFamilyOf3: 0,
-          priceForFamilyOf4: 0,
-          tripProgram: '',
-          levelOfHardship: '',
-          conditionsAndRequirements: '',
-          safetyAndEquipment: '',
-          cancellationAndRefundPolicy: '',
-          moreDetails: ''
-        },
+        country: selectedCountry ? {
+          _type: 'reference',
+          _ref: selectedCountry,
+          _key: `service-country-${new Date().getTime()}`
+        } : null,
+        government: selectedGovernorate ? {
+          _type: 'reference',
+          _ref: selectedGovernorate,
+          _key: `service-government-${new Date().getTime()}`
+        } : null,
+        city: selectedCity ? {
+          _type: 'reference',
+          _ref: selectedCity,
+          _key: `service-city-${new Date().getTime()}`
+        } : null,
         statusAdminApproved: false,
-        statusProviderApproved: true
+        statusProviderApproved: true,
+      };
+  
+      // Step 6: Remove undefined fields
+      Object.keys(serviceDoc).forEach(key => serviceDoc[key] === undefined && delete serviceDoc[key]);
+  
+      // Step 7: Create the service in Sanity
+      const createdService = await client.create(serviceDoc);
+  
+      // Step 8: Update the provider's servicesRef array with unique _key
+      const provider = await client.getDocument(providerId);
+      const updatedServicesRef = [
+        ...(provider.servicesRef || []),
+        {
+          _type: 'reference',
+          _ref: createdService._id,
+          _key: `provider-service-${new Date().getTime()}`
+        }
+      ];
+  
+      await client.patch(providerId)
+        .set({ servicesRef: updatedServicesRef })
+        .commit();
+  
+      // Step 9: Show success message
+      toast({
+        title: "Success",
+        description: "Service created successfully",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
       });
+  
+      // Step 10: Reset form
+      setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
+      setConfirmDataAccuracy(false);
+  
+      // Step 11: Refresh the page
+      window.location.reload();
     } catch (err) {
-      setError(err.message);
+      console.error('Error submitting service:', err);
+      setError('An error occurred while submitting the service. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleLinksChange = (e) => {
+    const linksValue = e.target.value;
+    const linksArray = linksValue ? linksValue.split(',').map(link => link.trim()) : [];
+    setFormData(prev => ({
+      ...prev,
+      links: linksArray
+    }));
+  };
+
+  const handleNestedMealChange = (index, fieldName, value) => {
+    const newMeals = [...formData.tripCoordinator.meals];
+    newMeals[index][fieldName] = value;
+    setFormData({
+      ...formData,
+      tripCoordinator: {
+        ...formData.tripCoordinator,
+        meals: newMeals
+      }
+    });
+  };
+
+  const addMeal = () => {
+    setFormData({
+      ...formData,
+      tripCoordinator: {
+        ...formData.tripCoordinator,
+        meals: [
+          ...formData.tripCoordinator.meals,
+          { mealType: '', mealDescription: '' }
+        ]
+      }
+    });
   };
 
   return (
@@ -590,7 +1066,7 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
                   value={formData.servicePhone}
                   onChange={handleChange}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Phone Number"
+                  placeholder="country code and phone number (e.g., +966 for Saudi Arabia)"
                   required
                 />
               </div>
@@ -752,8 +1228,8 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
               <input
                 type="text"
                 name="links"
-                value={formData.links}
-                onChange={handleChange}
+                value={formData.links.join(', ')}
+                onChange={handleLinksChange}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                 placeholder="Social Media Links (comma separated)"
               />
@@ -800,16 +1276,41 @@ const ServiceForm = ({ currentUser, onSubmit }) => {
               <button
                 type="submit"
                 disabled={isSubmitting || !agreedToTerms || !confirmDataAccuracy}
-                className={`
-                    py-4 px-8 text-sm text-white font-semibold rounded
-                    ${isSubmitting || !agreedToTerms || !confirmDataAccuracy
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-500 hover:bg-blue-500 transform hover:scale-105 transition-all duration-300'
-                  }
-                `}
+                className={`py-2 px-6 text-sm font-semibold rounded transition-all duration-200
+                        ${isSubmitting || !agreedToTerms || !confirmDataAccuracy
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-100 active:bg-blue-200'
+                  }`}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Service'}
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="animate-spin mr-2 h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  'Submit'
+                )}
               </button>
+
             </div>
           </div>
         </form>
