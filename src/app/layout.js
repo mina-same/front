@@ -1,8 +1,8 @@
-import '../../public/assets/css/animate.min.css'
 
 import "swiper/css"
 import 'tailwindcss/tailwind.css';
 import '../../public/assets/css/tailwind-built.css'
+import '../../public/assets/css/animate.min.css'
 
 import { Poppins, Montserrat } from 'next/font/google'
 
