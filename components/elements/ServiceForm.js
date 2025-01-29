@@ -976,8 +976,8 @@ const ServiceForm = ({ currentUser }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+    <div className="max-w-full mx-auto">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         {error && (
           <Alert variant="destructive" className="m-6">
             <AlertDescription>{error}</AlertDescription>

@@ -6,12 +6,14 @@ import { Search, MapPin, Phone, Mail, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from 'components/layout/Layout';
 import { client, urlFor } from '../../lib/sanity'; // Import Sanity client and urlFor
+import { useRouter } from 'next/navigation'; 
 
 const HorseCateringPage = () => {
   const [cateringServices, setCateringServices] = useState([]); // State to store fetched catering services
   const [searchQuery, setSearchQuery] = useState(''); // State for search functionality
   const [loading, setLoading] = useState(true); // State for loading status
   const [error, setError] = useState(null); // State for error handling
+  const route = useRouter();
 
   // Fetch horse catering services from Sanity
   useEffect(() => {
@@ -104,7 +106,7 @@ const HorseCateringPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCateringServices.map((service, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${stable._id}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <img
                       src={service.image ? urlFor(service.image).url() : '/api/placeholder/400/300'}

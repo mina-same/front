@@ -80,11 +80,7 @@ const Contact = () => {
 										</label>
 									</div>
 									<div className="flex justify-between items-center wow animate__animatedanimated animate__fadeIn" data-wow-delay=".3s">
-										<label>
-											<input className="mr-1" type="checkbox" name="terms" value="1" />
-											<span className="text-sm font-semibold">I agree to terms and conditions.</span>
-										</label>
-										<button className="py-4 px-8 text-sm text-white font-semibold leading-none bg-blue-500 hover:bg-blue-700 rounded" type="submit">
+										<button className="w-full py-4 px-8 text-sm text-white font-semibold leading-none bg-blue-500 hover:bg-blue-700 rounded" type="submit">
 											Submit
 										</button>
 									</div>

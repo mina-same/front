@@ -6,12 +6,14 @@ import { Search, MapPin, Phone, Mail, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from 'components/layout/Layout';
 import { client, urlFor } from '../../lib/sanity'; // Import Sanity client and urlFor
+import { useRouter } from 'next/navigation'; 
 
 const HorseTrainerPage = () => {
   const [trainers, setTrainers] = useState([]); // State to store fetched trainers
   const [searchQuery, setSearchQuery] = useState(''); // State for search functionality
   const [loading, setLoading] = useState(true); // State for loading status
   const [error, setError] = useState(null); // State for error handling
+  const route = useRouter();
 
   // Fetch horse trainers from Sanity
   useEffect(() => {
@@ -19,6 +21,7 @@ const HorseTrainerPage = () => {
       try {
         // Define the query to fetch horse trainers
         const query = `*[_type == "services" && serviceType == "horse_trainer" && statusAdminApproved == true] {
+          _id,
           name_en,
           name_ar,
           about_en,
@@ -107,7 +110,7 @@ const HorseTrainerPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTrainers.map((trainer, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${trainer._id}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <img
                       src={trainer.image ? urlFor(trainer.image).url() : '/api/placeholder/400/300'}

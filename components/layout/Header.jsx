@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { client, urlFor } from "../../src/lib/sanity";
+import userFallbackImage from "../../public/assets/imgs/elements/user.png";
 
 const Header = ({ handleHidden }) => {
   const router = useRouter();
@@ -146,13 +147,23 @@ const Header = ({ handleHidden }) => {
                 </Link>
               </li>
 
+              {/* Trips */}
+              <li className="group relative pt-4 pb-4">
+                <Link
+                  href="/tripCoordinator"
+                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+                >
+                  Trips
+                </Link>
+              </li>
+
               {/* Bublic Services */}
               <li className="group relative pt-4 pb-4 has-child">
                 <Link
-                  href="/bublicServices"
+                  href="/publicServices"
                   className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
                 >
-                  Bublic Services
+                  Public Services
                 </Link>
                 <ul className="drop-down-menu min-w-200">
                   <li>
@@ -248,18 +259,18 @@ const Header = ({ handleHidden }) => {
             <div className="hidden lg:block">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  {userImage && (
-                    <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
-                      <Image
-                        src={urlFor(userImage).url()}
-                        alt="User profile"
-                        width={40}
-                        height={40}
-                        className="object-cover w-full h-full"
-                        onClick={() => router.push("/profile")}
-                      />
-                    </div>
-                  )}
+                  <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
+                    <Image
+                      src={
+                        userImage ? urlFor(userImage).url() : userFallbackImage
+                      }
+                      alt="User profile"
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full rounded-full cursor-pointer"
+                      onClick={() => router.push("/profile")}
+                    />
+                  </div>
                   <button
                     onClick={handleLogout}
                     className="btn-primary hover-up-2"

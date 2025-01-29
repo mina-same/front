@@ -6,12 +6,14 @@ import { Search, MapPin, Phone, Mail, ExternalLink, Trophy, User, Award } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Layout from 'components/layout/Layout';
 import { client, urlFor } from '../../lib/sanity';
+import { useRouter } from 'next/navigation'; 
 
 const CompetitionsPage = () => {
   const [competitions, setCompetitions] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const route = useRouter();
 
   useEffect(() => {
     const fetchCompetitions = async () => {
@@ -107,7 +109,7 @@ const CompetitionsPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCompetitions.map((competition, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${stable._id}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <img
                       src={competition.image ? urlFor(competition.image).url() : '/api/placeholder/400/300'}

@@ -27,13 +27,12 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
 				<div className="navbar-backdrop fixed inset-0 bg-blueGray-800 opacity-25"></div>
 				<nav className="fixed top-0 left-0 bottom-0 flex flex-col w-5/6 max-w-sm py-6 px-6 bg-white border-r overflow-y-auto transition duration-300">
 					<div className="flex items-center mb-8">
-						<Link href="#" className="mr-auto text-3xl font-semibold leading-none">
+						<Link href="/" className="mr-auto text-3xl font-semibold leading-none">
 							<Image
 								width="0"
 								height="0"
 								sizes="100vw"
 								style={{ width: "auto", height: "auto" }} className="h-10" src="/assets/imgs/logos/logohorse.svg" alt="Monst" />
-
 						</Link>
 						<button className="navbar-close" onClick={handleRemove}>
 							<svg className="h-6 w-6 text-blueGray-400 cursor-pointer hover:text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -43,94 +42,61 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
 					</div>
 					<div>
 						<ul className="mobile-menu">
+							<li className="mb-1 rounded-xl">
+								<Link href="/" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Home</Link>
+							</li>
+							<li className="mb-1 rounded-xl">
+								<Link href="/Stables" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Stables</Link>
+							</li>
+							<li className="mb-1 rounded-xl">
+								<Link href="/competitions" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Competitions</Link>
+							</li>
+							<li className="mb-1 rounded-xl">
+								<Link href="/tripCoordinator" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Trips</Link>
+							</li>
 							<li className={isActive.key == 1 ? "mb-1 menu-item-has-children rounded-xl active" : "mb-1 menu-item-has-children rounded-xl"} onClick={() => handleToggle(1)}>
 								<span className="menu-expand">+</span>
-								<Link href="#" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Home
-								</Link>
+								<Link href="/publicServices" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Public Services</Link>
 								<ul className={isActive.key == 1 ? "dropdown pl-5" : "hidden"}>
 									<li>
-										<Link href="/index" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Home 1
-										</Link>
+										<Link href="/veterinarian" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Veterinarian</Link>
 									</li>
 									<li>
-										<Link href="/index-2" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Home 2
-										</Link>
+										<Link href="/housing" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Housing</Link>
 									</li>
 									<li>
-										<Link href="/index-3" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Home 3
-										</Link>
+										<Link href="/horseTrainer" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Horse Trainer</Link>
 									</li>
 									<li>
-										<Link href="/index-4" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Home 4
-										</Link>
+										<Link href="/horseTrimmer" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Horse Hoof Trimmer - FARRIER</Link>
 									</li>
 									<li>
-										<Link href="/index-5" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Home 5
-										</Link>
+										<Link href="/horseTransport" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Horse Transport</Link>
+									</li>
+								</ul>
+							</li>
+							<li className={isActive.key == 2 ? "mb-1 menu-item-has-children rounded-xl active" : "mb-1 menu-item-has-children rounded-xl"} onClick={() => handleToggle(2)}>
+								<span className="menu-expand">+</span>
+								<Link href="/publicMarket" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Public Market</Link>
+								<ul className={isActive.key == 2 ? "dropdown pl-5" : "hidden"}>
+									<li>
+										<Link href="/contractors" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Contractors</Link>
+									</li>
+									<li>
+										<Link href="/suppliers" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Suppliers</Link>
+									</li>
+									<li>
+										<Link href="/horseCatering" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Horse Catering Services</Link>
 									</li>
 								</ul>
 							</li>
 							<li className="mb-1 rounded-xl">
-								<Link href="/about" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">About Us
-								</Link>
-							</li>
-							<li className="mb-1">
-								<Link href="/services" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Services
-								</Link>
-							</li>
-							<li className="mb-1">
-								<Link href="/portfolio" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Portfolio
-								</Link>
-							</li>
-							<li className="mb-1">
-								<Link href="/pricing" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Pricing
-								</Link>
-							</li>
-							<li className="mb-1">
-								<Link href="/team" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Team
-								</Link>
-							</li>
-							<li className={isActive.key == 2 ? "mb-1 menu-item-has-children rounded-xl active" : "mb-1 menu-item-has-children rounded-xl"} onClick={() => handleToggle(2)}>
-								<span className="menu-expand">+</span>
-								<Link href="#" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Blog
-								</Link>
-								<ul className={isActive.key == 2 ? "dropdown pl-5" : "hidden"}>
-									<li>
-										<Link href="/blog" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Category 1
-										</Link>
-									</li>
-									<li>
-										<Link href="/blog-2" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Category 2
-										</Link>
-									</li>
-									<li>
-										<Link href="/blog-single" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Single 1
-										</Link>
-									</li>
-									<li>
-										<Link href="/blog-single-2" className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Single 2
-										</Link>
-									</li>
-								</ul>
-							</li>
-							<li className="mb-1">
-								<Link href="/faqs" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Faqs
-								</Link>
-							</li>
-							<li className="mb-1">
-								<Link href="/testimonials" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Testimonial
-								</Link>
-							</li>
-							<li className="mb-1">
-								<Link href="/contact" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500">Contact Us
-								</Link>
+								<Link href="/contact" className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl">Contact</Link>
 							</li>
 						</ul>
 						<div className="mt-4 pt-6 border-t border-blueGray-100">
-							<Link href="/signup" className="block px-4 py-3 mb-3 text-xs text-center font-semibold leading-none bg-blue-400 hover:bg-blue-500 text-white rounded">Sign Up
-							</Link>
-							<Link href="/login" className="block px-4 py-3 mb-2 text-xs text-center text-blue-500 hover:text-blue-700 font-semibold leading-none border border-blue-200 hover:border-blue-300 rounded">Log In
-							</Link>
+							<Link href="/signup" className="block px-4 py-3 mb-3 text-xs text-center font-semibold leading-none bg-blue-400 hover:bg-blue-500 text-white rounded">Sign Up</Link>
+							<Link href="/login" className="block px-4 py-3 mb-2 text-xs text-center text-blue-500 hover:text-blue-700 font-semibold leading-none border border-blue-200 hover:border-blue-300 rounded">Log In</Link>
 						</div>	
 					</div>
 					<div className="mt-auto">
@@ -166,4 +132,4 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
 	)
 }
 
-export default MobileMenu
+export default MobileMenu 

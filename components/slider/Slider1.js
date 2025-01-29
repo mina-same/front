@@ -15,6 +15,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-1.png" } },
       description_en: "Top-notch horse care.",
       description_ar: "رعاية خيول فاخرة.",
+      route: "Stables", // Added route
     },
     {
       _id: "2",
@@ -24,6 +25,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-2.png" } },
       description_en: "Expert horse health care.",
       description_ar: "رعاية بيطرية متخصصة.",
+      route: "veterinarian", // Added route
     },
     {
       _id: "3",
@@ -33,6 +35,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-3.png" } },
       description_en: "Exciting horse events.",
       description_ar: "مسابقات خيول ممتعة.",
+      route: "competitions", // Added route
     },
     {
       _id: "4",
@@ -42,6 +45,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-4.png" } },
       description_en: "Secure horse shelters.",
       description_ar: "مساكن آمنة للخيول.",
+      route: "housing", // Added route
     },
     {
       _id: "5",
@@ -51,6 +55,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-5.png" } },
       description_en: "Organized horse trips.",
       description_ar: "رحلات منظمة للخيول.",
+      route: "tripCoordinator", // Added route
     },
     {
       _id: "6",
@@ -60,6 +65,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-6.png" } },
       description_en: "Quality horse meals.",
       description_ar: "وجبات عالية الجودة.",
+      route: "horseCatering", // Added route
     },
     {
       _id: "7",
@@ -69,6 +75,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-7.png" } },
       description_en: "Safe horse transportation.",
       description_ar: "نقل آمن للخيول.",
+      route: "horseTransport", // Added route
     },
     {
       _id: "8",
@@ -78,6 +85,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/7.jpg" } },
       description_en: "Professional horse facilities.",
       description_ar: "مرافق خيول محترفة.",
+      route: "contractors", // Added route
     },
     {
       _id: "9",
@@ -87,6 +95,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-9.png" } },
       description_en: "Trusted horse supplies.",
       description_ar: "مستلزمات خيول موثوقة.",
+      route: "suppliers", // Added route
     },
     {
       _id: "10",
@@ -96,6 +105,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-10.png" } },
       description_en: "Experienced horse training.",
       description_ar: "تدريب خيول بخبرة.",
+      route: "horseTrainer", // Added route
     },
     {
       _id: "11",
@@ -105,6 +115,7 @@ const Slider1 = () => {
       image: { asset: { url: "/assets/imgs/placeholders/slider-11.png" } },
       description_en: "Professional hoof care.",
       description_ar: "رعاية أظافر محترفة.",
+      route: "hoofTrimmer", // Added route
     },
   ];
 
@@ -141,7 +152,7 @@ const Slider1 = () => {
                 <div className="flex justify-between items-end">
                   <div>
                     <h1 className="mt-5 text-sm font-semibold group-hover:text-blue-500">
-                      <Link href={`/services/${service._id}`} legacyBehavior>
+                      <Link href={`/${service.route}`} legacyBehavior>
                         <a>{service.name_en}</a>
                       </Link>
                     </h1>
@@ -151,7 +162,7 @@ const Slider1 = () => {
                   </div>
                   <div>
                     <Link
-                      href={`/services/${service._id}`}
+                      href={`/${service.route}`}
                       legacyBehavior
                     >
                       <a className="tracking-wide hover-up-2 mr-2 inline-block px-4 py-3 text-xs text-blue-500 font-semibold leading-none border border-blue-200 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded">
