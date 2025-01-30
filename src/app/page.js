@@ -8,6 +8,7 @@ import Image from "next/image"
 import { GiHorseHead } from "react-icons/gi";
 import { LuHeartHandshake } from "react-icons/lu";
 import { RiLineChartLine } from "react-icons/ri";
+import { client } from "../lib/sanity"
 
 
 import { useEffect, useState } from 'react'

@@ -1424,6 +1424,14 @@ video {
   background-color: #fcfc9e54 !important;
 }
 
+.bg-black{
+  background-color: #000 !important;
+}
+
+.border-blue-500{
+  border: 1px solid #b28a2f !important;
+}
+
 .bg-blue-400 {
   --tw-bg-opacity: 1 !important;
   background-color: #b28a2f !important;

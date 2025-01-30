@@ -23,7 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import toast from 'react-hot-toast';
 import { client, urlFor } from '../../src/lib/sanity';
 
-const ServiceForm = ({ currentUser }) => {
+const NewProviderServiceForm = ({ currentUser }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -36,6 +36,9 @@ const ServiceForm = ({ currentUser }) => {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedGovernorate, setSelectedGovernorate] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+
+  // Helper function to generate unique keys
+  const generateKey = () => `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   // Initialize all form fields with empty values
   const initialFormState = {
@@ -108,7 +111,6 @@ const ServiceForm = ({ currentUser }) => {
       moreDetails: ''
     },
     statusAdminApproved: false,
-    statusProviderApproved: true
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -153,6 +155,11 @@ const ServiceForm = ({ currentUser }) => {
     }
   };
 
+  const handleDeleteImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, image: null }));
+  };
+
   const handleChange = useCallback((e) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -192,19 +199,19 @@ const ServiceForm = ({ currentUser }) => {
     setFormData(prev => ({ ...prev, city: cityId }));
   };
 
-  const serviceTypeIcons = {
-    horse_stable: <Home className="w-5 h-5" />,
-    veterinary: <Stethoscope className="w-5 h-5" />,
-    competitions: <Trophy className="w-5 h-5" />,
-    housing: <Building className="w-5 h-5" />,
-    trip_coordinator: <Map className="w-5 h-5" />,
-    horse_catering: <Utensils className="w-5 h-5" />,
-    horse_transport: <Truck className="w-5 h-5" />,
-    contractors: <HardHat className="w-5 h-5" />,
-    suppliers: <Package className="w-5 h-5" />,
-    horse_trainer: <Dumbbell className="w-5 h-5" />,
-    hoof_trimmer: <Scissors className="w-5 h-5" />
-  };
+    const serviceTypeIcons = {
+      horse_stable: <Home className="w-5 h-5" />,
+      veterinary: <Stethoscope className="w-5 h-5" />,
+      competitions: <Trophy className="w-5 h-5" />,
+      housing: <Building className="w-5 h-5" />,
+      trip_coordinator: <Map className="w-5 h-5" />,
+      horse_catering: <Utensils className="w-5 h-5" />,
+      horse_transport: <Truck className="w-5 h-5" />,
+      contractors: <HardHat className="w-5 h-5" />,
+      suppliers: <Package className="w-5 h-5" />,
+      horse_trainer: <Dumbbell className="w-5 h-5" />,
+      hoof_trimmer: <Scissors className="w-5 h-5" />
+    };
 
   const renderServiceTypeFields = () => {
     switch (formData.serviceType) {
@@ -755,8 +762,6 @@ const ServiceForm = ({ currentUser }) => {
     }
   };
 
-
-
   // Add a function to prepare the form data before submission
   const prepareFormData = (data) => {
     const preparedData = { ...data };
@@ -789,153 +794,152 @@ const ServiceForm = ({ currentUser }) => {
     return preparedData;
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Step 1: Validate form inputs
-    if (!agreedToTerms || !confirmDataAccuracy) {
-      setError('Please agree to the terms and confirm data accuracy.');
+
+    if (!currentUser?.user?._id) {
+      toast.error('Please log in to create a service');
       return;
     }
-  
-    // Additional validation for trip coordinator dates
-    if (formData.serviceType === 'trip_coordinator') {
-      if (!formData.tripCoordinator.startDate || !formData.tripCoordinator.endDate) {
-        setError('Start date and end date are required for trip coordinator services.');
-        return;
-      }
+
+    if (!agreedToTerms || !confirmDataAccuracy) {
+      toast.error('Please agree to the terms and confirm data accuracy.');
+      return;
     }
-  
+
     setIsSubmitting(true);
-    setError(null);
-  
+
     try {
-      // Step 2: Create provider document if it doesn't exist
-      let providerId;
-  
-      // Check if provider already exists for this user
+      // Check for required fields
+      if (!formData.name_en || !formData.name_ar || !formData.serviceType || !formData.price) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      // Check for existing provider
       const existingProvider = await client.fetch(
         `*[_type == "provider" && userRef._ref == $userId][0]`,
-        { userId: currentUser.userId }
+        { userId: currentUser.user._id }
       );
-  
-      if (!existingProvider) {
-        // Create new provider with unique _key for userRef
+
+      let providerId = existingProvider?._id;
+
+      if (!providerId) {
+        // Create new provider with empty servicesRef array
         const providerDoc = {
           _type: 'provider',
           userRef: {
             _type: 'reference',
-            _ref: currentUser.userId,
-            _key: `provider-user-${new Date().getTime()}`
+            _ref: currentUser.user._id
           },
-          servicesRef: [], // Initialize empty services array
+          servicesRef: [] // Initialize as empty array
         };
-  
+
         const createdProvider = await client.create(providerDoc);
         providerId = createdProvider._id;
-  
-        // Update user document to include provider reference with unique _key
-        await client.patch(currentUser.userId)
+
+        // Update the user document with provider reference as an array
+        await client.patch(currentUser.user._id)
           .set({
             provider: [{
               _type: 'reference',
               _ref: providerId,
-              _key: `user-provider-${new Date().getTime()}`
-            }],
+              _key: generateKey() // Add _key for array items
+            }]
           })
           .commit();
-      } else {
-        providerId = existingProvider._id;
       }
-  
-      // Step 3: Upload image to Sanity (if provided)
+
+      // Handle image upload
       let imageAsset;
       if (formData.image) {
-        const imageFile = formData.image;
-        const imageAssetResponse = await client.assets.upload('image', imageFile);
-        imageAsset = imageAssetResponse;
+        imageAsset = await client.assets.upload('image', formData.image);
       }
-  
-      // Step 4: Prepare the service document with the cleaned data
-      const preparedFormData = prepareFormData(formData);
-  
-      // Step 5: Create the service document with unique keys for all references
+
+      // Prepare arrays with _key properties
+      const preparedLinks = formData.links.map(link => ({
+        _key: generateKey(),
+        value: link
+      }));
+
+      const preparedMeals = formData.tripCoordinator?.meals?.map(meal => ({
+        _key: generateKey(),
+        ...meal
+      })) || [];
+
+      // Create service document
       const serviceDoc = {
         _type: 'services',
-        ...preparedFormData,
+        ...prepareFormData(formData),
         image: imageAsset ? {
           _type: 'image',
           asset: {
             _type: 'reference',
-            _ref: imageAsset._id,
-            _key: `service-image-${new Date().getTime()}`
+            _ref: imageAsset._id
           }
         } : null,
+        links: preparedLinks,
         providerRef: {
           _type: 'reference',
-          _ref: providerId,
-          _key: `service-provider-${new Date().getTime()}`
+          _ref: providerId
         },
         country: selectedCountry ? {
           _type: 'reference',
-          _ref: selectedCountry,
-          _key: `service-country-${new Date().getTime()}`
+          _ref: selectedCountry
         } : null,
         government: selectedGovernorate ? {
           _type: 'reference',
-          _ref: selectedGovernorate,
-          _key: `service-government-${new Date().getTime()}`
+          _ref: selectedGovernorate
         } : null,
         city: selectedCity ? {
           _type: 'reference',
-          _ref: selectedCity,
-          _key: `service-city-${new Date().getTime()}`
+          _ref: selectedCity
         } : null,
         statusAdminApproved: false,
-        statusProviderApproved: true,
+        statusProviderApproved: true
       };
-  
-      // Step 6: Remove undefined fields
-      Object.keys(serviceDoc).forEach(key => serviceDoc[key] === undefined && delete serviceDoc[key]);
-  
-      // Step 7: Create the service in Sanity
+
+      // Add meals if service type is trip_coordinator
+      if (formData.serviceType === 'trip_coordinator' && serviceDoc.tripCoordinator) {
+        serviceDoc.tripCoordinator.meals = preparedMeals;
+      }
+
       const createdService = await client.create(serviceDoc);
-  
-      // Step 8: Update the provider's servicesRef array with unique _key
-      const provider = await client.getDocument(providerId);
-      const updatedServicesRef = [
-        ...(provider.servicesRef || []),
-        {
-          _type: 'reference',
-          _ref: createdService._id,
-          _key: `provider-service-${new Date().getTime()}`
-        }
-      ];
-  
+
+      // Get current servicesRef array
+      const currentProvider = await client.getDocument(providerId);
+      const currentServices = currentProvider.servicesRef || [];
+
+      // Create new reference object with _key
+      const newServiceRef = {
+        _key: generateKey(),
+        _type: 'reference',
+        _ref: createdService._id
+      };
+
+      // Update provider with new service reference in array
       await client.patch(providerId)
-        .set({ servicesRef: updatedServicesRef })
+        .set({
+          servicesRef: [...currentServices, newServiceRef]
+        })
         .commit();
-  
-      // Step 9: Show success message
-      toast({
-        title: "Success",
-        description: "Service created successfully",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-  
-      // Step 10: Reset form
+
+      toast.success('Service created successfully!');
+
+      // Reset form
       setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
       setConfirmDataAccuracy(false);
-  
-      // Step 11: Refresh the page
-      window.location.reload();
+
+      // Refresh the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      
     } catch (err) {
-      console.error('Error submitting service:', err);
-      setError('An error occurred while submitting the service. Please try again.');
+      console.error('Error:', err);
+      toast.error(err.message || 'An error occurred while creating the service.');
     } finally {
       setIsSubmitting(false);
     }
@@ -963,16 +967,20 @@ const ServiceForm = ({ currentUser }) => {
   };
 
   const addMeal = () => {
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       tripCoordinator: {
-        ...formData.tripCoordinator,
+        ...prev.tripCoordinator,
         meals: [
-          ...formData.tripCoordinator.meals,
-          { mealType: '', mealDescription: '' }
+          ...(prev.tripCoordinator?.meals || []),
+          {
+            _key: generateKey(),
+            mealType: '',
+            mealDescription: ''
+          }
         ]
       }
-    });
+    }));
   };
 
   return (
@@ -990,21 +998,22 @@ const ServiceForm = ({ currentUser }) => {
           <div className="flex justify-center mb-8">
             <div className="relative w-48 h-48">
               {imagePreview ? (
-                <div className="relative w-full h-full rounded-xl overflow-hidden">
+                <div className="relative w-full h-full rounded-xl overflow-hidden group">
                   <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                   <button
                     type="button"
-                    onClick={() => {
-                      setImagePreview(null);
-                      setFormData(prev => ({ ...prev, image: null }));
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    onClick={handleDeleteImage}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    aria-label="Delete image"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                <label style={{ padding: "0px 50px" }} className="flex flex-col items-center justify-center w-full h-full border-4 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-all duration-300">
+                <label
+                  style={{ padding: "0px 50px" }}
+                  className="flex flex-col items-center justify-center w-full h-full border-4 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-all duration-300"
+                >
                   <Upload className="w-10 h-10 text-gray-400" />
                   <span className="mt-2 text-sm text-gray-500">Upload Image</span>
                   <input
@@ -1319,4 +1328,4 @@ const ServiceForm = ({ currentUser }) => {
   );
 };
 
-export default ServiceForm;
+export default NewProviderServiceForm;

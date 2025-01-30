@@ -3,14 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Layout from "components/layout/Layout";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Users, Briefcase, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Phone, MapPin, Check, X, AlertCircle } from 'lucide-react';
-
+import { Plus, Users, Briefcase, UserPlus, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle } from 'lucide-react';
 import { client, urlFor } from '../../lib/sanity';
 import { useRouter } from 'next/navigation';
-import ServiceForm from 'components/elements/ServiceForm'; // Import your ServiceForm component
+import NewProviderServiceForm from 'components/elements/NewProviderServiceForm'; // Import your ServiceForm component
 import userFallbackImage from "../../../public/assets/imgs/elements/user.png";
 import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import AddServiceForm from "components/elements/AddServiceForm"
+import JoinServiceForm from "components/elements/JoinServiceForm"
 
 const ProfessionalProfileDashboard = () => {
     const router = useRouter();
@@ -25,7 +26,6 @@ const ProfessionalProfileDashboard = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    const [showAddService, setShowAddService] = useState(false);
 
     // Data state
     const [services, setServices] = useState([]);
@@ -41,6 +41,82 @@ const ProfessionalProfileDashboard = () => {
     const [showJoinRequest, setShowJoinRequest] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState(null);
     const [pendingReservations, setPendingReservations] = useState([]);
+    const [selectedService, setSelectedService] = useState(null);
+
+    const [showCreateProvider, setShowCreateProvider] = useState(false);
+    const [showAddService, setShowAddService] = useState(false);
+    const [showJoinService, setShowJoinService] = useState(false);
+
+    // State to manage the visibility of the ServiceForm modal
+    const [showServiceForm, setShowServiceForm] = useState(false);
+    const [existingProviderId, setExistingProviderId] = useState(null);
+    const [selectedProviderName, setSelectedProviderName] = useState(null);
+
+    // Modal component
+    const Modal = ({ isOpen, onClose, title, children }) => (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+                    onClick={onClose}
+                >
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.95, opacity: 0 }}
+                        className="bg-white rounded-xl shadow-xl w-full max-w-6xl overflow-y-auto max-h-[90vh]"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="p-6 border-b border-gray-100" style={{padding: "50px 0px"}}>
+                            <h3 className="text-xl font-semibold">{title}</h3>
+                        </div>
+                        <div className="p-6 overflow-y-auto">
+                            {children}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+
+    const renderServiceFormModal = () => (
+        <Modal
+            isOpen={showServiceForm}
+            onClose={() => setShowServiceForm(false)}
+            title="Create New Service"
+        >
+            <NewProviderServiceForm
+                currentUser={{ user }}
+            />
+        </Modal>
+    );
+
+    // No Providers View
+    const NoProvidersView = () => (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16 px-4 bg-gradient-to-br bg-blue-200 rounded-2xl shadow-sm"
+        >
+            <div className="max-w-md mx-auto space-y-6">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg">
+                    <Users className="w-10 h-10 text-black" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Start Your Provider Journey</h3>
+                <p className="text-gray-500">Create your first provider profile to start offering services to customers</p>
+                <button
+                    onClick={() => setShowServiceForm(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#333] to-[#000] text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                    <Plus className="w-5 h-5" />
+                    Create Your First Service
+                </button>
+            </div>
+        </motion.div>
+    );
 
 
     // Define tabs array
@@ -132,6 +208,7 @@ const ProfessionalProfileDashboard = () => {
         const fetchUserData = async () => {
             try {
                 const query = `*[_type == "user" && _id == $userId]{
+                    _id,
                     email,
                     userName,
                     image,
@@ -161,50 +238,6 @@ const ProfessionalProfileDashboard = () => {
         fetchUserData();
     }, [userId]);
 
-    // Fetch services effect
-    // useEffect(() => {
-    //     const fetchServices = async () => {
-    //         if (!userId || user?.userType !== 'provider') return;
-
-    //         setIsLoadingServices(true);
-    //         try {
-    //             const providerQuery = `*[_type == "provider" && userRef._ref == $userId][0]{_id}`;
-    //             const provider = await client.fetch(providerQuery, { userId });
-
-    //             if (!provider?._id) {
-    //                 console.log('No provider found for this user.');
-    //                 setServices([]);
-    //                 return;
-    //             }
-
-    //             const servicesQuery = `*[_type == "services" && providerRef._ref == $providerId]{
-    //                 _id,
-    //                 name_en,
-    //                 name_ar,
-    //                 serviceType,
-    //                 price,
-    //                 image,
-    //                 statusAdminApproved,
-    //                 statusProviderApproved
-    //             }`;
-    //             const result = await client.fetch(servicesQuery, { providerId: provider._id });
-
-    //             console.log("Fetched services:", result);
-    //             setServices(result);
-    //         } catch (error) {
-    //             console.error('Error fetching services:', error);
-    //             setError('Failed to load services.');
-    //         } finally {
-    //             setIsLoadingServices(false);
-    //         }
-    //     };
-
-    //     if (activeTab === 'services') {
-    //         fetchServices();
-    //     }
-    // }, [userId, user?.userType, activeTab]);
-
-
     useEffect(() => {
         const fetchProviders = async () => {
             if (!userId || user?.userType !== 'provider') return;
@@ -213,43 +246,58 @@ const ProfessionalProfileDashboard = () => {
             try {
                 // Fetch all providers associated with the current user
                 const providersQuery = `*[_type == "provider" && userRef._ref == $userId]{
-                _id,
-                name_en,
-                name_ar,
-                servicesRef[]->{
                     _id,
                     name_en,
                     name_ar,
-                    price,
-                    image,
-                    statusAdminApproved,
-                    statusProviderApproved,
-                    serviceType
-                }
-            }`;
+                    servicesRef[]->{
+                        _id,
+                        name_en,
+                        name_ar,
+                        price,
+                        image,
+                        statusAdminApproved,
+                        statusProviderApproved,
+                        serviceType
+                    }
+                }`;
 
                 const result = await client.fetch(providersQuery, { userId });
+                console.log("Fetched providers:", result);
                 setProviders(result);
 
-                // Fetch pending reservations for the provider
+                // Enhanced reservation query with more details
                 const reservationsQuery = `*[_type == "reservation" && provider._ref in $providerIds && status == "pending"]{
-                _id,
-                user->{
-                    userName,
-                    image
-                },
-                datetime,
-                service->{
-                    name_en,
-                    name_ar
-                }
-            }`;
+                    _id,
+                    datetime,
+                    status,
+                    user->{
+                        _id,
+                        userName,
+                        email,
+                        image
+                    },
+                    service->{
+                        _id,
+                        name_en,
+                        name_ar,
+                        price
+                    },
+                    provider->{
+                        _id,
+                        name_en,
+                        name_ar
+                    }
+                }`;
+
                 const providerIds = result.map(p => p._id);
+                console.log("Provider IDs for reservation query:", providerIds);
+
                 const reservations = await client.fetch(reservationsQuery, { providerIds });
+                console.log("Fetched pending reservations:", reservations);
                 setPendingReservations(reservations);
 
             } catch (error) {
-                console.error('Error fetching providers:', error);
+                console.error('Error fetching providers and reservations:', error);
                 setError('Failed to load providers and services.');
             } finally {
                 setIsLoadingServices(false);
@@ -260,6 +308,7 @@ const ProfessionalProfileDashboard = () => {
             fetchProviders();
         }
     }, [userId, user?.userType, activeTab]);
+
 
     // Handle profile form submission
     const handleSubmit = async (e) => {
@@ -284,6 +333,228 @@ const ProfessionalProfileDashboard = () => {
             ...prev,
             [name]: value
         }));
+    };
+
+    const ProviderCard = ({ provider }) => {
+        // Filter reservations for this specific provider
+        const providerReservations = pendingReservations.filter(
+            res => res.provider?._id === provider._id
+        );
+
+        console.log(`Reservations for provider ${provider._id}:`, providerReservations);
+
+        const mainService = provider.servicesRef?.[0];
+        const additionalServices = provider.servicesRef?.slice(1) || [];
+
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl overflow-hidden"
+            >
+                {/* Hero Section */}
+                <div className="relative h-72 overflow-hidden">
+                    {mainService && (
+                        <>
+                            <motion.div
+                                className="absolute inset-0"
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ duration: 0.6 }}
+                            >
+                                <img
+                                    src={mainService.image ? urlFor(mainService.image).url() : '/placeholder-service.png'}
+                                    alt={mainService.name_en}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                            </motion.div>
+
+                            {/* Premium Badge */}
+                            <div className="absolute top-4 right-4 px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-full text-white text-sm font-semibold shadow-lg">
+                                Premium Provider
+                            </div>
+
+                            {/* Provider Info Overlay */}
+                            <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <Image
+                                        src={user?.image ? urlFor(user.image).url() : userFallbackImage}
+                                        alt={"providerIamge"}
+                                        className="w-16 h-16 rounded-full ring-4 ring-white/30"
+                                        onError={(e) => {
+                                            e.target.src = userFallbackImage;
+                                        }}
+                                    />
+                                    <div>
+                                        <h2 className="text-3xl font-bold">{provider.name_en}</h2>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                            <span className="text-sm">4.9 (128 reviews)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Main Content */}
+                <div className="p-8">
+                    {/* Featured Service */}
+                    {mainService && (
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-2xl font-bold text-gray-900">Featured Service</h3>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-2xl font-bold text-black">${mainService.price}</span>
+                                    <span className="text-sm text-gray-500">/ session</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-3 mb-4">
+                                <span className="px-3 py-1 bg-blue-50 text-blue-500 rounded-full text-sm font-medium">
+                                    {mainService.serviceType}
+                                </span>
+                                <span className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-sm font-medium">
+                                    <Users className="w-4 h-4 inline-block mr-1" />
+                                    Available Now
+                                </span>
+                                <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-sm font-medium">
+                                    <Briefcase className="w-4 h-4 inline-block mr-1" />
+                                    Professional
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Additional Services Carousel */}
+                    {additionalServices.length > 0 && (
+                        <div className="mb-8">
+                            <h4 className="text-lg font-semibold text-gray-700 mb-4">Additional Services</h4>
+                            <div className="flex h-full gap-4 overflow-x-auto pb-10 scrollbar-hide">
+                                {additionalServices.map((service) => (
+                                    <motion.div
+                                        key={service._id}
+                                        whileHover={{ scale: 1.05 }}
+                                        className="relative flex-shrink-0 group cursor-pointer"
+                                        onClick={() => setSelectedService(service)}
+                                    >
+                                        <div className="w-20 h-20 rounded-xl overflow-hidden ring-2 ring-white shadow-lg">
+                                            <img
+                                                src={service.image ? urlFor(service.image).url() : '/placeholder-service.png'}
+                                                alt={service.name_en}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                            {service.name_en}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Pending Reservations Section */}
+                    {providerReservations.length > 0 && (
+                        <div className="space-y-4">
+                            <h4 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-blue-500" />
+                                Pending Reservations ({providerReservations.length})
+                            </h4>
+
+                            <div className="space-y-3">
+                                {providerReservations.map(reservation => (
+                                    <motion.div
+                                        key={reservation._id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <div className="relative">
+                                                    <img
+                                                        src={reservation.user?.image ? urlFor(reservation.user.image).url() : '/placeholder-user.png'}
+                                                        alt={reservation.user?.userName}
+                                                        className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500"
+                                                    />
+                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-white">
+                                                        <Check className="w-3 h-3 text-white" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h5 className="font-semibold text-gray-900">{reservation.user?.userName}</h5>
+                                                    <p className="text-sm text-gray-500">
+                                                        {reservation.service?.name_en}
+                                                    </p>
+                                                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-4 h-4" />
+                                                            {new Date(reservation.datetime).toLocaleDateString()}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="w-4 h-4" />
+                                                            {new Date(reservation.datetime).toLocaleTimeString()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <motion.button
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    onClick={() => handleReservationResponse(reservation._id, 'approved')}
+                                                    className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                                                >
+                                                    Accept
+                                                </motion.button>
+                                                <motion.button
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
+                                                    onClick={() => handleReservationResponse(reservation._id, 'rejected')}
+                                                    className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                                                >
+                                                    Decline
+                                                </motion.button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="mt-8 flex gap-4">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                                setSelectedProvider(provider._id);
+                                setExistingProviderId(provider._id); // Set the provider ID
+                                setSelectedProviderName(provider.name_en); // Set the provider name
+                                setShowAddService(true);
+                            }}
+                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border-blue-500 text-blue-500 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Add New Service
+                        </motion.button>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                                setShowJoinService(true)
+                            }}
+                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#b28a2f] to-[#b28a2f] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                        >
+                            <UserPlus className="w-5 h-5" />
+                            Join Service
+                        </motion.button>
+                    </div>
+                </div>
+            </motion.div>
+        );
     };
 
     // Render profile content (edit or view mode)
@@ -362,7 +633,7 @@ const ProfessionalProfileDashboard = () => {
                         </button>
                         <button
                             type="submit"
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-500 transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-[#333] transition-all"
                         >
                             <Save size={20} /> Save Changes
                         </button>
@@ -399,7 +670,7 @@ const ProfessionalProfileDashboard = () => {
                     <div className="border-t pt-6 mt-6">
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-500 transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-[#333] transition-all"
                         >
                             <Edit3 size={20} /> Edit Profile
                         </button>
@@ -503,7 +774,7 @@ const ProfessionalProfileDashboard = () => {
             setError('Failed to update reservation status.');
         }
     };
-    
+
     // Render reservations content
     const renderReservationsContent = () => (
         <div className="max-w-7xl mx-auto p-6">
@@ -651,159 +922,76 @@ const ProfessionalProfileDashboard = () => {
         </motion.div>
     );
 
-    const renderServicesContent = () => {
+    const PremiumProviderServices = () => {
+        if (!providers.length && user?.userType === 'provider') {
+            return <NoProvidersView />;
+        }
+
         return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="space-y-6 bg-white rounded-xl p-6 shadow-sm"
-            >
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">My Services</h2>
-                    <div className="flex gap-2">
-                        <button
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-                            onClick={() => setShowJoinRequest(true)}
-                        >
-                            <Plus size={20} /> Join Provider
-                        </button>
-                    </div>
+            <div className="space-y-8">
+                {/* Provider Actions */}
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => setShowCreateProvider(true)}
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-black to-[#333] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                        <Plus className="w-5 h-5" />
+                        New Provider
+                    </button>
                 </div>
 
-                {/* Pending Reservations Section */}
-                {pendingReservations.length > 0 && (
-                    <div className="mb-8">
-                        <h3 className="text-xl font-semibold mb-4">Pending Reservations</h3>
-                        <div className="grid gap-4">
-                            {pendingReservations.map(reservation => (
-                                <Card key={reservation._id} className="p-4">
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center gap-3">
-                                            <img
-                                                src={reservation.user?.image ? urlFor(reservation.user.image).url() : '/placeholder-user.png'}
-                                                alt={reservation.user?.userName}
-                                                className="w-10 h-10 rounded-full"
-                                            />
-                                            <div>
-                                                <p className="font-medium">{reservation.user?.userName}</p>
-                                                <p className="text-sm text-gray-500">
-                                                    {new Date(reservation.datetime).toLocaleString()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleReservationResponse(reservation._id, 'approved')}
-                                                className="px-4 py-2 bg-green-500 text-white rounded-lg"
-                                            >
-                                                Accept
-                                            </button>
-                                            <button
-                                                onClick={() => handleReservationResponse(reservation._id, 'rejected')}
-                                                className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                                            >
-                                                Reject
-                                            </button>
-                                        </div>
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Providers and Services Section */}
-                <div className="grid gap-6">
+                {/* Existing Providers */}
+                <div className="space-y-12">
                     {providers.map(provider => (
-                        <Card key={provider._id} className="overflow-hidden">
-                            <CardHeader className="flex flex-row justify-between items-center">
-                                <CardTitle>{provider.name_en}</CardTitle>
-                                <button
-                                    onClick={() => {
-                                        setSelectedProvider(provider._id);
-                                        setShowAddService(true);
-                                    }}
-                                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all"
-                                >
-                                    <Plus size={20} /> Add Service
-                                </button>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {provider.servicesRef?.map(service => (
-                                        <motion.div
-                                            key={service._id}
-                                            whileHover={{ scale: 1.05 }}
-                                            className="bg-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all"
-                                        >
-                                            <img
-                                                src={service.image ? urlFor(service.image).url() : '/placeholder-service.png'}
-                                                alt={service.name_en}
-                                                className="w-full h-48 object-cover"
-                                            />
-                                            <div className="p-5">
-                                                <h3 className="text-xl font-bold mb-2">{service.name_en}</h3>
-                                                <p className="text-sm text-gray-600 mb-2">Type: {service.serviceType}</p>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-gray-600">${service.price}</span>
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${service.statusAdminApproved
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-yellow-100 text-yellow-800'
-                                                        }`}>
-                                                        {service.statusAdminApproved ? 'Approved' : 'Pending'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <ProviderCard key={provider._id} provider={provider} />
                     ))}
                 </div>
 
-                {/* Add Service Form Modal */}
-                {showAddService && (
-                    <ServiceForm
-                        onSubmit={(serviceData) => handleAddService(selectedProvider, serviceData)}
-                        onCancel={() => setShowAddService(false)}
-                    />
-                )}
+                {/* Modals */}
+                <Modal
+                    isOpen={showCreateProvider}
+                    onClose={() => setShowCreateProvider(false)}
+                    title="Create New Provider"
+                >
+                    {/* Your provider creation form will go here */}
+                    <NewProviderServiceForm currentUser={{ userId, userType: user?.userType }} />
+                </Modal>
 
-                {/* Join Provider Request Modal */}
-                {showJoinRequest && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                        <div className="bg-white p-6 rounded-xl max-w-md w-full">
-                            <h3 className="text-xl font-bold mb-4">Join as Service Provider</h3>
-                            <p className="text-gray-600 mb-4">
-                                Submit a request to join as a service provider. Our team will review your request.
-                            </p>
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    onClick={() => setShowJoinRequest(false)}
-                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => handleJoinRequest(selectedProvider)}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                >
-                                    Submit Request
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </motion.div>
+                <Modal
+                    isOpen={showAddService}
+                    onClose={() => setShowAddService(false)}
+                    title={`Add New Service to ${selectedProviderName || "Main Service"}`} // Dynamic title
+                >
+                    <AddServiceForm providerId={existingProviderId} />
+                </Modal>
+
+                <Modal
+                    isOpen={showJoinService}
+                    onClose={() => setShowJoinService(false)}
+                    title=""
+                >
+                    <JoinServiceForm
+                        currentUserId={userId}
+                        onClose={() => setShowJoinService(false)}
+                    />
+                </Modal>
+
+                {/* Service Form Modal */}
+                <Modal
+                    isOpen={showServiceForm}
+                    onClose={() => setShowServiceForm(false)}
+                    title="Create New Service"
+                >
+                    <NewProviderServiceForm currentUser={{ userId, userType: user?.userType }} />
+                </Modal>
+            </div>
         );
     };
-
 
     // Tab content mapping
     const contentMap = {
         profile: renderProfileContent,
-        services: renderServicesContent,
+        services: PremiumProviderServices,
         reservations: renderReservationsContent,
         settings: renderSettingsContent
     };
@@ -854,7 +1042,7 @@ const ProfessionalProfileDashboard = () => {
                                                 key={tab.key}
                                                 onClick={() => setActiveTab(tab.key)}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === tab.key
-                                                    ? 'bg-blue-500 text-white'
+                                                    ? 'bg-black text-white'
                                                     : 'text-gray-700 hover:bg-gray-200'
                                                     }`}
                                             >
@@ -872,6 +1060,8 @@ const ProfessionalProfileDashboard = () => {
                     </div>
                 </div>
             </div>
+            {/* Render the ServiceForm modal at the root level */}
+            {renderServiceFormModal()}
         </Layout>
     );
 };
