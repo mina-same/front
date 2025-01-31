@@ -58,7 +58,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
     city: null,
     location: '',
     graduationDetails: {
-      graduationCertificate: '',
+      graduationCertificate: null,
       previousExperience: ''
     },
     competitions: {
@@ -199,19 +199,19 @@ const NewProviderServiceForm = ({ currentUser }) => {
     setFormData(prev => ({ ...prev, city: cityId }));
   };
 
-    const serviceTypeIcons = {
-      horse_stable: <Home className="w-5 h-5" />,
-      veterinary: <Stethoscope className="w-5 h-5" />,
-      competitions: <Trophy className="w-5 h-5" />,
-      housing: <Building className="w-5 h-5" />,
-      trip_coordinator: <Map className="w-5 h-5" />,
-      horse_catering: <Utensils className="w-5 h-5" />,
-      horse_transport: <Truck className="w-5 h-5" />,
-      contractors: <HardHat className="w-5 h-5" />,
-      suppliers: <Package className="w-5 h-5" />,
-      horse_trainer: <Dumbbell className="w-5 h-5" />,
-      hoof_trimmer: <Scissors className="w-5 h-5" />
-    };
+  const serviceTypeIcons = {
+    horse_stable: <Home className="w-5 h-5" />,
+    veterinary: <Stethoscope className="w-5 h-5" />,
+    competitions: <Trophy className="w-5 h-5" />,
+    housing: <Building className="w-5 h-5" />,
+    trip_coordinator: <Map className="w-5 h-5" />,
+    horse_catering: <Utensils className="w-5 h-5" />,
+    horse_transport: <Truck className="w-5 h-5" />,
+    contractors: <HardHat className="w-5 h-5" />,
+    suppliers: <Package className="w-5 h-5" />,
+    horse_trainer: <Dumbbell className="w-5 h-5" />,
+    hoof_trimmer: <Scissors className="w-5 h-5" />
+  };
 
   const renderServiceTypeFields = () => {
     switch (formData.serviceType) {
@@ -237,14 +237,40 @@ const NewProviderServiceForm = ({ currentUser }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
             <div>
               <label className="block text-sm font-semibold mb-2">Graduation Certificate</label>
-              <input
-                type="text"
-                value={formData.graduationDetails.graduationCertificate}
-                onChange={(e) => handleNestedChange('graduationDetails', 'graduationCertificate', e.target.value)}
-                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter graduation certificate details"
-                required
-              />
+              <div className="flex items-center justify-between px-2 bg-blueGray-50 rounded" htmlFor="graduation-certificate-input">
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleNestedChange('graduationDetails', 'graduationCertificate', e.target.files[0])}
+                  name="Choose file"
+                  id="graduation-certificate-input"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" // Allow multiple file types
+                />
+                {formData.graduationDetails.graduationCertificate ? (
+                  <span className="ml-2 text-blueGray-600">
+                    {formData.graduationDetails.graduationCertificate.name}
+                  </span>
+                ) : (
+                  <span className="ml-2 text-blueGray-600">No file selected</span>
+                )}
+                <div className='py-2'>
+                  {formData.graduationDetails.graduationCertificate && (
+                    <button
+                      type="button"
+                      className="mr-4 justify-center items-center text-red-500" // Assuming text-red-500 is defined
+                      onClick={() => handleNestedChange('graduationDetails', 'graduationCertificate', null)}
+                    >
+                      <Trash size={16} style={{ color: "red" }} />
+                    </button>
+                  )}
+                  <span
+                    className="px-4 py-3 text-xs text-white font-semibold leading-none bg-blueGray-500 hover:bg-blueGray-600 rounded cursor-pointer"
+                    onClick={() => document.getElementById('graduation-certificate-input').click()}
+                  >
+                    Browse
+                  </span>
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-semibold mb-2">Previous Experience</label>
@@ -794,152 +820,138 @@ const NewProviderServiceForm = ({ currentUser }) => {
     return preparedData;
   };
 
-
   const handleSubmit = async (e) => {
+    console.log("Submit event triggered");
     e.preventDefault();
-
-    if (!currentUser?.user?._id) {
-      toast.error('Please log in to create a service');
+  
+    if (!currentUser?.userId) {
+      toast.error("Please log in to create a service");
       return;
     }
-
+  
     if (!agreedToTerms || !confirmDataAccuracy) {
-      toast.error('Please agree to the terms and confirm data accuracy.');
+      toast.error("Please agree to the terms and confirm data accuracy.");
       return;
     }
-
+  
     setIsSubmitting(true);
-
+  
+    let providerId = null;
+    let createdService = null;
+  
     try {
-      // Check for required fields
-      if (!formData.name_en || !formData.name_ar || !formData.serviceType || !formData.price) {
-        throw new Error('Please fill in all required fields');
-      }
-
-      // Check for existing provider
-      const existingProvider = await client.fetch(
-        `*[_type == "provider" && userRef._ref == $userId][0]`,
-        { userId: currentUser.user._id }
-      );
-
-      let providerId = existingProvider?._id;
-
-      if (!providerId) {
-        // Create new provider with empty servicesRef array
-        const providerDoc = {
-          _type: 'provider',
-          userRef: {
-            _type: 'reference',
-            _ref: currentUser.user._id
-          },
-          servicesRef: [] // Initialize as empty array
-        };
-
-        const createdProvider = await client.create(providerDoc);
-        providerId = createdProvider._id;
-
-        // Update the user document with provider reference as an array
-        await client.patch(currentUser.user._id)
-          .set({
-            provider: [{
-              _type: 'reference',
-              _ref: providerId,
-              _key: generateKey() // Add _key for array items
-            }]
-          })
-          .commit();
-      }
-
-      // Handle image upload
-      let imageAsset;
-      if (formData.image) {
-        imageAsset = await client.assets.upload('image', formData.image);
-      }
-
-      // Prepare arrays with _key properties
-      const preparedLinks = formData.links.map(link => ({
-        _key: generateKey(),
-        value: link
-      }));
-
-      const preparedMeals = formData.tripCoordinator?.meals?.map(meal => ({
-        _key: generateKey(),
-        ...meal
-      })) || [];
-
-      // Create service document
-      const serviceDoc = {
-        _type: 'services',
-        ...prepareFormData(formData),
-        image: imageAsset ? {
-          _type: 'image',
-          asset: {
-            _type: 'reference',
-            _ref: imageAsset._id
-          }
-        } : null,
-        links: preparedLinks,
-        providerRef: {
-          _type: 'reference',
-          _ref: providerId
+      // Always create a new provider
+      const providerDoc = {
+        _type: "provider",
+        name_ar: formData.name_ar,
+        name_en: formData.name_en,
+        userRef: {
+          _type: "reference",
+          _ref: currentUser.userId, // Use userId instead of currentUser.user._id
         },
-        country: selectedCountry ? {
-          _type: 'reference',
-          _ref: selectedCountry
-        } : null,
-        government: selectedGovernorate ? {
-          _type: 'reference',
-          _ref: selectedGovernorate
-        } : null,
-        city: selectedCity ? {
-          _type: 'reference',
-          _ref: selectedCity
-        } : null,
-        statusAdminApproved: false,
-        statusProviderApproved: true
+        servicesRef: [],
+        mainServiceRef: null,
       };
-
-      // Add meals if service type is trip_coordinator
-      if (formData.serviceType === 'trip_coordinator' && serviceDoc.tripCoordinator) {
-        serviceDoc.tripCoordinator.meals = preparedMeals;
+  
+      const createdProvider = await client.create(providerDoc);
+      providerId = createdProvider._id;
+  
+      // Handle image upload
+      let imageAsset = null;
+      if (formData.image && formData.image instanceof File) {
+        imageAsset = await client.assets.upload("image", formData.image);
       }
-
-      const createdService = await client.create(serviceDoc);
-
-      // Get current servicesRef array
-      const currentProvider = await client.getDocument(providerId);
-      const currentServices = currentProvider.servicesRef || [];
-
-      // Create new reference object with _key
-      const newServiceRef = {
-        _key: generateKey(),
-        _type: 'reference',
-        _ref: createdService._id
+  
+      // Handle graduation certificate upload
+      let graduationCertificateAsset = null;
+      if (formData.graduationDetails?.graduationCertificate instanceof File) {
+        graduationCertificateAsset = await client.assets.upload(
+          "file",
+          formData.graduationDetails.graduationCertificate
+        );
+      }
+  
+      // Prepare service document
+      const serviceDoc = {
+        _type: "services",
+        ...formData,
+        providerRef: {
+          _type: "reference",
+          _ref: providerId,
+        },
+        image: imageAsset
+          ? {
+              _type: "image",
+              asset: {
+                _type: "reference",
+                _ref: imageAsset._id,
+              },
+            }
+          : null,
+        country: selectedCountry
+          ? { _type: "reference", _ref: selectedCountry }
+          : null,
+        government: selectedGovernorate
+          ? { _type: "reference", _ref: selectedGovernorate }
+          : null,
+        city: selectedCity
+          ? { _type: "reference", _ref: selectedCity }
+          : null,
+        statusAdminApproved: false,
+        graduationDetails: {
+          ...formData.graduationDetails,
+          graduationCertificate: graduationCertificateAsset
+            ? {
+                _type: "file",
+                asset: {
+                  _type: "reference",
+                  _ref: graduationCertificateAsset._id,
+                },
+              }
+            : null,
+        },
       };
-
-      // Update provider with new service reference in array
-      await client.patch(providerId)
+  
+      // Create service
+      createdService = await client.create(serviceDoc);
+  
+      // Update provider with main service reference
+      await client
+        .patch(providerId)
         .set({
-          servicesRef: [...currentServices, newServiceRef]
+          mainServiceRef: {
+            _type: "reference",
+            _ref: createdService._id,
+          },
         })
         .commit();
-
-      toast.success('Service created successfully!');
-
+  
+      toast.success("Service created successfully!");
+  
       // Reset form
       setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
       setConfirmDataAccuracy(false);
-
-      // Refresh the page after a short delay
+  
+      // Optional: Refresh or navigate
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-      
+  
     } catch (err) {
-      console.error('Error:', err);
-      toast.error(err.message || 'An error occurred while creating the service.');
+      console.error("Error in service creation:", err);
+      toast.error(err.message || "Failed to create service");
+  
+      // Cleanup: Delete provider if service creation failed
+      if (providerId) {
+        try {
+          await client.delete(providerId);
+          console.log("Cleanup: Provider deleted due to service creation failure");
+        } catch (deleteErr) {
+          console.error("Error during provider cleanup:", deleteErr);
+        }
+      }
     } finally {
       setIsSubmitting(false);
     }

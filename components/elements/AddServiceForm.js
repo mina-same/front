@@ -55,7 +55,7 @@ const AddServiceForm = ({ providerId }) => {
     city: null,
     location: '',
     graduationDetails: {
-      graduationCertificate: '',
+      graduationCertificate: null,
       previousExperience: ''
     },
     competitions: {
@@ -108,7 +108,6 @@ const AddServiceForm = ({ providerId }) => {
       moreDetails: ''
     },
     statusAdminApproved: false,
-    statusProviderApproved: true
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -230,14 +229,40 @@ const AddServiceForm = ({ providerId }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
             <div>
               <label className="block text-sm font-semibold mb-2">Graduation Certificate</label>
-              <input
-                type="text"
-                value={formData.graduationDetails.graduationCertificate}
-                onChange={(e) => handleNestedChange('graduationDetails', 'graduationCertificate', e.target.value)}
-                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter graduation certificate details"
-                required
-              />
+              <div className="flex items-center justify-between px-2 bg-blueGray-50 rounded" htmlFor="graduation-certificate-input">
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleNestedChange('graduationDetails', 'graduationCertificate', e.target.files[0])}
+                  name="Choose file"
+                  id="graduation-certificate-input"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" // Allow multiple file types
+                />
+                {formData.graduationDetails.graduationCertificate ? (
+                  <span className="ml-2 text-blueGray-600">
+                    {formData.graduationDetails.graduationCertificate.name}
+                  </span>
+                ) : (
+                  <span className="ml-2 text-blueGray-600">No file selected</span>
+                )}
+                <div className='py-2'>
+                  {formData.graduationDetails.graduationCertificate && (
+                    <button
+                      type="button"
+                      className="mr-4 justify-center items-center text-red-500" // Assuming text-red-500 is defined
+                      onClick={() => handleNestedChange('graduationDetails', 'graduationCertificate', null)}
+                    >
+                      <Trash size={16} style={{ color: "red" }} />
+                    </button>
+                  )}
+                  <span
+                    className="px-4 py-3 text-xs text-white font-semibold leading-none bg-blueGray-500 hover:bg-blueGray-600 rounded cursor-pointer"
+                    onClick={() => document.getElementById('graduation-certificate-input').click()}
+                  >
+                    Browse
+                  </span>
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-semibold mb-2">Previous Experience</label>
@@ -788,34 +813,36 @@ const AddServiceForm = ({ providerId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    console.log("Form Data:", formData); // Debugging line
+  
     if (!agreedToTerms || !confirmDataAccuracy) {
       setError('Please agree to the terms and confirm data accuracy.');
       return;
     }
-
+  
     setIsSubmitting(true);
     setError(null);
-
+  
     try {
       // Upload image if provided
       let imageAsset;
       if (formData.image) {
         imageAsset = await client.assets.upload('image', formData.image);
       }
-
+  
       // Create service document
       const serviceDoc = {
         _type: 'services',
-        ...preparedFormData,
-        image: imageAsset ? {
-          _type: 'image',
-          asset: {
-            _type: 'reference',
-            _ref: imageAsset._id,
-            _key: `service-image-${new Date().getTime()}`
-          }
-        } : null,
+        name_ar: formData.name_ar,
+        name_en: formData.name_en,
+        price: formData.price,
+        servicePhone: formData.servicePhone,
+        serviceEmail: formData.serviceEmail,
+        links: formData.links,
+        about_ar: formData.about_ar,
+        about_en: formData.about_en,
+        serviceType: formData.serviceType,
         providerRef: {
           _type: 'reference',
           _ref: providerId,
@@ -837,11 +864,20 @@ const AddServiceForm = ({ providerId }) => {
           _key: `service-city-${new Date().getTime()}`
         } : null,
         statusAdminApproved: false,
-        statusProviderApproved: true,
+        image: imageAsset ? {
+          _type: 'image',
+          asset: {
+            _type: 'reference',
+            _ref: imageAsset._id,
+            _key: `service-image-${new Date().getTime()}`
+          }
+        } : null,
+        // Add other fields as necessary...
       };
-
+  
       const createdService = await client.create(serviceDoc);
-
+      console.log("Created Service:", createdService); // Debugging line
+  
       // Update provider's servicesRef array
       const provider = await client.getDocument(providerId);
       const updatedServicesRef = [
@@ -852,11 +888,11 @@ const AddServiceForm = ({ providerId }) => {
           _key: `provider-service-${new Date().getTime()}`
         }
       ];
-
+  
       await client.patch(providerId)
         .set({ servicesRef: updatedServicesRef })
         .commit();
-
+  
       toast({
         title: "Success",
         description: "Service added successfully",
@@ -864,13 +900,17 @@ const AddServiceForm = ({ providerId }) => {
         duration: 5000,
         isClosable: true,
       });
-
+  
       // Reset form
       setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
       setConfirmDataAccuracy(false);
-
+  
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+  
     } catch (err) {
       console.error('Error adding service:', err);
       setError('An error occurred. Please try again.');

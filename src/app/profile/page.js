@@ -70,7 +70,7 @@ const ProfessionalProfileDashboard = () => {
                         className="bg-white rounded-xl shadow-xl w-full max-w-6xl overflow-y-auto max-h-[90vh]"
                         onClick={e => e.stopPropagation()}
                     >
-                        <div className="p-6 border-b border-gray-100" style={{padding: "50px 0px"}}>
+                        <div className="p-6 border-b border-gray-100" style={{ padding: "50px 0px" }}>
                             <h3 className="text-xl font-semibold">{title}</h3>
                         </div>
                         <div className="p-6 overflow-y-auto">
@@ -133,27 +133,33 @@ const ProfessionalProfileDashboard = () => {
             setIsLoadingReservations(true);
             try {
                 const query = `*[_type == "reservation" && user._ref == $userId]{
-                _id,
-                provider->{
                     _id,
-                    name_en,
-                    name_ar,
-                    userRef->{
-                        userName,
-                        image
-                    },
-                    servicesRef[]->{
+                    provider->{
                         _id,
                         name_en,
                         name_ar,
-                        image
-                    }
-                },
-                datetime,
-                status,
-                proposedDatetime,
-                userResponse
-            }`;
+                        userRef->{
+                            userName,
+                            image
+                        },
+                        mainServiceRef->{
+                            _id,
+                            name_en,
+                            name_ar,
+                            image
+                        },
+                        servicesRef[]->{
+                            _id,
+                            name_en,
+                            name_ar,
+                            image
+                        }
+                    },
+                    datetime,
+                    status,
+                    proposedDatetime,
+                    userResponse
+                }`;
 
                 const params = { userId };
                 const result = await client.fetch(query, params);
@@ -249,6 +255,16 @@ const ProfessionalProfileDashboard = () => {
                     _id,
                     name_en,
                     name_ar,
+                    mainServiceRef->{
+                        _id,
+                        name_en,
+                        name_ar,
+                        price,
+                        image,
+                        statusAdminApproved,
+                        statusProviderApproved,
+                        serviceType
+                    },
                     servicesRef[]->{
                         _id,
                         name_en,
@@ -343,8 +359,8 @@ const ProfessionalProfileDashboard = () => {
 
         console.log(`Reservations for provider ${provider._id}:`, providerReservations);
 
-        const mainService = provider.servicesRef?.[0];
-        const additionalServices = provider.servicesRef?.slice(1) || [];
+        const mainService = provider.mainServiceRef; // Now using mainServiceRef
+        const additionalServices = provider.servicesRef || []; // Now using servicesRef
 
         return (
             <motion.div
@@ -702,38 +718,6 @@ const ProfessionalProfileDashboard = () => {
         }
     };
 
-    const handleAddService = async (providerId, serviceData) => {
-        try {
-            const newService = {
-                _type: 'services',
-                providerRef: {
-                    _type: 'reference',
-                    _ref: providerId,
-                },
-                ...serviceData,
-            };
-
-            const result = await client.create(newService);
-
-            // Update the providers state with the new service
-            setProviders(prevProviders =>
-                prevProviders.map(provider =>
-                    provider._id === providerId
-                        ? {
-                            ...provider,
-                            servicesRef: [...provider.servicesRef, result]
-                        }
-                        : provider
-                )
-            );
-
-            setShowAddService(false);
-        } catch (error) {
-            console.error('Error adding service:', error);
-            setError('Failed to add service.');
-        }
-    };
-
     const handleJoinRequest = async (providerId) => {
         try {
             const joinRequest = {
@@ -830,8 +814,8 @@ const ProfessionalProfileDashboard = () => {
                                             {/* Service Image Section (Fixed Width) */}
                                             <div className="w-1/3 relative">
                                                 <img
-                                                    src={reservation.provider?.servicesRef?.[0]?.image ? urlFor(reservation.provider.servicesRef[0].image).url() : '/placeholder-service.png'}
-                                                    alt={reservation.provider?.servicesRef?.[0]?.name_en || 'Service Image'}
+                                                    src={reservation.provider?.mainServiceRef?.image ? urlFor(reservation.provider.mainServiceRef.image).url() : '/placeholder-service.png'}
+                                                    alt={reservation.provider?.mainServiceRef?.name_en || 'Service Image'}
                                                     className="w-full h-full object-cover"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
@@ -907,6 +891,38 @@ const ProfessionalProfileDashboard = () => {
             </motion.div>
         </div>
     );
+
+    const handleAddService = async (providerId, serviceData) => {
+        try {
+            const newService = {
+                _type: 'services',
+                providerRef: {
+                    _type: 'reference',
+                    _ref: providerId,
+                },
+                ...serviceData,
+            };
+
+            const result = await client.create(newService);
+
+            // Update the providers state with the new service
+            setProviders(prevProviders =>
+                prevProviders.map(provider =>
+                    provider._id === providerId
+                        ? {
+                            ...provider,
+                            servicesRef: [...provider.servicesRef, result]
+                        }
+                        : provider
+                )
+            );
+
+            setShowAddService(false);
+        } catch (error) {
+            console.error('Error adding service:', error);
+            setError('Failed to add service.');
+        }
+    };
 
     // Render settings content
     const renderSettingsContent = () => (
