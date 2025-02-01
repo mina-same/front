@@ -8,8 +8,8 @@ import {
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
-  const [providers, setProviders] = useState([]);
+const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
+  const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState(null);
@@ -17,7 +17,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [activeServiceType, setActiveServiceType] = useState('all');
-  const [view, setView] = useState('grid'); // 'grid' or 'list'
+  const [view, setView] = useState('grid');
 
   const serviceTypeIcons = {
     horse_stable: <Home className="w-5 h-5" />,
@@ -49,42 +49,45 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
   };
 
   useEffect(() => {
-    const fetchProviders = async () => {
+    const fetchServices = async () => {
       try {
-        const query = `*[_type == "provider" && userRef._ref != $currentUserId]{
+        const query = `*[_type == "services" && isMainService == true && statusAdminApproved == true]{
           _id,
           name_en,
           name_ar,
-          userRef->{
-            userName,
-            image
-          },
-          "services": servicesRef[]->{
+          price,
+          image,
+          serviceType,
+          about_en,
+          providerRef->{
             _id,
             name_en,
             name_ar,
-            image,
-            price,
-            serviceType,
-            statusAdminApproved,
-            about_en
+            userRef->{
+              _id,
+              userName,
+              image
+            }
           }
         }`;
 
-        const result = await client.fetch(query, { currentUserId });
-        const filteredProviders = result.filter(provider =>
-          provider.services && provider.services.some(service => service.statusAdminApproved)
+        const result = await client.fetch(query);
+        
+        // Filter out services belonging to providers owned by the current user
+        const filteredServices = result.filter(service => 
+          service.providerRef?.userRef?._id !== currentUserId
         );
-        setProviders(filteredProviders);
+
+        setServices(filteredServices);
       } catch (error) {
-        console.error('Error fetching providers:', error);
-        setErrorMessage('Failed to load providers');
+        console.error('Error fetching services:', error);
+        setErrorMessage('Failed to load services');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProviders();
+    fetchServices();
   }, [currentUserId]);
 
   const handleJoinRequest = async () => {
@@ -93,47 +96,38 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      const joinRequest = {
-        _type: 'joinRequest',
-        service: {
+      const serviceRequest = {
+        _type: 'serviceRequest',
+        requesterProviderRef: {
+          _type: 'reference',
+          _ref: currentProviderId,
+        },
+        requestedServiceRef: {
           _type: 'reference',
           _ref: selectedService._id,
         },
-        requestingUser: {
-          _type: 'reference',
-          _ref: currentUserId,
-        },
         status: 'pending',
-        requestDate: new Date().toISOString(),
       };
 
-      await client.create(joinRequest);
-      setSuccessMessage('Join request sent successfully!');
+      await client.create(serviceRequest);
+      setSuccessMessage('Service request sent successfully!');
       setTimeout(onClose, 2000);
     } catch (error) {
-      console.error('Error sending join request:', error);
-      setErrorMessage('Failed to send join request');
+      console.error('Error sending service request:', error);
+      setErrorMessage('Failed to send service request');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const filteredServices = providers.flatMap(provider =>
-    provider.services
-      .filter(service => service.statusAdminApproved)
-      .filter(service =>
-        activeServiceType === 'all' || service.serviceType === activeServiceType
-      )
-      .filter(service =>
-        service.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        provider.name_en.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .map(service => ({
-        ...service,
-        providerName: provider.name_en,
-        providerImage: provider.userRef?.image
-      }))
-  );
+  const filteredServices = services
+    .filter(service =>
+      activeServiceType === 'all' || service.serviceType === activeServiceType
+    )
+    .filter(service =>
+      service.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.providerRef?.name_en.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   return (
     <div className="w-full max-h-4xl inset-0 flex items-center justify-center z-50">
@@ -142,7 +136,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
         <div className="p-6 border-b">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">Discover Services</h2>
+              <h2 className="text-3xl font-bold text-gray-900">Ask Services To Join</h2>
               <p className="text-gray-500 mt-1">Find and join professional services in the equestrian world</p>
             </div>
             <button
@@ -162,8 +156,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
                 placeholder="Search services or providers..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 bg-white"
-                style={{paddingLeft: "50px"}}
+                className="w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 bg-white"
               />
             </div>
             <div className="flex gap-2">
@@ -183,7 +176,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
           </div>
         </div>
 
-        {/* Scrollable Content */}
+        {/* Services Display */}
         <div className="flex-1 overflow-y-auto">
           <div className="h-full flex">
             {/* Service Type Filter Sidebar */}
@@ -260,7 +253,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
                             <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                               <div className="flex items-center gap-1">
                                 <User className="w-4 h-4" />
-                                <span>{service.providerName}</span>
+                                <span>{service.providerRef?.name_en}</span>
                               </div>
                               <div className="flex items-center gap-1 text-black font-medium">
                                 <DollarSign className="w-4 h-4" />
@@ -286,7 +279,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
                             <div className="flex items-center gap-4 text-sm text-gray-500">
                               <div className="flex items-center gap-1">
                                 <User className="w-4 h-4" />
-                                <span>{service.providerName}</span>
+                                <span>{service.providerRef?.name_en}</span>
                               </div>
                               <div className="flex items-center gap-1 text-blue-600 font-medium">
                                 <DollarSign className="w-4 h-4" />
@@ -343,7 +336,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
 
         {/* Notifications */}
         {successMessage && (
-          <Alert className="mt-6 bg-green-50 border-green-200">
+          <Alert className="absolute bottom-4 right-4 w-96 bg-green-50 border-green-200">
             <Check className="w-5 h-5 text-green-500" />
             <AlertDescription className="text-green-700">
               {successMessage}
@@ -351,7 +344,7 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
           </Alert>
         )}
         {errorMessage && (
-          <Alert className="mt-6 bg-red-50 border-red-200">
+          <Alert className="absolute bottom-4 right-4 w-96 bg-red-50 border-red-200">
             <AlertTriangle className="w-5 h-5 text-red-500" />
             <AlertDescription className="text-red-700">
               {errorMessage}
@@ -363,4 +356,4 @@ const JoinServiceForm = ({ currentUserId, providerId, onClose }) => {
   );
 };
 
-export default JoinServiceForm;   
+export default JoinServiceForm;

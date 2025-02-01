@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from "components/layout/Layout";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Users, Briefcase, UserPlus, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle } from 'lucide-react';
+import { CheckCircle, Plus, Users, Briefcase, UserPlus, Sparkles,ShieldCheck , Zap, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle } from 'lucide-react';
 import { client, urlFor } from '../../lib/sanity';
 import { useRouter } from 'next/navigation';
 import NewProviderServiceForm from 'components/elements/NewProviderServiceForm'; // Import your ServiceForm component
@@ -89,7 +89,7 @@ const ProfessionalProfileDashboard = () => {
             title="Create New Service"
         >
             <NewProviderServiceForm
-                currentUser={{ user }}
+                currentUser={{ userId, userType: user?.userType }}
             />
         </Modal>
     );
@@ -366,46 +366,65 @@ const ProfessionalProfileDashboard = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl overflow-hidden"
+                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100/50 backdrop-blur-sm"
             >
                 {/* Hero Section */}
-                <div className="relative h-72 overflow-hidden">
+                <div className="relative h-80 overflow-hidden group">
                     {mainService && (
                         <>
                             <motion.div
-                                className="absolute inset-0"
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ duration: 0.6 }}
+                                className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
                             >
                                 <img
                                     src={mainService.image ? urlFor(mainService.image).url() : '/placeholder-service.png'}
                                     alt={mainService.name_en}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             </motion.div>
 
-                            {/* Premium Badge */}
-                            <div className="absolute top-4 right-4 px-4 py-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-full text-white text-sm font-semibold shadow-lg">
-                                Premium Provider
+                            {/* Approval Status Badge */}
+                            <div className={`absolute top-4 right-4 px-4 py-2 inline-flex items-center rounded-full 
+                                text-sm font-semibold backdrop-blur-sm transition-all duration-300 ${mainService.statusAdminApproved
+                                    ? 'bg-emerald-600/90 hover:bg-emerald-700 text-emerald-50 ring-2 ring-emerald-200/30'
+                                    : 'bg-amber-500/90 hover:bg-amber-600/90 text-amber-50 ring-2 ring-amber-200/30 animate-pulse'
+                                } shadow-xl hover:shadow-lg`}>
+                                {mainService.statusAdminApproved ? (
+                                    <>
+                                        <CheckCircle className="w-5 h-5 mr-2 text-current" />
+                                        <span>Approved</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Clock className="w-5 h-5 mr-2 text-current animate-pulse" />
+                                        <span>Pending Review</span>
+                                    </>
+                                )}
                             </div>
 
                             {/* Provider Info Overlay */}
-                            <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <Image
-                                        src={user?.image ? urlFor(user.image).url() : userFallbackImage}
-                                        alt={"providerIamge"}
-                                        className="w-16 h-16 rounded-full ring-4 ring-white/30"
-                                        onError={(e) => {
-                                            e.target.src = userFallbackImage;
-                                        }}
-                                    />
-                                    <div>
-                                        <h2 className="text-3xl font-bold">{provider.name_en}</h2>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                            <span className="text-sm">4.9 (128 reviews)</span>
+                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+                                <div className="flex items-center gap-4">
+                                    <div className="relative">
+                                        <Image
+                                            src={user?.image ? urlFor(user.image).url() : userFallbackImage}
+                                            alt="Provider"
+                                            className="w-20 h-20 rounded-full ring-4 ring-white/20 backdrop-blur-sm"
+                                            width={80}
+                                            height={80}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h2 className="text-2xl font-bold text-white tracking-tight">{provider.name_en}</h2>
+                                        <div className="flex items-center gap-2 text-sm text-white/90">
+                                            <div className="flex items-center gap-1.5">
+                                                <Star className="w-4 h-4 text-amber-400 fill-current" />
+                                                <span>4.9</span>
+                                                <span className="text-white/70">(128 reviews)</span>
+                                            </div>
+                                            <span className="mx-1">•</span>
+                                            <span>15 years experience</span>
                                         </div>
                                     </div>
                                 </div>
@@ -415,54 +434,56 @@ const ProfessionalProfileDashboard = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="p-8">
+                <div className="p-6 space-y-6">
                     {/* Featured Service */}
                     {mainService && (
-                        <div className="mb-8">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-2xl font-bold text-gray-900">Featured Service</h3>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-2xl font-bold text-black">${mainService.price}</span>
-                                    <span className="text-sm text-gray-500">/ session</span>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-semibold text-gray-900">Featured Service</h3>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-3xl font-bold text-gray-900">${mainService.price}</span>
+                                    <span className="text-gray-500">/ session</span>
                                 </div>
                             </div>
-                            <div className="flex flex-wrap gap-3 mb-4">
-                                <span className="px-3 py-1 bg-blue-50 text-blue-500 rounded-full text-sm font-medium">
+                            <div className="flex flex-wrap gap-2">
+                                <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4" />
                                     {mainService.serviceType}
-                                </span>
-                                <span className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-sm font-medium">
-                                    <Users className="w-4 h-4 inline-block mr-1" />
-                                    Available Now
-                                </span>
-                                <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-sm font-medium">
-                                    <Briefcase className="w-4 h-4 inline-block mr-1" />
-                                    Professional
-                                </span>
+                                </div>
+                                <div className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm flex items-center gap-2">
+                                    <Zap className="w-4 h-4" />
+                                    Instant Booking
+                                </div>
+                                <div className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full text-sm flex items-center gap-2">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    Verified Professional
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Additional Services Carousel */}
+                    {/* Additional Services */}
                     {additionalServices.length > 0 && (
-                        <div className="mb-8">
-                            <h4 className="text-lg font-semibold text-gray-700 mb-4">Additional Services</h4>
-                            <div className="flex h-full gap-4 overflow-x-auto pb-10 scrollbar-hide">
+                        <div className="space-y-4">
+                            <h4 className="text-lg font-semibold text-gray-900">Additional Services</h4>
+                            <div className="flex gap-4 pb-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-50">
                                 {additionalServices.map((service) => (
                                     <motion.div
                                         key={service._id}
                                         whileHover={{ scale: 1.05 }}
-                                        className="relative flex-shrink-0 group cursor-pointer"
-                                        onClick={() => setSelectedService(service)}
+                                        className="relative group flex-shrink-0"
                                     >
-                                        <div className="w-20 h-20 rounded-xl overflow-hidden ring-2 ring-white shadow-lg">
+                                        <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-white shadow-lg">
                                             <img
                                                 src={service.image ? urlFor(service.image).url() : '/placeholder-service.png'}
                                                 alt={service.name_en}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
                                             />
                                         </div>
-                                        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                            {service.name_en}
+                                        <div className="absolute inset-x-0 -bottom-2 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <span className="inline-block px-2 py-1 bg-black/90 text-white text-xs rounded-lg">
+                                                {service.name_en}
+                                            </span>
                                         </div>
                                     </motion.div>
                                 ))}
@@ -470,45 +491,44 @@ const ProfessionalProfileDashboard = () => {
                         </div>
                     )}
 
-                    {/* Pending Reservations Section */}
+                    {/* Pending Reservations */}
                     {providerReservations.length > 0 && (
                         <div className="space-y-4">
-                            <h4 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-blue-500" />
-                                Pending Reservations ({providerReservations.length})
+                            <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
+                                <CalendarDays className="w-5 h-5 text-blue-600" />
+                                Pending Reservations
+                                <span className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-sm">
+                                    {providerReservations.length}
+                                </span>
                             </h4>
 
                             <div className="space-y-3">
                                 {providerReservations.map(reservation => (
                                     <motion.div
                                         key={reservation._id}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
+                                        className="p-4 bg-gray-50 rounded-xl border border-gray-200/60 hover:border-gray-300 transition-colors"
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3">
                                                 <div className="relative">
                                                     <img
                                                         src={reservation.user?.image ? urlFor(reservation.user.image).url() : '/placeholder-user.png'}
                                                         alt={reservation.user?.userName}
-                                                        className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500"
+                                                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
                                                     />
-                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center ring-2 ring-white">
+                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
                                                         <Check className="w-3 h-3 text-white" />
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold text-gray-900">{reservation.user?.userName}</h5>
-                                                    <p className="text-sm text-gray-500">
-                                                        {reservation.service?.name_en}
-                                                    </p>
-                                                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                                                        <span className="flex items-center gap-1">
+                                                    <h5 className="font-medium text-gray-900">{reservation.user?.userName}</h5>
+                                                    <p className="text-sm text-gray-600">{reservation.service?.name_en}</p>
+                                                    <div className="flex gap-2 mt-1 text-sm text-gray-500">
+                                                        <span className="flex items-center gap-1.5">
                                                             <Calendar className="w-4 h-4" />
                                                             {new Date(reservation.datetime).toLocaleDateString()}
                                                         </span>
-                                                        <span className="flex items-center gap-1">
+                                                        <span className="flex items-center gap-1.5">
                                                             <Clock className="w-4 h-4" />
                                                             {new Date(reservation.datetime).toLocaleTimeString()}
                                                         </span>
@@ -517,18 +537,16 @@ const ProfessionalProfileDashboard = () => {
                                             </div>
                                             <div className="flex gap-2">
                                                 <motion.button
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
+                                                    whileHover={{ y: -2 }}
                                                     onClick={() => handleReservationResponse(reservation._id, 'approved')}
-                                                    className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium shadow-sm transition-colors"
                                                 >
                                                     Accept
                                                 </motion.button>
                                                 <motion.button
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
+                                                    whileHover={{ y: -2 }}
                                                     onClick={() => handleReservationResponse(reservation._id, 'rejected')}
-                                                    className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                                                    className="px-4 py-2 bg-transparent text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-300 font-medium transition-colors"
                                                 >
                                                     Decline
                                                 </motion.button>
@@ -541,28 +559,25 @@ const ProfessionalProfileDashboard = () => {
                     )}
 
                     {/* Action Buttons */}
-                    <div className="mt-8 flex gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ y: -2 }}
+                            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-emerald-600 text-emerald-600 rounded-xl font-medium hover:bg-emerald-50 transition-colors"
                             onClick={() => {
                                 setSelectedProvider(provider._id);
-                                setExistingProviderId(provider._id); // Set the provider ID
-                                setSelectedProviderName(provider.name_en); // Set the provider name
+                                setExistingProviderId(provider._id);
+                                setSelectedProviderName(provider.name_en);
                                 setShowAddService(true);
                             }}
-                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border-blue-500 text-blue-500 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
                         >
                             <Plus className="w-5 h-5" />
-                            Add New Service
+                            Add Service
                         </motion.button>
                         <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => {
-                                setShowJoinService(true)
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#b28a2f] to-[#b28a2f] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                            whileHover={{ y: -2 }}
+                            className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#b28a2f] to-[#9b7733] text-white rounded-xl font-medium hover:shadow-lg transition-shadow"
+                            
+                            onClick={() => {setShowJoinService(true); setExistingProviderId(provider._id)}}
                         >
                             <UserPlus className="w-5 h-5" />
                             Join Service
@@ -987,6 +1002,7 @@ const ProfessionalProfileDashboard = () => {
                     title=""
                 >
                     <JoinServiceForm
+                        currentProviderId={existingProviderId}
                         currentUserId={userId}
                         onClose={() => setShowJoinService(false)}
                     />

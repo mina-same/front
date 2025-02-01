@@ -111,6 +111,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
       moreDetails: ''
     },
     statusAdminApproved: false,
+    isMainService: true,
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -823,22 +824,22 @@ const NewProviderServiceForm = ({ currentUser }) => {
   const handleSubmit = async (e) => {
     console.log("Submit event triggered");
     e.preventDefault();
-  
+
     if (!currentUser?.userId) {
       toast.error("Please log in to create a service");
       return;
     }
-  
+
     if (!agreedToTerms || !confirmDataAccuracy) {
       toast.error("Please agree to the terms and confirm data accuracy.");
       return;
     }
-  
+
     setIsSubmitting(true);
-  
+
     let providerId = null;
     let createdService = null;
-  
+
     try {
       // Always create a new provider
       const providerDoc = {
@@ -852,16 +853,16 @@ const NewProviderServiceForm = ({ currentUser }) => {
         servicesRef: [],
         mainServiceRef: null,
       };
-  
+
       const createdProvider = await client.create(providerDoc);
       providerId = createdProvider._id;
-  
+
       // Handle image upload
       let imageAsset = null;
       if (formData.image && formData.image instanceof File) {
         imageAsset = await client.assets.upload("image", formData.image);
       }
-  
+
       // Handle graduation certificate upload
       let graduationCertificateAsset = null;
       if (formData.graduationDetails?.graduationCertificate instanceof File) {
@@ -870,7 +871,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
           formData.graduationDetails.graduationCertificate
         );
       }
-  
+
       // Prepare service document
       const serviceDoc = {
         _type: "services",
@@ -881,12 +882,12 @@ const NewProviderServiceForm = ({ currentUser }) => {
         },
         image: imageAsset
           ? {
-              _type: "image",
-              asset: {
-                _type: "reference",
-                _ref: imageAsset._id,
-              },
-            }
+            _type: "image",
+            asset: {
+              _type: "reference",
+              _ref: imageAsset._id,
+            },
+          }
           : null,
         country: selectedCountry
           ? { _type: "reference", _ref: selectedCountry }
@@ -898,23 +899,24 @@ const NewProviderServiceForm = ({ currentUser }) => {
           ? { _type: "reference", _ref: selectedCity }
           : null,
         statusAdminApproved: false,
+        isMainService: true,
         graduationDetails: {
           ...formData.graduationDetails,
           graduationCertificate: graduationCertificateAsset
             ? {
-                _type: "file",
-                asset: {
-                  _type: "reference",
-                  _ref: graduationCertificateAsset._id,
-                },
-              }
+              _type: "file",
+              asset: {
+                _type: "reference",
+                _ref: graduationCertificateAsset._id,
+              },
+            }
             : null,
         },
       };
-  
+
       // Create service
       createdService = await client.create(serviceDoc);
-  
+
       // Update provider with main service reference
       await client
         .patch(providerId)
@@ -925,24 +927,24 @@ const NewProviderServiceForm = ({ currentUser }) => {
           },
         })
         .commit();
-  
+
       toast.success("Service created successfully!");
-  
+
       // Reset form
       setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
       setConfirmDataAccuracy(false);
-  
+
       // Optional: Refresh or navigate
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-  
+
     } catch (err) {
       console.error("Error in service creation:", err);
       toast.error(err.message || "Failed to create service");
-  
+
       // Cleanup: Delete provider if service creation failed
       if (providerId) {
         try {

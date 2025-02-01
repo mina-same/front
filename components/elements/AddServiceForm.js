@@ -45,7 +45,9 @@ const AddServiceForm = ({ providerId }) => {
     image: null,
     servicePhone: '',
     serviceEmail: '',
-    links: [],
+    links:  [{ url: '' },
+    { url: '' },
+    { url: '' }],
     about_ar: '',
     about_en: '',
     serviceType: '',
@@ -140,6 +142,17 @@ const AddServiceForm = ({ providerId }) => {
     }
   }, [selectedGovernorate]);
 
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Modified handleImageChange to add remove functionality
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -149,6 +162,36 @@ const AddServiceForm = ({ providerId }) => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // New method to remove image
+  const removeImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, image: null }));
+  };
+
+  // Modified link handling methods
+  const handleLinkChange = (index, value) => {
+    const newLinks = [...formData.links];
+    newLinks[index] = { url: value };
+    setFormData(prev => ({ ...prev, links: newLinks }));
+  };
+
+  const addLink = () => {
+    if (formData.links.length < 6) {
+      setFormData(prev => ({
+        ...prev,
+        links: [...prev.links, { url: '' }]
+      }));
+    }
+  };
+
+  const removeLink = (index) => {
+    // Only allow removing links beyond the first three
+    if (index >= 3) {
+      const newLinks = formData.links.filter((_, i) => i !== index);
+      setFormData(prev => ({ ...prev, links: newLinks }));
     }
   };
 
@@ -813,24 +856,50 @@ const AddServiceForm = ({ providerId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     console.log("Form Data:", formData); // Debugging line
-  
+
+    const invalidLinks = formData.links.some(link =>
+      link.url.trim() !== '' && !isValidUrl(link.url)
+    );
+
+    if (invalidLinks) {
+      setError('Please enter valid URLs for all links.');
+      return;
+    }
+
+    const handleLinkChange = (index, value) => {
+      const newLinks = [...formData.links];
+      newLinks[index] = { url: value };
+      setFormData({ links: newLinks });
+    };
+
+    const addLink = () => {
+      setFormData({ links: [...formData.links, { url: '' }] });
+    };
+
+    const removeLink = (index) => {
+      if (index >= 3) {
+        const newLinks = formData.links.filter((_, i) => i !== index);
+        setFormData({ links: newLinks });
+      }
+    };
+
     if (!agreedToTerms || !confirmDataAccuracy) {
       setError('Please agree to the terms and confirm data accuracy.');
       return;
     }
-  
+
     setIsSubmitting(true);
     setError(null);
-  
+
     try {
       // Upload image if provided
       let imageAsset;
       if (formData.image) {
         imageAsset = await client.assets.upload('image', formData.image);
       }
-  
+
       // Create service document
       const serviceDoc = {
         _type: 'services',
@@ -874,10 +943,10 @@ const AddServiceForm = ({ providerId }) => {
         } : null,
         // Add other fields as necessary...
       };
-  
+
       const createdService = await client.create(serviceDoc);
       console.log("Created Service:", createdService); // Debugging line
-  
+
       // Update provider's servicesRef array
       const provider = await client.getDocument(providerId);
       const updatedServicesRef = [
@@ -888,11 +957,11 @@ const AddServiceForm = ({ providerId }) => {
           _key: `provider-service-${new Date().getTime()}`
         }
       ];
-  
+
       await client.patch(providerId)
         .set({ servicesRef: updatedServicesRef })
         .commit();
-  
+
       toast({
         title: "Success",
         description: "Service added successfully",
@@ -900,17 +969,17 @@ const AddServiceForm = ({ providerId }) => {
         duration: 5000,
         isClosable: true,
       });
-  
+
       // Reset form
       setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
       setConfirmDataAccuracy(false);
-  
+
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-  
+
     } catch (err) {
       console.error('Error adding service:', err);
       setError('An error occurred. Please try again.');
@@ -969,10 +1038,26 @@ const AddServiceForm = ({ providerId }) => {
             <div className="relative w-48 h-48">
               {imagePreview ? (
                 <div className="relative w-full h-full rounded-xl overflow-hidden">
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="z-20 gap-2"
+                    style={{position: "absolute", top: "4px", right: "2px"}}
+                  >
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="bg-red-400 text-white rounded-xl hover:bg-red-600"
+                      style={{padding: "8px"}}
+                    >
+                      <Trash size={20} />
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <label style={{ padding: "0px 50px" }} className="flex flex-col items-center justify-center w-full h-full border-4 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-all duration-300">
+                <label style={{padding: "50px"}} className="flex flex-col items-center justify-center w-full h-full border-4 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-all duration-300">
                   <Upload className="w-10 h-10 text-gray-400" />
                   <span className="mt-2 text-sm text-gray-500">Upload Image</span>
                   <input
@@ -1193,14 +1278,40 @@ const AddServiceForm = ({ providerId }) => {
             {/* Links */}
             <div className="wow animate__animated animate__fadeIn" data-wow-delay=".4s">
               <label className="block text-sm font-semibold mb-2">Links</label>
-              <input
-                type="text"
-                name="links"
-                value={formData.links.join(', ')}
-                onChange={handleLinksChange}
-                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Social Media Links (comma separated)"
-              />
+              {formData.links.map((link, index) => (
+                <div key={index} className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={link.url}
+                    onChange={(e) => handleLinkChange(index, e.target.value)}
+                    className={`w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none 
+                  ${(link.url && !isValidUrl(link.url))
+                        ? 'border-2 border-red-500'
+                        : ''
+                      }`}
+                    placeholder="Enter a valid URL (e.g., https://example.com)"
+                    required={index < 3}
+                  />
+                  {index >= 3 && (
+                    <button
+                      type="button"
+                      onClick={() => removeLink(index)}
+                      className="p-2 text-red-500 hover:text-red-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {formData.links.length < 6 && (
+                <button
+                  type="button"
+                  onClick={addLink}
+                  className="mt-2 px-4 py-2 text-sm font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2"
+                >
+                  <Plus size={16} /> Add Another Link
+                </button>
+              )}
             </div>
           </div>
 
