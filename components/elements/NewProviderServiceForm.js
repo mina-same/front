@@ -48,7 +48,11 @@ const NewProviderServiceForm = ({ currentUser }) => {
     image: null,
     servicePhone: '',
     serviceEmail: '',
-    links: [],
+    links: [
+      { _key: generateKey(), url: '' },
+      { _key: generateKey(), url: '' },
+      { _key: generateKey(), url: '' }
+    ],
     about_ar: '',
     about_en: '',
     serviceType: '',
@@ -178,6 +182,37 @@ const NewProviderServiceForm = ({ currentUser }) => {
       }
     }));
   }, []);
+
+  const handleLinkChange = (index, value) => {
+    const newLinks = [...formData.links];
+    newLinks[index] = { ...newLinks[index], url: value };
+    setFormData(prev => ({ ...prev, links: newLinks }));
+  };
+
+  const addLink = () => {
+    if (formData.links.length < 6) {
+      setFormData(prev => ({
+        ...prev,
+        links: [...prev.links, { _key: generateKey(), url: '' }]
+      }));
+    }
+  };
+
+  const removeLink = (index) => {
+    if (index >= 3) {
+      const newLinks = formData.links.filter((_, i) => i !== index);
+      setFormData(prev => ({ ...prev, links: newLinks }));
+    }
+  };
+
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const handleCountryChange = (e) => {
     const countryId = e.target.value;
@@ -824,22 +859,22 @@ const NewProviderServiceForm = ({ currentUser }) => {
   const handleSubmit = async (e) => {
     console.log("Submit event triggered");
     e.preventDefault();
-
+  
     if (!currentUser?.userId) {
       toast.error("Please log in to create a service");
       return;
     }
-
+  
     if (!agreedToTerms || !confirmDataAccuracy) {
       toast.error("Please agree to the terms and confirm data accuracy.");
       return;
     }
-
+  
     setIsSubmitting(true);
-
+  
     let providerId = null;
     let createdService = null;
-
+  
     try {
       // Always create a new provider
       const providerDoc = {
@@ -853,16 +888,16 @@ const NewProviderServiceForm = ({ currentUser }) => {
         servicesRef: [],
         mainServiceRef: null,
       };
-
+  
       const createdProvider = await client.create(providerDoc);
       providerId = createdProvider._id;
-
+  
       // Handle image upload
       let imageAsset = null;
       if (formData.image && formData.image instanceof File) {
         imageAsset = await client.assets.upload("image", formData.image);
       }
-
+  
       // Handle graduation certificate upload
       let graduationCertificateAsset = null;
       if (formData.graduationDetails?.graduationCertificate instanceof File) {
@@ -871,7 +906,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
           formData.graduationDetails.graduationCertificate
         );
       }
-
+  
       // Prepare service document
       const serviceDoc = {
         _type: "services",
@@ -913,10 +948,10 @@ const NewProviderServiceForm = ({ currentUser }) => {
             : null,
         },
       };
-
+  
       // Create service
       createdService = await client.create(serviceDoc);
-
+  
       // Update provider with main service reference
       await client
         .patch(providerId)
@@ -927,24 +962,24 @@ const NewProviderServiceForm = ({ currentUser }) => {
           },
         })
         .commit();
-
+  
       toast.success("Service created successfully!");
-
+  
       // Reset form
       setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
       setConfirmDataAccuracy(false);
-
+  
       // Optional: Refresh or navigate
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-
+  
     } catch (err) {
       console.error("Error in service creation:", err);
       toast.error(err.message || "Failed to create service");
-
+  
       // Cleanup: Delete provider if service creation failed
       if (providerId) {
         try {
@@ -1248,15 +1283,42 @@ const NewProviderServiceForm = ({ currentUser }) => {
             {/* Links */}
             <div className="wow animate__animated animate__fadeIn" data-wow-delay=".4s">
               <label className="block text-sm font-semibold mb-2">Links</label>
-              <input
-                type="text"
-                name="links"
-                value={formData.links.join(', ')}
-                onChange={handleLinksChange}
-                className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Social Media Links (comma separated)"
-              />
+              {formData.links.map((link, index) => (
+                <div key={link._key} className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={link.url}
+                    onChange={(e) => handleLinkChange(index, e.target.value)}
+                    className={`w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none
+          ${(link.url && !isValidUrl(link.url))
+                        ? 'border-2 border-[#f00]'
+                        : ''
+                      }`}
+                    placeholder="Enter a valid URL facebook & youtube & website (e.g., https://example.com)"
+                    required={index < 3}
+                  />
+                  {index >= 3 && (
+                    <button
+                      type="button"
+                      onClick={() => removeLink(index)}
+                      className="p-2 text-red-500 hover:text-red-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {formData.links.length < 6 && (
+                <button
+                  type="button"
+                  onClick={addLink}
+                  className="mt-2 px-4 py-2 text-sm font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2"
+                >
+                  <Plus size={16} /> Add Another Link
+                </button>
+              )}
             </div>
+
           </div>
 
           {/* Block 4: Terms and Conditions */}

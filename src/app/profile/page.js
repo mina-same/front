@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from "components/layout/Layout";
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, Plus, Users, Briefcase, UserPlus, Sparkles,ShieldCheck , Zap, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle } from 'lucide-react';
+import { CalendarDays, BriefcaseBusiness, CheckCircle, Plus, Users, Briefcase, UserPlus, Sparkles, ShieldCheck, Zap, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle } from 'lucide-react';
 import { client, urlFor } from '../../lib/sanity';
 import { useRouter } from 'next/navigation';
 import NewProviderServiceForm from 'components/elements/NewProviderServiceForm'; // Import your ServiceForm component
@@ -12,6 +12,199 @@ import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import AddServiceForm from "components/elements/AddServiceForm"
 import JoinServiceForm from "components/elements/JoinServiceForm"
+import ServiceRequestsDashboard from "components/elements/ServiceRequestsDashboard"
+import ProviderReservations from "components/elements/ProviderReservations"
+
+// Define the delete handlers
+const handleProviderDeletion = async (providerId, client) => {
+    try {
+        // First, let's identify exactly what's referencing this provider
+        const references = await client.fetch(`
+            *[references($providerId)]{
+                _id,
+                _type,
+                "fields": *[references($providerId)]
+            }
+        `, { providerId });
+
+        console.log('Found references:', references);
+
+        // Check for active reservations first
+        const activeReservations = await client.fetch(`
+            *[_type == "reservation" && 
+              provider._ref == $providerId && 
+              (status == "pending" || status == "approved")]{
+                _id
+            }
+        `, { providerId });
+
+        if (activeReservations.length > 0) {
+            throw new Error('Cannot delete provider with active reservations');
+        }
+
+        // Step 1: Update users first - remove provider references
+        await client.fetch(`
+            *[_type == "user" && references($providerId)]{_id}
+        `, { providerId })
+        .then(users => {
+            return Promise.all(users.map(user => 
+                client.patch(user._id)
+                .unset(['provider'])
+                .commit()
+            ));
+        });
+
+        // Step 2: Update any services that reference this provider
+        await client.fetch(`
+            *[_type == "services" && references($providerId)]{_id}
+        `, { providerId })
+        .then(services => {
+            return Promise.all(services.map(service => 
+                client.patch(service._id)
+                .unset(['providerRef'])
+                .commit()
+            ));
+        });
+
+        // Step 3: Update any providers that reference this provider
+        await client.fetch(`
+            *[_type == "provider" && _id != $providerId && references($providerId)]{_id}
+        `, { providerId })
+        .then(providers => {
+            return Promise.all(providers.map(provider => 
+                client.patch(provider._id)
+                .unset(['mainServiceRef', 'servicesRef', 'pendingRequests'])
+                .commit()
+            ));
+        });
+
+        // Step 4: Delete service requests
+        await client.fetch(`
+            *[_type == "serviceRequest" && 
+              (requesterProviderRef._ref == $providerId || 
+               receiverProviderRef._ref == $providerId)]{_id}
+        `, { providerId })
+        .then(requests => {
+            return Promise.all(requests.map(request => 
+                client.delete(request._id)
+            ));
+        });
+
+        // Step 5: Delete rejected reservations
+        await client.fetch(`
+            *[_type == "reservation" && 
+              provider._ref == $providerId && 
+              status == "rejected"]{_id}
+        `, { providerId })
+        .then(reservations => {
+            return Promise.all(reservations.map(reservation => 
+                client.delete(reservation._id)
+            ));
+        });
+
+        // Step 6: Get and delete associated services
+        const providerServices = await client.fetch(`
+            *[_type == "services" && providerRef._ref == $providerId]{_id}
+        `, { providerId });
+
+        await Promise.all(providerServices.map(service => 
+            client.delete(service._id)
+        ));
+
+        // Final check for any remaining references
+        const remainingRefs = await client.fetch(`
+            *[references($providerId)]{
+                _id,
+                _type
+            }
+        `, { providerId });
+
+        console.log('Remaining references before final deletion:', remainingRefs);
+
+        if (remainingRefs.length > 0) {
+            // Try one last time to remove all references
+            await Promise.all(remainingRefs.map(ref => 
+                client.patch(ref._id)
+                .unset([
+                    'provider',
+                    'providerRef',
+                    'mainServiceRef',
+                    'servicesRef',
+                    'pendingRequests',
+                    'requesterProviderRef',
+                    'receiverProviderRef'
+                ])
+                .commit()
+            ));
+        }
+
+        // Finally, try to delete the provider
+        await client.delete(providerId);
+
+        return {
+            success: true,
+            message: 'Provider deleted successfully'
+        };
+
+    } catch (error) {
+        console.error('Error details:', error);
+        return {
+            success: false,
+            message: 'Failed to delete provider',
+            error: error.message,
+            referenceDoc: error.message.match(/from "(.*?)"/)?.[1] || null
+        };
+    }
+};
+
+// Helper function to handle the deletion
+const deleteProvider = async (providerId, client) => {
+    const result = await handleProviderDeletion(providerId, client);
+    if (!result.success && result.referenceDoc) {
+        console.log(`Failed due to reference from document: ${result.referenceDoc}`);
+        
+        // Get details about the referencing document
+        const referencingDoc = await client.fetch(`
+            *[_id == $docId][0]{
+                _id,
+                _type,
+                ...
+            }
+        `, { docId: result.referenceDoc });
+        
+        console.log('Referencing document details:', referencingDoc);
+    }
+    return result;
+};
+
+const handleServiceDeletion = async (serviceId, providerId, client) => {
+    try {
+        // 1. Remove service reference from provider's servicesRef array
+        await client
+            .patch(providerId)
+            .unset([`servicesRef[_ref == "${serviceId}"]`])
+            .commit();
+
+        // 2. Fetch all reservation IDs associated with this specific service
+        const reservationIds = await client.fetch(
+            `*[_type == "reservation" && service._ref == $serviceId]._id`,
+            { serviceId }
+        );
+
+        // 3. Delete all reservations associated with this specific service
+        if (reservationIds.length > 0) {
+            await client.delete(reservationIds);
+        }
+
+        // 4. Delete the service document
+        await client.delete(serviceId);
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting service:', error);
+        throw error;
+    }
+};
 
 const ProfessionalProfileDashboard = () => {
     const router = useRouter();
@@ -118,7 +311,6 @@ const ProfessionalProfileDashboard = () => {
         </motion.div>
     );
 
-
     // Define tabs array
     const tabs = [
         { key: 'profile', icon: Users, label: 'Profile' },
@@ -132,7 +324,8 @@ const ProfessionalProfileDashboard = () => {
         const fetchReservations = async () => {
             setIsLoadingReservations(true);
             try {
-                const query = `*[_type == "reservation" && user._ref == $userId]{
+                // Updated query to fetch all reservations regardless of status
+                const query = `*[_type == "reservation" && provider._ref in *[_type == "provider" && userRef._ref == \$userId]._id]{
                     _id,
                     provider->{
                         _id,
@@ -158,7 +351,13 @@ const ProfessionalProfileDashboard = () => {
                     datetime,
                     status,
                     proposedDatetime,
-                    userResponse
+                    userResponse,
+                    user->{  // Added user information
+                        _id,
+                        userName,
+                        email,
+                        image
+                    }
                 }`;
 
                 const params = { userId };
@@ -213,7 +412,7 @@ const ProfessionalProfileDashboard = () => {
 
         const fetchUserData = async () => {
             try {
-                const query = `*[_type == "user" && _id == $userId]{
+                const query = `*[_type == "user" && _id == \$userId]{
                     _id,
                     email,
                     userName,
@@ -251,7 +450,7 @@ const ProfessionalProfileDashboard = () => {
             setIsLoadingServices(true);
             try {
                 // Fetch all providers associated with the current user
-                const providersQuery = `*[_type == "provider" && userRef._ref == $userId]{
+                const providersQuery = `*[_type == "provider" && userRef._ref == \$userId]{
                     _id,
                     name_en,
                     name_ar,
@@ -282,7 +481,7 @@ const ProfessionalProfileDashboard = () => {
                 setProviders(result);
 
                 // Enhanced reservation query with more details
-                const reservationsQuery = `*[_type == "reservation" && provider._ref in $providerIds && status == "pending"]{
+                const reservationsQuery = `*[_type == "reservation" && provider._ref in \$providerIds && status == "pending"]{
                     _id,
                     datetime,
                     status,
@@ -325,7 +524,6 @@ const ProfessionalProfileDashboard = () => {
         }
     }, [userId, user?.userType, activeTab]);
 
-
     // Handle profile form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -352,15 +550,56 @@ const ProfessionalProfileDashboard = () => {
     };
 
     const ProviderCard = ({ provider }) => {
-        // Filter reservations for this specific provider
         const providerReservations = pendingReservations.filter(
             res => res.provider?._id === provider._id
         );
 
-        console.log(`Reservations for provider ${provider._id}:`, providerReservations);
+        const mainService = provider.mainServiceRef;
+        const additionalServices = provider.servicesRef || [];
 
-        const mainService = provider.mainServiceRef; // Now using mainServiceRef
-        const additionalServices = provider.servicesRef || []; // Now using servicesRef
+        // Delete provider function
+        const handleDeleteProvider = async () => {
+            if (window.confirm('Are you sure you want to delete this provider? This action cannot be undone.')) {
+                try {
+                    // Delete the provider using the new function
+                    await handleProviderDeletion(provider._id, client);
+
+                    // Update local state by filtering out the deleted provider
+                    setProviders(prevProviders =>
+                        prevProviders.filter(p => p._id !== provider._id)
+                    );
+                } catch (error) {
+                    console.error('Error deleting provider:', error);
+                    setError('Failed to delete provider.');
+                }
+            }
+        };
+
+        // Delete additional service function
+        const handleDeleteService = async (serviceId) => {
+            if (window.confirm('Are you sure you want to delete this service? This action cannot be undone.')) {
+                try {
+                    // Delete the service using the new function
+                    await handleServiceDeletion(serviceId, provider._id, client);
+
+                    // Update local state by filtering out the deleted service
+                    setProviders(prevProviders =>
+                        prevProviders.map(p => {
+                            if (p._id === provider._id) {
+                                return {
+                                    ...p,
+                                    servicesRef: p.servicesRef.filter(s => s._id !== serviceId)
+                                };
+                            }
+                            return p;
+                        })
+                    );
+                } catch (error) {
+                    console.error('Error deleting service:', error);
+                    setError('Failed to delete service.');
+                }
+            }
+        };
 
         return (
             <motion.div
@@ -368,7 +607,7 @@ const ProfessionalProfileDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100/50 backdrop-blur-sm"
             >
-                {/* Hero Section */}
+                {/* Existing hero section code remains the same */}
                 <div className="relative h-80 overflow-hidden group">
                     {mainService && (
                         <>
@@ -385,8 +624,8 @@ const ProfessionalProfileDashboard = () => {
                             </motion.div>
 
                             {/* Approval Status Badge */}
-                            <div className={`absolute top-4 right-4 px-4 py-2 inline-flex items-center rounded-full 
-                                text-sm font-semibold backdrop-blur-sm transition-all duration-300 ${mainService.statusAdminApproved
+                            <div className={`absolute top-4 right-4 px-4 py-2 inline-flex items-center rounded-full
+                                text-sm font-semibold backdrop-blur-sm transition-all duration-300 \${mainService.statusAdminApproved
                                     ? 'bg-emerald-600/90 hover:bg-emerald-700 text-emerald-50 ring-2 ring-emerald-200/30'
                                     : 'bg-amber-500/90 hover:bg-amber-600/90 text-amber-50 ring-2 ring-amber-200/30 animate-pulse'
                                 } shadow-xl hover:shadow-lg`}>
@@ -417,7 +656,7 @@ const ProfessionalProfileDashboard = () => {
                                     </div>
                                     <div className="space-y-1">
                                         <h2 className="text-2xl font-bold text-white tracking-tight">{provider.name_en}</h2>
-                                        <div className="flex items-center gap-2 text-sm text-white/90">
+                                        <div className="flex items-center gap-2 text-white/90">
                                             <div className="flex items-center gap-1.5">
                                                 <Star className="w-4 h-4 text-amber-400 fill-current" />
                                                 <span>4.9</span>
@@ -431,17 +670,25 @@ const ProfessionalProfileDashboard = () => {
                             </div>
                         </>
                     )}
+
+                    {/* Add Delete Provider Button */}
+                    <button
+                        onClick={handleDeleteProvider}
+                        className="absolute top-4 left-4 px-4 py-2 bg-red-600/90 text-white rounded-full flex items-center gap-2 hover:bg-red-700/90 transition-all duration-300"
+                    >
+                        <Trash className="w-4 h-4" />
+                        Delete Main service
+                    </button>
                 </div>
 
                 {/* Main Content */}
                 <div className="p-6 space-y-6">
-                    {/* Featured Service */}
                     {mainService && (
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-xl font-semibold text-gray-900">Featured Service</h3>
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl font-bold text-gray-900">${mainService.price}</span>
+                                    <span className="text-3xl font-bold text-gray-900">\${mainService.price}</span>
                                     <span className="text-gray-500">/ session</span>
                                 </div>
                             </div>
@@ -462,11 +709,19 @@ const ProfessionalProfileDashboard = () => {
                         </div>
                     )}
 
-                    {/* Additional Services */}
+                    {/* Updated Additional Services section */}
                     {additionalServices.length > 0 && (
                         <div className="space-y-4">
-                            <h4 className="text-lg font-semibold text-gray-900">Additional Services</h4>
-                            <div className="flex gap-4 pb-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-50">
+                            <div className="flex items-center justify-between pt-6">
+                                <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
+                                    <BriefcaseBusiness className="w-5 h-5 text-blue-600" />
+                                    Additional Services
+                                    <span className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-sm">
+                                        0
+                                    </span>
+                                </h4>
+                            </div>
+                            <div className="bg-gray-50 flex gap-4 pb-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-50">
                                 {additionalServices.map((service) => (
                                     <motion.div
                                         key={service._id}
@@ -479,6 +734,23 @@ const ProfessionalProfileDashboard = () => {
                                                 alt={service.name_en}
                                                 className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
                                             />
+
+                                            {/* Status Badge */}
+                                            <div className={`absolute top-1 right-1 w-3 h-3 rounded-full \${service.statusAdminApproved
+                                                ? 'bg-green-500'
+                                                : 'bg-yellow-500 animate-pulse'
+                                                }`} />
+
+                                            {/* Delete Service Button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteService(service._id);
+                                                }}
+                                                className="absolute top-1 left-1 p-1 bg-red-600/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                            >
+                                                <Trash className="w-3 h-3" />
+                                            </button>
                                         </div>
                                         <div className="absolute inset-x-0 -bottom-2 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                             <span className="inline-block px-2 py-1 bg-black/90 text-white text-xs rounded-lg">
@@ -491,78 +763,18 @@ const ProfessionalProfileDashboard = () => {
                         </div>
                     )}
 
-                    {/* Pending Reservations */}
-                    {providerReservations.length > 0 && (
-                        <div className="space-y-4">
-                            <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
-                                <CalendarDays className="w-5 h-5 text-blue-600" />
-                                Pending Reservations
-                                <span className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-sm">
-                                    {providerReservations.length}
-                                </span>
-                            </h4>
+                    <ProviderReservations
+                        reservations={reservations.filter(res => res.provider?._id === provider._id)}
+                        onStatusUpdate={handleReservationResponse}
+                    />
 
-                            <div className="space-y-3">
-                                {providerReservations.map(reservation => (
-                                    <motion.div
-                                        key={reservation._id}
-                                        className="p-4 bg-gray-50 rounded-xl border border-gray-200/60 hover:border-gray-300 transition-colors"
-                                    >
-                                        <div className="flex items-center justify-between gap-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="relative">
-                                                    <img
-                                                        src={reservation.user?.image ? urlFor(reservation.user.image).url() : '/placeholder-user.png'}
-                                                        alt={reservation.user?.userName}
-                                                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow"
-                                                    />
-                                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
-                                                        <Check className="w-3 h-3 text-white" />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <h5 className="font-medium text-gray-900">{reservation.user?.userName}</h5>
-                                                    <p className="text-sm text-gray-600">{reservation.service?.name_en}</p>
-                                                    <div className="flex gap-2 mt-1 text-sm text-gray-500">
-                                                        <span className="flex items-center gap-1.5">
-                                                            <Calendar className="w-4 h-4" />
-                                                            {new Date(reservation.datetime).toLocaleDateString()}
-                                                        </span>
-                                                        <span className="flex items-center gap-1.5">
-                                                            <Clock className="w-4 h-4" />
-                                                            {new Date(reservation.datetime).toLocaleTimeString()}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <motion.button
-                                                    whileHover={{ y: -2 }}
-                                                    onClick={() => handleReservationResponse(reservation._id, 'approved')}
-                                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium shadow-sm transition-colors"
-                                                >
-                                                    Accept
-                                                </motion.button>
-                                                <motion.button
-                                                    whileHover={{ y: -2 }}
-                                                    onClick={() => handleReservationResponse(reservation._id, 'rejected')}
-                                                    className="px-4 py-2 bg-transparent text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-300 font-medium transition-colors"
-                                                >
-                                                    Decline
-                                                </motion.button>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    <ServiceRequestsDashboard providerId={provider._id} />
 
                     {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-4">
                         <motion.button
                             whileHover={{ y: -2 }}
-                            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-emerald-600 text-emerald-600 rounded-xl font-medium hover:bg-emerald-50 transition-colors"
+                            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-blue-500 text-blue-500 rounded-xl font-medium hover:bg-emerald-50 transition-colors"
                             onClick={() => {
                                 setSelectedProvider(provider._id);
                                 setExistingProviderId(provider._id);
@@ -576,8 +788,8 @@ const ProfessionalProfileDashboard = () => {
                         <motion.button
                             whileHover={{ y: -2 }}
                             className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#b28a2f] to-[#9b7733] text-white rounded-xl font-medium hover:shadow-lg transition-shadow"
-                            
-                            onClick={() => {setShowJoinService(true); setExistingProviderId(provider._id)}}
+
+                            onClick={() => { setShowJoinService(true); setExistingProviderId(provider._id) }}
                         >
                             <UserPlus className="w-5 h-5" />
                             Join Service
@@ -759,14 +971,19 @@ const ProfessionalProfileDashboard = () => {
 
     const handleReservationResponse = async (reservationId, status) => {
         try {
+            // Update the reservation status in the backend
             await client
                 .patch(reservationId)
                 .set({ status })
                 .commit();
 
-            // Update the pending reservations list
-            setPendingReservations(prev =>
-                prev.filter(res => res._id !== reservationId)
+            // Update the state to reflect the new status
+            setPendingReservations(prevReservations =>
+                prevReservations.map(reservation =>
+                    reservation._id === reservationId
+                        ? { ...reservation, status }
+                        : reservation
+                )
             );
         } catch (error) {
             console.error('Error updating reservation:', error);

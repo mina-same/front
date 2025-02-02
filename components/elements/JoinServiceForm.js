@@ -72,9 +72,9 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
         }`;
 
         const result = await client.fetch(query);
-        
+
         // Filter out services belonging to providers owned by the current user
-        const filteredServices = result.filter(service => 
+        const filteredServices = result.filter(service =>
           service.providerRef?.userRef?._id !== currentUserId
         );
 
@@ -94,13 +94,17 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
     if (!selectedService) return;
 
     setIsSubmitting(true);
-    
+
     try {
       const serviceRequest = {
         _type: 'serviceRequest',
         requesterProviderRef: {
           _type: 'reference',
           _ref: currentProviderId,
+        },
+        receiverProviderRef: {
+          _type: 'reference',
+          _ref: selectedService.providerRef._id,
         },
         requestedServiceRef: {
           _type: 'reference',
@@ -187,11 +191,10 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
                   <button
                     key={type}
                     onClick={() => setActiveServiceType(type)}
-                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                      activeServiceType === type
-                        ? 'bg-black text-white'
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${activeServiceType === type
+                      ? 'bg-black text-white'
+                      : 'text-gray-600 hover:bg-gray-50'
+                      }`}
                   >
                     {type === 'all' ? (
                       <Package className="w-5 h-5" />
@@ -222,17 +225,16 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
                     <div
                       key={service._id}
                       onClick={() => setSelectedService(service)}
-                      className={`group cursor-pointer transition-all ${
-                        view === 'grid'
-                          ? 'bg-white rounded-xl border-2 overflow-hidden hover:shadow-lg ' +
-                            (selectedService?._id === service._id
-                              ? 'border-blue-500 ring-2 ring-blue-100'
-                              : 'border-gray-100 hover:border-black')
-                          : 'flex items-center p-4 rounded-xl border-2 ' +
-                            (selectedService?._id === service._id
-                              ? 'border-black'
-                              : 'border-gray-100 hover:border-black')
-                      }`}
+                      className={`group cursor-pointer transition-all ${view === 'grid'
+                        ? 'bg-white rounded-xl border-2 overflow-hidden hover:shadow-lg ' +
+                        (selectedService?._id === service._id
+                          ? 'border-blue-500 ring-2 ring-blue-100'
+                          : 'border-gray-100 hover:border-black')
+                        : 'flex items-center p-4 rounded-xl border-2 ' +
+                        (selectedService?._id === service._id
+                          ? 'border-black'
+                          : 'border-gray-100 hover:border-black')
+                        }`}
                     >
                       {view === 'grid' ? (
                         <>
@@ -313,11 +315,10 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
             <button
               onClick={handleJoinRequest}
               disabled={!selectedService || isSubmitting}
-              className={`px-8 py-2 rounded-lg text-white font-medium flex items-center gap-2 ${
-                !selectedService || isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              }`}
+              className={`px-8 py-2 rounded-lg text-white font-medium flex items-center gap-2 ${!selectedService || isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 hover:bg-blue-600'
+                }`}
             >
               {isSubmitting ? (
                 <>
@@ -337,22 +338,28 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
         {/* Notifications */}
         {successMessage && (
           <Alert className="absolute bottom-4 right-4 w-96 bg-green-50 border-green-200">
-            <Check className="w-5 h-5 text-green-500" />
-            <AlertDescription className="text-green-700">
-              {successMessage}
-            </AlertDescription>
+            <div className="flex items-center gap-2">
+              <Check className="w-6 h-6 text-green-600 mr-2 flex-shrink-0" />
+              <AlertDescription className="text-green-800 font-semibold">
+                {successMessage}
+              </AlertDescription>
+            </div>
           </Alert>
         )}
+
+
         {errorMessage && (
           <Alert className="absolute bottom-4 right-4 w-96 bg-red-50 border-red-200">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
-            <AlertDescription className="text-red-700">
-              {errorMessage}
-            </AlertDescription>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <AlertDescription className="text-red-700">
+                {errorMessage}
+              </AlertDescription>
+            </div>
           </Alert>
         )}
       </Card>
-    </div>
+    </div >
   );
 };
 

@@ -1366,6 +1366,16 @@ video {
   border-left-width: 4px !important;
 }
 
+.bg-emerald-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(5 150 105 / var(--tw-bg-opacity, 1)) /* #059669 */;
+}
+
+.hover\:bg-emerald-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(4 120 87 / var(--tw-bg-opacity, 1)) /* #047857 */;
+}
+
 .border-r {
   border-right-width: 1px !important;
 }
