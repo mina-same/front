@@ -46,37 +46,37 @@ const handleProviderDeletion = async (providerId, client) => {
         await client.fetch(`
             *[_type == "user" && references($providerId)]{_id}
         `, { providerId })
-        .then(users => {
-            return Promise.all(users.map(user => 
-                client.patch(user._id)
-                .unset(['provider'])
-                .commit()
-            ));
-        });
+            .then(users => {
+                return Promise.all(users.map(user =>
+                    client.patch(user._id)
+                        .unset(['provider'])
+                        .commit()
+                ));
+            });
 
         // Step 2: Update any services that reference this provider
         await client.fetch(`
             *[_type == "services" && references($providerId)]{_id}
         `, { providerId })
-        .then(services => {
-            return Promise.all(services.map(service => 
-                client.patch(service._id)
-                .unset(['providerRef'])
-                .commit()
-            ));
-        });
+            .then(services => {
+                return Promise.all(services.map(service =>
+                    client.patch(service._id)
+                        .unset(['providerRef'])
+                        .commit()
+                ));
+            });
 
         // Step 3: Update any providers that reference this provider
         await client.fetch(`
             *[_type == "provider" && _id != $providerId && references($providerId)]{_id}
         `, { providerId })
-        .then(providers => {
-            return Promise.all(providers.map(provider => 
-                client.patch(provider._id)
-                .unset(['mainServiceRef', 'servicesRef', 'pendingRequests'])
-                .commit()
-            ));
-        });
+            .then(providers => {
+                return Promise.all(providers.map(provider =>
+                    client.patch(provider._id)
+                        .unset(['mainServiceRef', 'servicesRef', 'pendingRequests'])
+                        .commit()
+                ));
+            });
 
         // Step 4: Delete service requests
         await client.fetch(`
@@ -84,11 +84,11 @@ const handleProviderDeletion = async (providerId, client) => {
               (requesterProviderRef._ref == $providerId || 
                receiverProviderRef._ref == $providerId)]{_id}
         `, { providerId })
-        .then(requests => {
-            return Promise.all(requests.map(request => 
-                client.delete(request._id)
-            ));
-        });
+            .then(requests => {
+                return Promise.all(requests.map(request =>
+                    client.delete(request._id)
+                ));
+            });
 
         // Step 5: Delete rejected reservations
         await client.fetch(`
@@ -96,18 +96,18 @@ const handleProviderDeletion = async (providerId, client) => {
               provider._ref == $providerId && 
               status == "rejected"]{_id}
         `, { providerId })
-        .then(reservations => {
-            return Promise.all(reservations.map(reservation => 
-                client.delete(reservation._id)
-            ));
-        });
+            .then(reservations => {
+                return Promise.all(reservations.map(reservation =>
+                    client.delete(reservation._id)
+                ));
+            });
 
         // Step 6: Get and delete associated services
         const providerServices = await client.fetch(`
             *[_type == "services" && providerRef._ref == $providerId]{_id}
         `, { providerId });
 
-        await Promise.all(providerServices.map(service => 
+        await Promise.all(providerServices.map(service =>
             client.delete(service._id)
         ));
 
@@ -123,18 +123,18 @@ const handleProviderDeletion = async (providerId, client) => {
 
         if (remainingRefs.length > 0) {
             // Try one last time to remove all references
-            await Promise.all(remainingRefs.map(ref => 
+            await Promise.all(remainingRefs.map(ref =>
                 client.patch(ref._id)
-                .unset([
-                    'provider',
-                    'providerRef',
-                    'mainServiceRef',
-                    'servicesRef',
-                    'pendingRequests',
-                    'requesterProviderRef',
-                    'receiverProviderRef'
-                ])
-                .commit()
+                    .unset([
+                        'provider',
+                        'providerRef',
+                        'mainServiceRef',
+                        'servicesRef',
+                        'pendingRequests',
+                        'requesterProviderRef',
+                        'receiverProviderRef'
+                    ])
+                    .commit()
             ));
         }
 
@@ -162,7 +162,7 @@ const deleteProvider = async (providerId, client) => {
     const result = await handleProviderDeletion(providerId, client);
     if (!result.success && result.referenceDoc) {
         console.log(`Failed due to reference from document: ${result.referenceDoc}`);
-        
+
         // Get details about the referencing document
         const referencingDoc = await client.fetch(`
             *[_id == $docId][0]{
@@ -171,7 +171,7 @@ const deleteProvider = async (providerId, client) => {
                 ...
             }
         `, { docId: result.referenceDoc });
-        
+
         console.log('Referencing document details:', referencingDoc);
     }
     return result;
@@ -318,6 +318,37 @@ const ProfessionalProfileDashboard = () => {
         { key: 'reservations', icon: Calendar, label: 'Reservations' },
         { key: 'settings', icon: Settings, label: 'Settings' }
     ];
+
+    const fetchReservations = async (providerId) => {
+        try {
+            const query = `*[_type == "reservation" && provider._ref == $providerId]{
+            _id,
+            datetime,
+            status,
+            service->{
+              _id,
+              name_en,
+              name_ar,
+              image,
+              price
+            },
+            user->{
+              _id,
+              userName,
+              email,
+              image,
+              phoneNumber,
+              location
+            }
+          }`;
+
+            const result = await client.fetch(query, { providerId });
+            return result;
+        } catch (error) {
+            console.error('Error fetching reservations:', error);
+            return [];
+        }
+    };
 
     // Fetch reservations effect
     useEffect(() => {
@@ -550,9 +581,47 @@ const ProfessionalProfileDashboard = () => {
     };
 
     const ProviderCard = ({ provider }) => {
-        const providerReservations = pendingReservations.filter(
-            res => res.provider?._id === provider._id
-        );
+        const [providerReservations, setProviderReservations] = useState([]);
+        const [isLoadingProviderReservations, setIsLoadingProviderReservations] = useState(false);
+
+        // Add effect to fetch reservations for this specific provider
+        useEffect(() => {
+            const fetchProviderReservations = async () => {
+                setIsLoadingProviderReservations(true);
+                try {
+                    const query = `*[_type == "reservation" && provider._ref == $providerId]{
+                    _id,
+                    datetime,
+                    status,
+                    proposedDatetime,
+                    userResponse,
+                    service->{
+                        _id,
+                        name_en,
+                        name_ar,
+                        price,
+                        image
+                    },
+                    user->{
+                        _id,
+                        userName,
+                        email,
+                        image,
+                        phoneNumber
+                    }
+                }`;
+
+                    const result = await client.fetch(query, { providerId: provider._id });
+                    setProviderReservations(result);
+                } catch (error) {
+                    console.error('Error fetching provider reservations:', error);
+                } finally {
+                    setIsLoadingProviderReservations(false);
+                }
+            };
+
+            fetchProviderReservations();
+        }, [provider._id]);
 
         const mainService = provider.mainServiceRef;
         const additionalServices = provider.servicesRef || [];
@@ -717,7 +786,7 @@ const ProfessionalProfileDashboard = () => {
                                     <BriefcaseBusiness className="w-5 h-5 text-blue-600" />
                                     Additional Services
                                     <span className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-sm">
-                                        0
+                                        {additionalServices.length}
                                     </span>
                                 </h4>
                             </div>
@@ -763,9 +832,25 @@ const ProfessionalProfileDashboard = () => {
                         </div>
                     )}
 
+
                     <ProviderReservations
-                        reservations={reservations.filter(res => res.provider?._id === provider._id)}
-                        onStatusUpdate={handleReservationResponse}
+                        reservations={providerReservations}
+                        onStatusUpdate={async (reservationId, newStatus) => {
+                            try {
+                                await client.patch(reservationId).set({ status: newStatus }).commit();
+
+                                // Update local state after successful update
+                                setProviderReservations(prevReservations =>
+                                    prevReservations.map(reservation =>
+                                        reservation._id === reservationId
+                                            ? { ...reservation, status: newStatus }
+                                            : reservation
+                                    )
+                                );
+                            } catch (error) {
+                                console.error('Error updating reservation status:', error);
+                            }
+                        }}
                     />
 
                     <ServiceRequestsDashboard providerId={provider._id} />
@@ -971,14 +1056,10 @@ const ProfessionalProfileDashboard = () => {
 
     const handleReservationResponse = async (reservationId, status) => {
         try {
-            // Update the reservation status in the backend
-            await client
-                .patch(reservationId)
-                .set({ status })
-                .commit();
+            await client.patch(reservationId).set({ status }).commit();
 
-            // Update the state to reflect the new status
-            setPendingReservations(prevReservations =>
+            // Update local state
+            setReservations(prevReservations =>
                 prevReservations.map(reservation =>
                     reservation._id === reservationId
                         ? { ...reservation, status }
@@ -1045,10 +1126,12 @@ const ProfessionalProfileDashboard = () => {
                                         <div className="flex">
                                             {/* Service Image Section (Fixed Width) */}
                                             <div className="w-1/3 relative">
-                                                <img
-                                                    src={reservation.provider?.mainServiceRef?.image ? urlFor(reservation.provider.mainServiceRef.image).url() : '/placeholder-service.png'}
+                                                <Image
+                                                    src={reservation.provider?.mainServiceRef?.image ? urlFor(reservation.provider.mainServiceRef.image).url() : userFallbackImage}
                                                     alt={reservation.provider?.mainServiceRef?.name_en || 'Service Image'}
                                                     className="w-full h-full object-cover"
+                                                    width={50}
+                                                    height={50}
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
                                                 <div className="absolute bottom-4 left-4 text-white">
@@ -1247,7 +1330,7 @@ const ProfessionalProfileDashboard = () => {
 
     return (
         <Layout>
-            <div className="min-h-screen bg-gray-50 p-8">
+            <div className="bg-gray-50 p-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <div className="flex">
