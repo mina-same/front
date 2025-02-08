@@ -20,6 +20,32 @@
   /* 2 */
 }
 
+/* RTL Support */
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
+}
+
+/* Override default spacing for RTL */
+.rtl .lg\:space-x-12 > * + * {
+  margin-left: 0;
+  margin-right: 3rem;
+}
+
+.rtl .space-x-4 > * + * {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+/* Dropdown positioning for RTL */
+.rtl .drop-down-menu {
+  left: auto;
+  right: 0;
+}
+
 ::before,
 ::after {
   --tw-content: "";
@@ -552,6 +578,38 @@ video {
 @media (min-width: 1024px) {
   .container {
     max-width: 1024px;
+  }
+}
+
+.pl-10{
+  padding-left: 15px !important;
+}
+
+/* Add the space-x-4 class */
+.space-x-4 > *:not(:last-child) {
+  margin-right: 1rem; /* Equivalent to space-x-4 */
+}
+
+.space-x-2 > *:not(:last-child) {
+  margin-right: 5px; /* Equivalent to space-x-4 */
+}
+
+/* Add the space-x-4-reverse class */
+.space-x-4-reverse > *:not(:last-child) {
+  margin-left: 1rem; /* Equivalent to space-x-4-reverse */
+}
+
+
+@media (min-width: 1024px) {
+  .lg\:space-x-12-reverse > *:not(:last-child) {
+    margin-left: 4rem; /* Equivalent to 12 spacing in Tailwind */
+  }
+}
+
+
+@media (min-width: 1024px) {
+  .lg\:space-x-12 > *:not(:first-child) {
+    margin-left: 3rem; /* Equivalent to 12 spacing in Tailwind */
   }
 }
 
@@ -1444,7 +1502,7 @@ video {
   background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1)) /* #dc2626 */;
 }
 
-.bg-red-500 { 
+.bg-red-500 {
   background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1)) !important ;
 }
 

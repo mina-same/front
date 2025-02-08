@@ -1,0 +1,23 @@
+{
+    "heroTitle": "ملتزمون بـ <1>الناس</1>، والمستقبل",
+    "heroDescription": "نحن <1>Monst</1>، تصميم إبداعي <2>تأجير الخيول</2>",
+    "heroSubtext": "نساعدك على تعظيم إدارة العمليات من خلال الرقمنة",
+    "aboutButton": "من نحن",
+    "servicesButton": "خدماتنا",
+    "contactTitle": "اتصل بنا",
+    "contactSubtitle": "سنكون <1>سعداء</1> لسماع منك!",
+    "form": {
+        "subject": "الموضوع",
+        "name": "الاسم",
+        "email": "name@example.com",
+        "message": "الرسالة...",
+        "browse": "تصفح",
+        "submit": "إرسال"
+    },
+    "newsletter": {
+        "title": "اشترك الآن في <1>نشرتنا الإخبارية</1> واحصل على رمز القسيمة.",
+        "description": "جميع معلوماتك سرية تمامًا",
+        "placeholder": "اكتب بريدك الإلكتروني",
+        "signUp": "اشتراك"
+    }
+}

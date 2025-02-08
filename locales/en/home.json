@@ -1,0 +1,94 @@
+{
+    "hero": {
+        "mainTitle": "Passionate about Horses",
+        "subtitlePart1": "Dedicated to Your ",
+        "subtitlePart2": "Equestrian Journey",
+        "description": "We are ",
+        "companyName": "Tairia Horses",
+        "partnerText": "your trusted partner in ",
+        "services": [
+            "Horse Rentals",
+            "Training & Care",
+            "Veterinary Services"
+        ],
+        "buttons": {
+            "services": "Our Services",
+            "howItWorks": "How It Works"
+        }
+    },
+    "stats": {
+        "annualPartner": {
+            "count": "950",
+            "title": "Annual Partner"
+        },
+        "completedProjects": {
+            "count": "58",
+            "title": "Completed Projects"
+        },
+        "happyCustomers": {
+            "count": "500",
+            "title": "Happy Customers"
+        },
+        "researchWork": {
+            "count": "300",
+            "title": "Research Work"
+        }
+    },
+    "features": {
+        "title": "Key Features",
+        "subtitle": "What we offer?",
+        "items": {
+            "expandReach": {
+                "title": "Expand Your Reach",
+                "description": "At 'Nation Horses,' we connect riders with professionals, offering easy access to equestrian resources and knowledge."
+            },
+            "horsesNation": {
+                "title": "Horses Nation",
+                "description": "Join 'Horses Nation' for training, competitions, and a community focused on horse care."
+            },
+            "elevateSkills": {
+                "title": "Elevate Your Skills",
+                "description": "Access resources for skill development, training, and competitions in the equestrian world."
+            }
+        }
+    },
+    "welcome": {
+        "title": "Welcome to",
+        "companyName": "Taiara Horses",
+        "subtitle": "Your gateway to the world of equestrianism",
+        "description": "Join us in a supportive environment where riders and their horses connect, grow, and thrive. From training to competitions, we aim to enrich your equestrian experience with resources, knowledge, and opportunities tailored to your needs."
+    },
+    "howWeWork": {
+        "items": {
+            "workshops": {
+                "title": "Workshops & Training",
+                "description": "Learn and enhance your equestrian skills through our expert-led workshops and training programs designed for all levels."
+            },
+            "community": {
+                "title": "Community Connection",
+                "description": "Connect with a network of riders, trainers, and enthusiasts to share experiences, exchange ideas, and build lasting relationships."
+            },
+            "resources": {
+                "title": "Resources & Knowledge",
+                "description": "Access a wealth of resources, from proper horse care tips to marketing products and advertising your equestrian résumé."
+            }
+        }
+    },
+    "empowering": {
+        "title": "Empowering",
+        "companyName": "Taiara Horses",
+        "subtitle": "Equestrian Connections",
+        "description": "Discover a supportive platform where riders and horses thrive, offering resources for training, care, and skill development."
+    },
+    "newsletter": {
+        "title": "Stay Connected with",
+        "companyName": "Homeland Horses",
+        "subtitle": "Join Our Newsletter",
+        "description": "Receive the latest equestrian insights, tips, and special offers straight to your inbox.",
+        "placeholder": "Type your email",
+        "button": "Sign Up"
+    },
+    "slider": {
+        "viewDetail": "View detail"
+    }
+}

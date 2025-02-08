@@ -1,0 +1,116 @@
+{
+    "stables": {
+        "heroTitle": "اسطبلات الخيول الفاخرة",
+        "heroDescription": "اكتشف أفضل المرافق الفروسية لخيولك المحبوبة",
+        "searchPlaceholder": "ابحث عن اسطبلات...",
+        "loadingMessage": "جاري التحميل...",
+        "errorMessage": "فشل تحميل اسطبلات الخيول. يرجى المحاولة مرة أخرى لاحقًا.",
+        "noStablesMessage": "لم يتم العثور على اسطبلات.",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "suppliers": {
+        "heroTitle": "الموردين المميزين",
+        "heroDescription": "اكتشف أفضل الموردين لاحتياجاتك الفروسية",
+        "searchPlaceholder": "ابحث عن موردين...",
+        "loadingMessage": "جاري التحميل...",
+        "errorMessage": "فشل تحميل الموردين. يرجى المحاولة مرة أخرى لاحقًا.",
+        "noSuppliersMessage": "لم يتم العثور على موردين.",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "competitions": {
+        "heroTitle": "مسابقات الخيول",
+        "heroDescription": "اكتشف وشارك في مسابقات الفروسية الراقية",
+        "searchPlaceholder": "ابحث عن مسابقات...",
+        "loadingMessage": "جاري التحميل...",
+        "errorMessage": "فشل تحميل المسابقات. يرجى المحاولة مرة أخرى لاحقًا.",
+        "noCompetitionsMessage": "لم يتم العثور على مسابقات.",
+        "visitWebsite": "تفاصيل المسابقة",
+        "raceTypes": {
+            "endurance_race": "سباق التحمل",
+            "shooting_arrows": "رماية السهام",
+            "pickup_pegs": "التقاط الأوتاد",
+            "dressage": "دريساج"
+        }
+    },
+    "contractors": {
+        "title": "مقاولون مميزون",
+        "subtitle": "اكتشف أفضل المقاولين لاحتياجات بنائك",
+        "searchPlaceholder": "ابحث عن مقاولين...",
+        "noContractors": "لم يتم العثور على مقاولين.",
+        "loading": "جاري التحميل...",
+        "error": "فشل تحميل المقاولين. يرجى المحاولة لاحقًا.",
+        "pricePerMonth": "{price} دولار/شهر",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "tripCoordinators": {
+        "heroTitle": "خدمات منسقي الرحلات",
+        "heroDescription": "تنسيق خبير لرحلات الخيول والمغامرات",
+        "searchPlaceholder": "ابحث عن منسقي الرحلات...",
+        "loadingMessage": "جاري التحميل...",
+        "errorMessage": "فشل تحميل منسقي الرحلات. يرجى المحاولة مرة أخرى لاحقًا.",
+        "noTripCoordinatorsMessage": "لم يتم العثور على منسقي رحلات.",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "veterinarian": {
+        "title": "أطباء بيطريون مميزون",
+        "subtitle": "اكتشف أفضل خدمات بيطرية لحيواناتك الأليفة",
+        "searchPlaceholder": "ابحث عن أطباء بيطريين...",
+        "noVeterinarians": "لم يتم العثور على أطباء بيطريين.",
+        "loading": "جاري التحميل...",
+        "error": "فشل تحميل الأطباء البيطريين. يرجى المحاولة لاحقًا.",
+        "pricePerConsultation": "{{price}} دولار/استشارة",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "housing": {
+        "title": "خدمات سكنية مميزة",
+        "subtitle": "اكتشف أفضل خدمات سكنية لاحتياجاتك",
+        "searchPlaceholder": "ابحث عن خدمات سكنية...",
+        "noHousings": "لم يتم العثور على خدمات سكنية.",
+        "loading": "جاري التحميل...",
+        "error": "فشل تحميل خدمات السكن. يرجى المحاولة لاحقًا.",
+        "pricePerService": "{{price}} دولار/خدمة",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "horseTrainer": {
+        "title": "مدربو الخيول المحترفون",
+        "subtitle": "ابحث عن أفضل المدربين لتحسين مهاراتك الفروسية",
+        "searchPlaceholder": "ابحث عن مدربين...",
+        "noTrainers": "لم يتم العثور على مدربين.",
+        "loading": "جاري التحميل...",
+        "error": "فشل تحميل مدربي الخيول. يرجى المحاولة لاحقًا.",
+        "pricePerSession": "{{price}}$ / جلسة",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "horseTransport": {
+        "title": "خدمات نقل الخيول",
+        "subtitle": "حلول موثوقة وآمنة لنقل خيولك",
+        "searchPlaceholder": "ابحث عن خدمات النقل...",
+        "noTransports": "لم يتم العثور على خدمات نقل.",
+        "loading": "جاري التحميل...",
+        "error": "فشل تحميل خدمات نقل الخيول. يرجى المحاولة لاحقًا.",
+        "pricePerMonth": "{{price}} دولار/شهر",
+        "visitWebsite": "زيارة الموقع"
+    },
+    "hoofTrimmer": {
+        "title": "مهنيون قص الحوافر",
+        "subtitle": "ابحث عن خبراء قص الحوافر للحفاظ على خيولك في حالة ممتازة",
+        "searchPlaceholder": "ابحث عن قص الحوافر...",
+        "noTrimmers": "لم يتم العثور على قص الحوافر.",
+        "loading": "جاري التحميل...",
+        "error": "فشل تحميل قص الحوافر. يرجى المحاولة لاحقًا.",
+        "pricePerSession": "{{price}} دولار/جلسة",
+        "visitWebsite": "زيارة الموقع",
+        "hoofTrimmerDetails": "تفاصيل قص الحوافر:"
+    },
+    "horseCatering": {
+        "title": "خدمات تقديم الطعام للخيول",
+        "subtitle": "اكتشف أفضل خدمات تقديم الطعام لخيولك",
+        "searchPlaceholder": "ابحث عن خدمات تقديم الطعام...",
+        "noCateringServices": "لم يتم العثور على خدمات تقديم الطعام.",
+        "loading": "جاري التحميل...",
+        "error": "فشل تحميل خدمات تقديم الطعام للخيول. يرجى المحاولة لاحقًا.",
+        "pricePerMonth": "{{price}} دولار/شهر",
+        "visitWebsite": "زيارة الموقع",
+        "cateringOptions": "خيارات تقديم الطعام:"
+    }
+}

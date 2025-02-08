@@ -1,0 +1,116 @@
+{
+    "stables": {
+        "heroTitle": "Premium Horse Stables",
+        "heroDescription": "Discover the finest equestrian facilities for your beloved horses",
+        "searchPlaceholder": "Search stables...",
+        "loadingMessage": "Loading...",
+        "errorMessage": "Failed to load horse stables. Please try again later.",
+        "noStablesMessage": "No stables found.",
+        "visitWebsite": "Visit Website"
+    },
+    "suppliers": {
+        "heroTitle": "Premium Suppliers",
+        "heroDescription": "Discover the finest suppliers for your equestrian needs",
+        "searchPlaceholder": "Search suppliers...",
+        "loadingMessage": "Loading...",
+        "errorMessage": "Failed to load suppliers. Please try again later.",
+        "noSuppliersMessage": "No suppliers found.",
+        "visitWebsite": "Visit Website"
+    },
+    "competitions": {
+        "heroTitle": "Horse Competitions",
+        "heroDescription": "Discover and participate in prestigious equestrian competitions",
+        "searchPlaceholder": "Search competitions...",
+        "loadingMessage": "Loading...",
+        "errorMessage": "Failed to load competitions. Please try again later.",
+        "noCompetitionsMessage": "No competitions found.",
+        "visitWebsite": "Competition Details",
+        "raceTypes": {
+            "endurance_race": "Endurance Race",
+            "shooting_arrows": "Shooting Arrows",
+            "pickup_pegs": "Pickup Pegs",
+            "dressage": "Dressage"
+        }
+    },
+    "tripCoordinators": {
+        "heroTitle": "Trip Coordinator Services",
+        "heroDescription": "Expert coordination for horse trips and adventures",
+        "searchPlaceholder": "Search for trip coordinators...",
+        "loadingMessage": "Loading...",
+        "errorMessage": "Failed to load trip coordinators. Please try again later.",
+        "noTripCoordinatorsMessage": "No trip coordinators found.",
+        "visitWebsite": "Visit Website"
+    },
+    "veterinarian": {
+        "title": "Premium Veterinarians",
+        "subtitle": "Discover the finest veterinary services for your beloved animals",
+        "searchPlaceholder": "Search veterinarians...",
+        "noVeterinarians": "No veterinarians found.",
+        "loading": "Loading...",
+        "error": "Failed to load veterinarians. Please try again later.",
+        "pricePerConsultation": "${price}/consultation",
+        "visitWebsite": "Visit Website"
+    },
+    "housing": {
+        "title": "Premium Housing Services",
+        "subtitle": "Discover the finest housing facilities for your needs",
+        "searchPlaceholder": "Search housing services...",
+        "noHousings": "No housing services found.",
+        "loading": "Loading...",
+        "error": "Failed to load housing services. Please try again later.",
+        "pricePerService": "${price}/service",
+        "visitWebsite": "Visit Website"
+    },
+    "horseTrainer": {
+        "title": "Professional Horse Trainers",
+        "subtitle": "Find the best horse trainers to enhance your equestrian skills",
+        "searchPlaceholder": "Search trainers...",
+        "noTrainers": "No trainers found.",
+        "loading": "Loading...",
+        "error": "Failed to load horse trainers. Please try again later.",
+        "pricePerSession": "{{price}}$/session",
+        "visitWebsite": "Visit Website"
+    },
+    "horseTransport": {
+        "title": "Horse Transport Services",
+        "subtitle": "Reliable and safe transportation solutions for your horses",
+        "searchPlaceholder": "Search transport services...",
+        "noTransports": "No transport services found.",
+        "loading": "Loading...",
+        "error": "Failed to load horse transport services. Please try again later.",
+        "pricePerMonth": "${{price}}/month",
+        "visitWebsite": "Visit Website"
+    },
+    "hoofTrimmer": {
+        "title": "Professional Hoof Trimmers",
+        "subtitle": "Find expert hoof trimmers to keep your horses in top condition",
+        "searchPlaceholder": "Search trimmers...",
+        "noTrimmers": "No trimmers found.",
+        "loading": "Loading...",
+        "error": "Failed to load hoof trimmers. Please try again later.",
+        "pricePerSession": "${{price}}/session",
+        "visitWebsite": "Visit Website",
+        "hoofTrimmerDetails": "Hoof Trimmer Details:"
+    },
+    "contractors": {
+        "title": "Premium Contractors",
+        "subtitle": "Discover the finest contractors for your construction needs",
+        "searchPlaceholder": "Search contractors...",
+        "noContractors": "No contractors found.",
+        "loading": "Loading...",
+        "error": "Failed to load contractors. Please try again later.",
+        "pricePerMonth": "${price}/month",
+        "visitWebsite": "Visit Website"
+    },
+    "horseCatering": {
+        "title": "Horse Catering Services",
+        "subtitle": "Discover the best catering services for your horses",
+        "searchPlaceholder": "Search catering services...",
+        "noCateringServices": "No catering services found.",
+        "loading": "Loading...",
+        "error": "Failed to load horse catering services. Please try again later.",
+        "pricePerMonth": "${price}/month",
+        "visitWebsite": "Visit Website",
+        "cateringOptions": "Catering Options:"
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "createAccount": "Create an Account",
+    "username": "Username",
+    "email": "Email",
+    "password": "Enter your password",
+    "confirmPassword": "Confirm password",
+    "agreeTo": "I agree to",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "signUpNow": "Sign Up Now",
+    "signingUp": "Signing up...",
+    "orContinueWith": "or continue with",
+    "signUpWithGoogle": "Sign Up with Google",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInNow": "Sign in now",
+    "allFieldsRequired": "All fields are required",
+    "acceptTerms": "Please accept the terms and conditions",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordMinLength": "Password must be at least 6 characters long",
+    "validEmail": "Please enter a valid email address",
+    "and": "and"
+  }

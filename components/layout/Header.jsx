@@ -1,18 +1,27 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { client, urlFor } from "../../src/lib/sanity";
 import userFallbackImage from "../../public/assets/imgs/elements/user.png";
+import i18nConfig from "../../i18nConfig";
+import { Globe } from "lucide-react";
 
 const Header = ({ handleHidden }) => {
   const router = useRouter();
+  const currentPathname = usePathname();
+  const { t, i18n } = useTranslation();
+  const currentLocale = i18n.language;
+  const isRTL = currentLocale === "ar";
+
   const [scroll, setScroll] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState(null);
   const [userImage, setUserImage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isLangOpen, setIsLangOpen] = useState(false);
 
   useEffect(() => {
     document.addEventListener("scroll", () => {
@@ -95,170 +104,271 @@ const Header = ({ handleHidden }) => {
     }
   };
 
+  const handleLanguageChange = (e) => {
+    const newLocale = e.target.value;
+    const days = 30;
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    const expires = date.toUTCString();
+    document.cookie = `NEXT_LOCALE=${newLocale};expires=${expires};path=/`;
+
+    if (
+      currentLocale === i18nConfig.defaultLocale &&
+      !i18nConfig.prefixDefault
+    ) {
+      router.push("/" + newLocale + currentPathname);
+    } else {
+      router.push(
+        currentPathname.replace(`/${currentLocale}`, `/${newLocale}`)
+      );
+    }
+    router.refresh();
+  };
+
+  const getFlagEmoji = (countryCode) => {
+    switch (countryCode) {
+      case "en":
+        return "🇺🇸";
+      case "ar":
+        return "🇸🇦";
+      default:
+        return "🌐";
+    }
+  };
+
+  const getLanguageName = (code) => {
+    const names = {
+      en: "English",
+      ar: "العربية",
+    };
+    return names[code] || code;
+  };
+
+  const getDirectionBasedStyles = () => {
+    return {
+      container: `container bg-transparent ${isRTL ? "rtl" : "ltr"}`,
+      navFlex: `bg-transparent flex justify-between items-center py-3 ${isRTL ? "flex-row-reverse" : "flex-row"}`,
+      menuSpace: `hidden lg:flex lg:items-center lg:w-auto ${isRTL ? "lg:space-x-12-reverse" : "lg:space-x-12"}`,
+      dropdownMenu: `drop-down-menu min-w-200 ${isRTL ? "right-0" : "left-0"}`,
+      languageDropdown: `absolute ${isRTL ? "left-0" : "right-0"} mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50`,
+      flexContainer: `flex items-center ${isRTL ? "space-x-4-reverse" : "space-x-4"}`,
+      languageButton: `flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200
+        bg-white/10 backdrop-blur-sm border border-gray-200 hover:border-gray-300
+        shadow-sm hover:shadow-md ${isRTL ? "flex-row-reverse" : "flex-row"}`,
+    };
+  };
+
+  const styles = getDirectionBasedStyles();
+
   return (
-    <>
-      <header
-        className={
-          scroll
-            ? "bg-transparent sticky-bar mt-4 stick"
-            : "bg-transparent sticky-bar mt-4"
-        }
-      >
-        <div className="container bg-transparent">
-          <nav className="bg-transparent flex justify-between items-center py-3">
-            <Link href="/" className="text-3xl font-semibold leading-none">
-              <Image
-                className="h-10"
-                src="/assets/imgs/logos/logohorse.svg"
-                alt="Monst"
-                width={125}
-                height={40}
-              />
-            </Link>
+    <header
+      className={
+        scroll
+          ? "bg-transparent sticky-bar mt-4 stick"
+          : "bg-transparent sticky-bar mt-4"
+      }
+    >
+      <div className={styles.container}>
+        <nav className={styles.navFlex}>
+          <Link href="/" className="text-3xl font-semibold leading-none">
+            <Image
+              className="h-10"
+              src="/assets/imgs/logos/logohorse.svg"
+              alt="Monst"
+              width={125}
+              height={40}
+            />
+          </Link>
 
-            <ul className="hidden lg:flex lg:items-center lg:w-auto lg:space-x-12">
-              {/* home */}
-              <li className="pt-4 pb-4">
-                <Link
-                  href="/"
-                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+          <ul className={styles.menuSpace}>
+            {/* Menu items */}
+            <li className="pt-4 pb-4">
+              <Link
+                href="/Stables"
+                className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+              >
+                {t("header:stables")}
+              </Link>
+            </li>
+            <li className="group relative pt-4 pb-4">
+              <Link
+                href="/competitions"
+                className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+              >
+                {t("header:competitions")}
+              </Link>
+            </li>
+            <li className="group relative pt-4 pb-4">
+              <Link
+                href="/tripCoordinator"
+                className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+              >
+                {t("header:trips")}
+              </Link>
+            </li>
+            <li className="group relative pt-4 pb-4 has-child">
+              <Link
+                href="/publicServices"
+                className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+              >
+                {t("header:publicServices")}
+              </Link>
+              <ul className={styles.dropdownMenu}>
+                <li>
+                  <Link
+                    href="/veterinarian"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:veterinarian")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/housing"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:housing")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/horseTrainer"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:horseTrainer")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/horseTrimmer"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:horseTrimmer")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/horseTransport"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:horseTransport")}
+                  </Link>
+                </li>
+              </ul>
+            </li>
+            <li className="group relative pt-4 pb-4 has-child">
+              <Link
+                href="/publicMarket"
+                className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+              >
+                {t("header:publicMarket")}
+              </Link>
+              <ul className={styles.dropdownMenu}>
+                <li>
+                  <Link
+                    href="/contractors"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:contractors")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/suppliers"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:suppliers")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/horseCatering"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:horseCatering")}
+                  </Link>
+                </li>
+              </ul>
+            </li>
+          </ul>
+
+          <div className={styles.flexContainer}>
+            {/* Language Switcher */}
+            <div className={`relative ${isRTL ? "mr-2" : "ml-2"}`}>
+              <div className="relative">
+                <button
+                  onClick={() => setIsLangOpen(!isLangOpen)}
+                  className={styles.languageButton}
                 >
-                  Home
-                </Link>
-              </li>
+                  <Globe className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {getFlagEmoji(currentLocale)}{" "}
+                    {getLanguageName(currentLocale)}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isLangOpen ? "transform rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
 
-              {/* Stables */}
-              <li className="pt-4 pb-4">
-                <Link
-                  href="/Stables"
-                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
-                >
-                  Stables
-                </Link>
-              </li>
-
-              {/* competitions   */}
-              <li className="group relative pt-4 pb-4">
-                <Link
-                  href="/competitions"
-                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
-                >
-                  competitions
-                </Link>
-              </li>
-
-              {/* Trips */}
-              <li className="group relative pt-4 pb-4">
-                <Link
-                  href="/tripCoordinator"
-                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
-                >
-                  Trips
-                </Link>
-              </li>
-
-              {/* Bublic Services */}
-              <li className="group relative pt-4 pb-4 has-child">
-                <Link
-                  href="/publicServices"
-                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
-                >
-                  Public Services
-                </Link>
-                <ul className="drop-down-menu min-w-200">
-                  <li>
-                    <Link
-                      href="/veterinarian"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                {isLangOpen && (
+                  <div className={styles.languageDropdown}>
+                    <div
+                      className="py-1"
+                      role="menu"
+                      aria-orientation="vertical"
                     >
-                      Veterinarian
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/housing"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Housing
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/horseTrainer"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      horse trainer
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/horseTrimmer"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      horse hoof trimmer - FARRIER
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/horseTransport"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Horse transport
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-
-              {/* publicMarket */}
-              <li className="group relative pt-4 pb-4 has-child">
-                <Link
-                  href="publicMarket"
-                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
-                >
-                  Public market
-                </Link>
-                <ul className="drop-down-menu min-w-200">
-                  <li>
-                    <Link
-                      href="/contractors"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Contractors
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/suppliers"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Suppliers
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/horseCatering"
-                      className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
-                    >
-                      Horse Catering Services
-                    </Link>
-                  </li>
-                </ul>
-              </li>
-
-              {/* contact */}
-              <li className="pt-4 pb-4">
-                <Link
-                  href="/contact"
-                  className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-
+                      {["en", "ar"].map((locale) => (
+                        <button
+                          key={locale}
+                          onClick={(e) => {
+                            handleLanguageChange({ target: { value: locale } });
+                            setIsLangOpen(false);
+                          }}
+                          className={`${
+                            currentLocale === locale
+                              ? "bg-gray-100 text-gray-900"
+                              : "text-gray-700"
+                          } group flex items-center w-full px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-150`}
+                          role="menuitem"
+                        >
+                          <span className="mr-2">{getFlagEmoji(locale)}</span>
+                          <span>{getLanguageName(locale)}</span>
+                          {currentLocale === locale && (
+                            <svg
+                              className="w-4 h-4 ml-auto text-blue-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* login */}
             <div className="hidden lg:block">
               {isAuthenticated ? (
-                <div className="flex items-center space-x-4">
+                <div className={styles.flexContainer}>
                   <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
                     <Image
                       src={
@@ -275,39 +385,51 @@ const Header = ({ handleHidden }) => {
                     onClick={handleLogout}
                     className="btn-primary hover-up-2"
                   >
-                    Log Out
+                    {t("header:logOut")}
                   </button>
                 </div>
               ) : (
-                <div className="hidden lg:block">
+                <div
+                  className={`hidden lg:block ${isRTL ? "space-x-4-reverse" : "space-x-2"}`}
+                >
                   <Link href="/login" className="btn-accent hover-up-2">
-                    Log In
+                    {t("header:logIn")}
                   </Link>
                   <Link href="/signup" className="btn-primary hover-up-2">
-                    Sign Up
+                    {t("header:signUp")}
                   </Link>
                 </div>
               )}
             </div>
-            <div className="lg:hidden">
-              <button
-                className="navbar-burger flex items-center py-2 px-3 text-[#b28a2f] hover:text-[#b28a2f] rounded border border-blue-200 hover:border-blue-300"
-                onClick={handleHidden}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="lg:hidden">
+            <button
+              className="navbar-burger flex items-center py-2 px-3 text-[#b28a2f] hover:text-[#b28a2f] rounded border border-blue-200 hover:border-blue-300"
+              onClick={handleHidden}
+            >
+              <svg
+                className="fill-current h-4 w-4"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  className="fill-current h-4 w-4"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <title>Mobile menu</title>
-                  <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
-                </svg>
-              </button>
-            </div>
-          </nav>
-        </div>
-      </header>
-    </>
+                <title>Mobile menu</title>
+                <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
+              </svg>
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* Click outside handler */}
+      {isLangOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsLangOpen(false)}
+        ></div>
+      )}
+    </header>
   );
 };
 

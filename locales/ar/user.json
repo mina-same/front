@@ -1,0 +1,17 @@
+{
+    "completeProfile": "إكمال ملفك الشخصي",
+    "joinCommunity": "انضم إلى مجتمعنا مع ملف شخصي مخصص",
+    "imageUpload": "إسقاط الصورة هنا",
+    "phoneInput": "رقم الهاتف",
+    "normalUser": "مستخدم عادي",
+    "serviceProvider": "مزود خدمة",
+    "completeProfileButton": "إكمال الملف الشخصي",
+    "processing": "جاري المعالجة...",
+    "error": {
+        "imageSize": "يجب أن يكون حجم الصورة أقل من 5 ميجابايت",
+        "imageType": "الرجاء تحميل ملف صورة",
+        "completeFields": "الرجاء إكمال جميع الحقول",
+        "uploadFailed": "فشل التحميل",
+        "profileCompletionError": "حدث خطأ أثناء تحديث ملفك الشخصي. يرجى المحاولة مرة أخرى."
+    }
+}

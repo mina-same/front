@@ -1,0 +1,21 @@
+{
+    "signIn": "تسجيل الدخول",
+    "joinCommunity": "انضم إلى مجتمعنا",
+    "emailPlaceholder": "البريد الإلكتروني",
+    "passwordPlaceholder": "أدخل كلمة المرور الخاصة بك",
+    "agreeTo": "أوافق على",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsOfUse": "شروط الاستخدام",
+    "signInNow": "تسجيل الدخول الآن",
+    "signingIn": "جاري تسجيل الدخول...",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "orContinueWith": "أو استمر باستخدام",
+    "signInWithGoogle": "تسجيل الدخول مع جوجل",
+    "dontHaveAccount": "ليس لديك حساب؟",
+    "signUpNow": "سجل الآن",
+    "allFieldsRequired": "الرجاء ملء جميع الحقول",
+    "acceptTerms": "الرجاء قبول الشروط والأحكام",
+    "loginFailed": "فشل تسجيل الدخول",
+    "errorOccurred": "حدث خطأ أثناء تسجيل الدخول",
+    "and": "أو"
+}

@@ -1,0 +1,17 @@
+{
+  "completeProfile": "Complete Your Profile",
+  "joinCommunity": "Join our community with a personalized profile",
+  "imageUpload": "Drop image here",
+  "phoneInput": "Phone Number",
+  "normalUser": "Normal User",
+  "serviceProvider": "Service Provider",
+  "completeProfileButton": "Complete Profile",
+  "processing": "Processing...",
+  "error": {
+    "imageSize": "Image size should be less than 5MB",
+    "imageType": "Please upload an image file",
+    "completeFields": "Please complete all fields",
+    "uploadFailed": "Upload failed",
+    "profileCompletionError": "An error occurred while updating your profile. Please try again."
+  }
+}

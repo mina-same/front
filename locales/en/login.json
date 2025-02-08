@@ -1,0 +1,21 @@
+{
+    "signIn": "Sign In",
+    "joinCommunity": "Join our community",
+    "emailPlaceholder": "name@email.com",
+    "passwordPlaceholder": "Enter your password",
+    "agreeTo": "I agree to",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "signInNow": "Sign In",
+    "signingIn": "Signing In...",
+    "forgotPassword": "Forgot Your Password?",
+    "orContinueWith": "or continue with",
+    "signInWithGoogle": "Sign In with Google",
+    "dontHaveAccount": "Don't Have an Account?",
+    "signUpNow": "Sign Up now",
+    "allFieldsRequired": "Please fill in all fields",
+    "acceptTerms": "Please accept the terms and conditions",
+    "loginFailed": "Login failed",
+    "errorOccurred": "An error occurred during login",
+    "and": "and"
+}

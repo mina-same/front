@@ -1,0 +1,23 @@
+{
+    "heroTitle": "Committed to <1>People</1>, and the future",
+    "heroDescription": "We are <1>Monst</1>, a Creative Design <2>Horse Rentals</2>",
+    "heroSubtext": "Helping you maximize operations management with digitization",
+    "aboutButton": "About Us",
+    "servicesButton": "Our Services",
+    "contactTitle": "Contact Us",
+    "contactSubtitle": "We will <1>be glad</1> to hear from you!",
+    "form": {
+        "subject": "Subject",
+        "name": "Name",
+        "email": "name@example.com",
+        "message": "Message...",
+        "browse": "Browse",
+        "submit": "Submit"
+    },
+    "newsletter": {
+        "title": "Subscribe now to <1>Our Newsletter</1> and get the Coupon code.",
+        "description": "All your information is completely confidential",
+        "placeholder": "Type your e-mail",
+        "signUp": "Sign Up"
+    }
+}

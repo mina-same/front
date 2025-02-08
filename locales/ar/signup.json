@@ -1,0 +1,22 @@
+{
+    "createAccount": "إنشاء حساب",
+    "username": "اسم المستخدم",
+    "email": "البريد الإلكتروني",
+    "password": "أدخل كلمة المرور الخاصة بك",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "agreeTo": "أوافق على",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsOfUse": "شروط الاستخدام",
+    "signUpNow": "سجل الآن",
+    "signingUp": "جاري التسجيل...",
+    "orContinueWith": "أو استمر باستخدام",
+    "signUpWithGoogle": "سجل مع جوجل",
+    "alreadyHaveAccount": "هل لديك حساب؟",
+    "signInNow": "تسجيل الدخول الآن",
+    "allFieldsRequired": "جميع الحقول مطلوبة",
+    "acceptTerms": "الرجاء قبول الشروط والأحكام",
+    "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+    "passwordMinLength": "يجب أن تكون كلمة المرور على الأقل 6 أحرف",
+    "validEmail": "الرجاء إدخال عنوان بريد إلكتروني صالح",
+    "and": "آو"
+}
