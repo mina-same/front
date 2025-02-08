@@ -42,7 +42,7 @@ function Home({ params }) {
 
 	return (
 		<Layout>
-			<section className="xl:bg-contain bg-top bg-no-repeat -mt-24 pt-24" style={{ backgroundImage: "url('assets/imgs/backgrounds/intersect.svg')" }}>
+			<section className="xl:bg-cover bg-top bg-no-repeat -mt-24 pt-24" style={{ backgroundImage: "url('assets/imgs/backgrounds/intersect.svg')" }}>
 				<div className="container px-4 mx-auto">
 					<div className="pt-12 text-center">
 						<div className="max-w-2xl mx-auto mb-8">
@@ -71,7 +71,7 @@ function Home({ params }) {
 								{t('hero.buttons.howItWorks')}
 							</Link>
 						</div>
-					</div>	
+					</div>
 				</div>
 
 				<div className="container px-4 mx-auto">

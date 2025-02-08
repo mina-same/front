@@ -14,12 +14,10 @@ const Footer = () => {
         className="container px-4 mx-auto wow animate__animated animate__fadeIn"
         data-wow-delay=".3s"
       >
-        <div
-          className={`flex flex-wrap mb-12 lg:mb-20 -mx-3 text-center lg:text-${isRTL ? "right" : "left"}`}
-        >
-          {/* Logo Section - Order changes based on RTL */}
+        <div className="flex flex-wrap mb-12 lg:mb-20 -mx-3 text-center lg:text-right">
+          {/* Logo Section */}
           <div
-            className={`w-full lg:w-1/5 px-3 mb-6 lg:mb-0 ${isRTL ? "order-last" : "order-first"}`}
+            className={`w-full lg:w-1/5 px-3 mb-6 lg:mb-0 ${isRTL ? "order-4" : "order-4"}`}
           >
             <Link
               href="/"
@@ -37,19 +35,32 @@ const Footer = () => {
             </Link>
           </div>
 
-          {/* Main content section - Order changes based on RTL */}
+          {/* Main content section */}
           <div
-            className={`w-full lg:w-2/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-first" : "order-1"}`}
+            className={`w-full lg:w-2/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-2" : "order-2"}`}
           >
             <p
-              className={`max-w-md mx-auto lg:max-w-full lg:mx-0 ${isRTL ? "lg:pl-32" : "lg:pr-32"} lg:text-lg text-blueGray-400 leading-relaxed`}
+              className={`max-w-md mx-auto lg:max-w-full lg:mx-0 ${
+                isRTL ? "lg:pl-32" : "lg:pr-32"
+              } lg:text-lg text-blueGray-400 leading-relaxed`}
               dangerouslySetInnerHTML={{ __html: t("footer:tagline") }}
             ></p>
           </div>
 
+          {/* Contact Section */}
+          <div
+            className={`w-full lg:w-1/5 px-3 ${isRTL ? "order-2" : "order-2"}`}
+          >
+            <p className="mb-2 lg:mb-4 lg:text-lg font-bold font-heading text-blueGray-800">
+              {t("footer:contacts")}
+            </p>
+            <p className="lg:text-lg text-blueGray-400">{t("footer:phone")}</p>
+            <p className="lg:text-lg text-blueGray-400">{t("footer:email")}</p>
+          </div>
+
           {/* Office Section */}
           <div
-            className={`w-full lg:w-1/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-2" : "order-2"}`}
+            className={`w-full lg:w-1/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-3" : "order-3"}`}
           >
             <p className="mb-2 lg:mb-4 lg:text-lg font-bold font-heading text-blueGray-800">
               {t("footer:office")}
@@ -58,32 +69,21 @@ const Footer = () => {
               {t("footer:officeAddress")}
             </p>
           </div>
-
-          {/* Contact Section */}
-          <div
-            className={`w-full lg:w-1/5 px-3 ${isRTL ? "order-3" : "order-3"}`}
-          >
-            <p className="mb-2 lg:mb-4 lg:text-lg font-bold font-heading text-blueGray-800">
-              {t("footer:contacts")}
-            </p>
-            <p className="lg:text-lg text-blueGray-400">{t("footer:phone")}</p>
-            <p className="lg:text-lg text-blueGray-400">{t("footer:email")}</p>
-          </div>
         </div>
 
         {/* Bottom section */}
-        <div className="flex flex-col lg:flex-row items-center justify-between">
+        <div
+          className={`flex flex-col lg:flex-row items-center ${isRTL ? "lg:flex-row-reverse" : ""} justify-between`}
+        >
           <p
-            className={`text-sm text-blueGray-400 ${isRTL ? "lg:order-2" : "lg:order-1"} order-2`}
+            className={`text-sm text-blueGray-400 ${isRTL ? "lg:text-right" : "lg:text-left"}`}
           >
             &copy; {new Date().getFullYear()}. {t("footer:rights")}{" "}
-            <Link style={{ color: " #b28a2f" }} href="https://alithemes.com">
+            <Link style={{ color: "#b28a2f" }} href="https://alithemes.com">
               {t("footer:designer")}
             </Link>
           </p>
-          <div
-            className={`flex ${isRTL ? "lg:order-1" : "lg:order-2"} order-1 -mx-2 mb-4 lg:mb-0`}
-          >
+          <div className="flex -mx-2 mb-4 lg:mb-0">
             <Link className="inline-block px-2" href="https://facebook.com">
               <Image
                 width="0"

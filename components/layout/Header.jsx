@@ -155,6 +155,8 @@ const Header = ({ handleHidden }) => {
       languageButton: `flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200
         bg-white/10 backdrop-blur-sm border border-gray-200 hover:border-gray-300
         shadow-sm hover:shadow-md ${isRTL ? "flex-row-reverse" : "flex-row"}`,
+      logoContainer: `order-${isRTL ? "1" : "0"}`,
+      buttonsContainer: `flex order-${isRTL ? "0" : "1"}`,
     };
   };
 
@@ -170,7 +172,118 @@ const Header = ({ handleHidden }) => {
     >
       <div className={styles.container}>
         <nav className={styles.navFlex}>
-          <Link href="/" className="text-3xl font-semibold leading-none">
+          <div className={styles.buttonsContainer}>
+            {/* Language Switcher */}
+            <div className={`relative ${isRTL ? "mr-2" : "ml-2"}`}>
+              <div className="relative">
+                <button
+                  onClick={() => setIsLangOpen(!isLangOpen)}
+                  className={styles.languageButton}
+                >
+                  <Globe className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {getFlagEmoji(currentLocale)}{" "}
+                    {getLanguageName(currentLocale)}
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isLangOpen ? "transform rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {isLangOpen && (
+                  <div className={styles.languageDropdown}>
+                    <div
+                      className="py-1"
+                      role="menu"
+                      aria-orientation="vertical"
+                    >
+                      {["en", "ar"].map((locale) => (
+                        <button
+                          key={locale}
+                          onClick={(e) => {
+                            handleLanguageChange({ target: { value: locale } });
+                            setIsLangOpen(false);
+                          }}
+                          className={`${
+                            currentLocale === locale
+                              ? "bg-gray-100 text-gray-900"
+                              : "text-gray-700"
+                          } group flex items-center w-full px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-150`}
+                          role="menuitem"
+                        >
+                          <span className="mr-2">{getFlagEmoji(locale)}</span>
+                          <span>{getLanguageName(locale)}</span>
+                          {currentLocale === locale && (
+                            <svg
+                              className="w-4 h-4 ml-auto text-blue-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* login */}
+            <div className="hidden lg:block">
+              {isAuthenticated ? (
+                <div className={styles.flexContainer}>
+                  <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
+                    <Image
+                      src={
+                        userImage ? urlFor(userImage).url() : userFallbackImage
+                      }
+                      alt="User profile"
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full rounded-full cursor-pointer"
+                      onClick={() => router.push("/profile")}
+                    />
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="btn-primary hover-up-2"
+                  >
+                    {t("header:logOut")}
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className={`hidden lg:block ${isRTL ? "space-x-4-reverse" : "space-x-2"}`}
+                >
+                  <Link href="/login" className="btn-accent hover-up-2">
+                    {t("header:logIn")}
+                  </Link>
+                  <Link href="/signup" className="btn-primary hover-up-2">
+                    {t("header:signUp")}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Link href="/" className={`text-3xl font-semibold leading-none ${styles.logoContainer}`}>
             <Image
               className="h-10"
               src="/assets/imgs/logos/logohorse.svg"
@@ -291,117 +404,6 @@ const Header = ({ handleHidden }) => {
               </ul>
             </li>
           </ul>
-
-          <div className={styles.flexContainer}>
-            {/* Language Switcher */}
-            <div className={`relative ${isRTL ? "mr-2" : "ml-2"}`}>
-              <div className="relative">
-                <button
-                  onClick={() => setIsLangOpen(!isLangOpen)}
-                  className={styles.languageButton}
-                >
-                  <Globe className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    {getFlagEmoji(currentLocale)}{" "}
-                    {getLanguageName(currentLocale)}
-                  </span>
-                  <svg
-                    className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isLangOpen ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {isLangOpen && (
-                  <div className={styles.languageDropdown}>
-                    <div
-                      className="py-1"
-                      role="menu"
-                      aria-orientation="vertical"
-                    >
-                      {["en", "ar"].map((locale) => (
-                        <button
-                          key={locale}
-                          onClick={(e) => {
-                            handleLanguageChange({ target: { value: locale } });
-                            setIsLangOpen(false);
-                          }}
-                          className={`${
-                            currentLocale === locale
-                              ? "bg-gray-100 text-gray-900"
-                              : "text-gray-700"
-                          } group flex items-center w-full px-4 py-2 text-sm hover:bg-gray-50 transition-colors duration-150`}
-                          role="menuitem"
-                        >
-                          <span className="mr-2">{getFlagEmoji(locale)}</span>
-                          <span>{getLanguageName(locale)}</span>
-                          {currentLocale === locale && (
-                            <svg
-                              className="w-4 h-4 ml-auto text-blue-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            {/* login */}
-            <div className="hidden lg:block">
-              {isAuthenticated ? (
-                <div className={styles.flexContainer}>
-                  <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
-                    <Image
-                      src={
-                        userImage ? urlFor(userImage).url() : userFallbackImage
-                      }
-                      alt="User profile"
-                      width={40}
-                      height={40}
-                      className="object-cover w-full h-full rounded-full cursor-pointer"
-                      onClick={() => router.push("/profile")}
-                    />
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="btn-primary hover-up-2"
-                  >
-                    {t("header:logOut")}
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={`hidden lg:block ${isRTL ? "space-x-4-reverse" : "space-x-2"}`}
-                >
-                  <Link href="/login" className="btn-accent hover-up-2">
-                    {t("header:logIn")}
-                  </Link>
-                  <Link href="/signup" className="btn-primary hover-up-2">
-                    {t("header:signUp")}
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* Mobile menu button */}
           <div className="lg:hidden">
