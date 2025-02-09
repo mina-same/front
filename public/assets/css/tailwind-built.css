@@ -581,8 +581,12 @@ video {
   }
 }
 
-.pl-10{
+.pl-10 {
   padding-left: 15px !important;
+}
+
+.min-h-80px {
+  min-height: 80px /* 40px */;
 }
 
 /* Add the space-x-4 class */
@@ -599,13 +603,11 @@ video {
   margin-left: 1rem; /* Equivalent to space-x-4-reverse */
 }
 
-
 @media (min-width: 1024px) {
   .lg\:space-x-12-reverse > *:not(:last-child) {
     margin-left: 4rem; /* Equivalent to 12 spacing in Tailwind */
   }
 }
-
 
 @media (min-width: 1024px) {
   .lg\:space-x-12 > *:not(:first-child) {

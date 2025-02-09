@@ -16,9 +16,7 @@ const Footer = () => {
       >
         <div className="flex flex-wrap mb-12 lg:mb-20 -mx-3 text-center lg:text-right">
           {/* Logo Section */}
-          <div
-            className={`w-full lg:w-1/5 px-3 mb-6 lg:mb-0 ${isRTL ? "order-4" : "order-4"}`}
-          >
+          <div className={`w-full lg:w-1/5 px-3 mb-6 lg:mb-0 ${isRTL ? "order-4" : "order-4"}`}>
             <Link
               href="/"
               className={`inline-block ${isRTL ? "lg:ml-auto" : "lg:mr-auto"} text-3xl font-semibold leading-none`}
@@ -36,9 +34,7 @@ const Footer = () => {
           </div>
 
           {/* Main content section */}
-          <div
-            className={`w-full lg:w-2/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-2" : "order-2"}`}
-          >
+          <div className={`w-full lg:w-2/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-2" : "order-2"}`}>
             <p
               className={`max-w-md mx-auto lg:max-w-full lg:mx-0 ${
                 isRTL ? "lg:pl-32" : "lg:pr-32"
@@ -47,10 +43,10 @@ const Footer = () => {
             ></p>
           </div>
 
+         
+
           {/* Contact Section */}
-          <div
-            className={`w-full lg:w-1/5 px-3 ${isRTL ? "order-2" : "order-2"}`}
-          >
+          <div className={`w-full lg:w-1/5 px-3 ${isRTL ? "order-2" : "order-2"}`}>
             <p className="mb-2 lg:mb-4 lg:text-lg font-bold font-heading text-blueGray-800">
               {t("footer:contacts")}
             </p>
@@ -58,10 +54,8 @@ const Footer = () => {
             <p className="lg:text-lg text-blueGray-400">{t("footer:email")}</p>
           </div>
 
-          {/* Office Section */}
-          <div
-            className={`w-full lg:w-1/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-3" : "order-3"}`}
-          >
+           {/* Office Section */}
+           <div className={`w-full lg:w-1/5 px-3 mb-8 lg:mb-0 ${isRTL ? "order-3" : "order-3"}`}>
             <p className="mb-2 lg:mb-4 lg:text-lg font-bold font-heading text-blueGray-800">
               {t("footer:office")}
             </p>
@@ -72,12 +66,8 @@ const Footer = () => {
         </div>
 
         {/* Bottom section */}
-        <div
-          className={`flex flex-col lg:flex-row items-center ${isRTL ? "lg:flex-row-reverse" : ""} justify-between`}
-        >
-          <p
-            className={`text-sm text-blueGray-400 ${isRTL ? "lg:text-right" : "lg:text-left"}`}
-          >
+        <div className={`flex flex-col lg:flex-row items-center ${isRTL ? "lg:flex-row-reverse" : ""} justify-between`}>
+          <p className={`text-sm text-blueGray-400 ${isRTL ? "lg:text-right" : "lg:text-left"}`}>
             &copy; {new Date().getFullYear()}. {t("footer:rights")}{" "}
             <Link style={{ color: "#b28a2f" }} href="https://alithemes.com">
               {t("footer:designer")}
@@ -104,10 +94,7 @@ const Footer = () => {
                 alt="Twitter"
               />
             </Link>
-            <Link
-              className="inline-block px-2"
-              href="https://www.instagram.com"
-            >
+            <Link className="inline-block px-2" href="https://www.instagram.com">
               <Image
                 width="0"
                 height="0"

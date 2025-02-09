@@ -33,7 +33,19 @@ export const metadata = {
 export default async function RootLayout({ children, params }) {
 	const locale = params?.locale;
 	if (!locale) return null;
-	const { resources } = await initTranslations(locale, ['home', "about", "header", "servicesPage", "contact", "signup", "login", "user", "footer"]);
+	const { resources } = await initTranslations(locale, [
+		'home',
+		"about",
+		"header",
+		"servicesPage",
+		"contact",
+		"signup",
+		"login",
+		"user",
+		"footer",
+		"publicServices",
+		"publicMarket"
+	]);
 	return (
 		<html lang="en">
 			<body className={`${poppins.variable} ${montserrat.variable}`}>
