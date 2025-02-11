@@ -45,7 +45,8 @@ export default async function RootLayout({ children, params }) {
 		"footer",
 		"publicServices",
 		"publicMarket",
-		"profile"
+		"profile",
+		"forgetPassword"
 	]);
 	return (
 		<html lang="en">

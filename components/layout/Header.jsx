@@ -157,6 +157,7 @@ const Header = ({ handleHidden }) => {
         shadow-sm hover:shadow-md ${isRTL ? "flex-row-reverse" : "flex-row"}`,
       logoContainer: `order-${isRTL ? "1" : "0"}`,
       buttonsContainer: `flex order-${isRTL ? "0" : "1"}`,
+      mobileMenuButton: `lg:hidden ${isRTL ? "ml-2" : "mr-2"}`,
     };
   };
 
@@ -174,7 +175,7 @@ const Header = ({ handleHidden }) => {
         <nav className={styles.navFlex}>
           <div className={styles.buttonsContainer}>
             {/* Language Switcher */}
-            <div className={`relative ${isRTL ? "mr-2" : "ml-2"}`}>
+            <div className={`relative lg:block hidden ${isRTL ? "mr-2" : "ml-2"}`}>
               <div className="relative">
                 <button
                   onClick={() => setIsLangOpen(!isLangOpen)}
@@ -406,7 +407,7 @@ const Header = ({ handleHidden }) => {
           </ul>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden">
+          <div className={styles.mobileMenuButton}>
             <button
               className="navbar-burger flex items-center py-2 px-3 text-[#b28a2f] hover:text-[#b28a2f] rounded border border-blue-200 hover:border-blue-300"
               onClick={handleHidden}

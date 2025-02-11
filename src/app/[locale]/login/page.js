@@ -204,7 +204,7 @@ const Login = () => {
 									</button>
 
 									<Link
-										href="/forgot-password"
+										href="/forget-password"
 										className={`mt-5 flex text-xs text-[#a78638] hover:text-[#C19733] font-semibold leading-none wow animate__animated animate__fadeIn animated justify-center items-center mx-auto ${isRTL ? 'font-arabic' : ''
 											}`}
 										data-wow-delay=".1s"
