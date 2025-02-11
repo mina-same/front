@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import toast from 'react-hot-toast';
 import { client, urlFor } from '../../src/lib/sanity';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 const AddServiceForm = ({ providerId }) => {
   const [imagePreview, setImagePreview] = useState(null);
@@ -1026,10 +1027,12 @@ const AddServiceForm = ({ providerId }) => {
             <div className="relative w-48 h-48">
               {imagePreview ? (
                 <div className="relative w-full h-full rounded-xl overflow-hidden">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Preview"
                     className="w-full h-full object-cover"
+                    width={100}
+                    height={30}
                   />
                   <div className="z-20 gap-2"
                     style={{ position: "absolute", top: "4px", right: "2px" }}

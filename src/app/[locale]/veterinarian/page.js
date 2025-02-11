@@ -7,6 +7,7 @@ import Layout from 'components/layout/Layout';
 import { client, urlFor } from '../../../lib/sanity'; // Import Sanity client and urlFor
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
+import Image from 'next/image';
 
 const VeterinarianPage = () => {
   const [veterinarians, setVeterinarians] = useState([]);
@@ -103,10 +104,12 @@ const VeterinarianPage = () => {
               {filteredVeterinarians.map((veterinarian, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${veterinarian._id}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                    <img
+                    <Image
                       src={veterinarian.image ? urlFor(veterinarian.image).url() : '/api/placeholder/400/300'}
                       alt={veterinarian.name_en}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      width={100}
+                      height={30}
                     />
                   </div>
                   <CardHeader>

@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Layout from '../../../../components/layout/Layout';
+import Layout from '../../../../../components/layout/Layout';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 export default function ResetPasswordClient() {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,19 +20,23 @@ export default function ResetPasswordClient() {
   const router = useRouter();
   const token = params.token;
 
+  useEffect(() => {
+    document.body.dir = isRTL ? 'rtl' : 'ltr';
+  }, [isRTL]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t('resetPassword:passwordsDoNotMatch'));
       setIsLoading(false);
       return;
     }
 
     if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters long");
+      setError(t('resetPassword:passwordMinLength'));
       setIsLoading(false);
       return;
     }
@@ -54,18 +61,18 @@ export default function ResetPasswordClient() {
         setError(data.message);
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      setError(t('resetPassword:errorOccurred'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!token) return <div>Invalid reset link</div>;
+  if (!token) return <div>{t('resetPassword:invalidLink')}</div>;
 
   return (
     <Layout>
       <section className="relative pb-20 pt-28">
-        <div className="hidden lg:block absolute inset-0 w-1/2 ml-auto">
+        <div className={`hidden lg:block absolute inset-0 ${isRTL ? 'w-1/2 mr-auto' : 'w-1/2 ml-auto'}`}>
           <div className="flex items-center h-full wow animate__animated animate__fadeIn animated" data-wow-delay=".1s">
             <Image
               width="0"
@@ -80,24 +87,24 @@ export default function ResetPasswordClient() {
         </div>
         <div className="container">
           <div className="relative flex flex-wrap pt-12">
-            <div className="lg:flex lg:flex-col w-full lg:w-1/2 py-6 lg:pr-20">
+            <div className={`lg:flex lg:flex-col w-full lg:w-1/2 py-6 ${isRTL ? 'lg:pl-20' : 'lg:pr-20'}`}>
               <div className="w-full max-w-lg mx-auto lg:mx-0 my-auto wow animate__animated animate__fadeIn animated" data-wow-delay=".3s">
-                <span className="text-sm text-blueGray-400">Reset password</span>
-                <h4 className="mb-6 text-3xl">Create new password</h4>
+                <span className="text-sm text-blueGray-400">{t('resetPassword:resetPassword')}</span>
+                <h4 className={`mb-6 text-3xl ${isRTL ? 'font-arabic' : ''}`}>{t('resetPassword:createNewPassword')}</h4>
 
                 {success ? (
                   <div className="text-center p-4 mb-4 text-green-700 bg-green-100 rounded">
-                    Password reset successful! Redirecting to login...
+                    {t('resetPassword:resetSuccess')}
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit}>
                     <div className="flex mb-4 px-4 bg-blueGray-50 rounded border border-gray-200">
                       <input
                         type="password"
-                        placeholder="Enter new password"
+                        placeholder={t('resetPassword:enterNewPassword')}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full py-4 text-xs placeholder-blueGray-400 font-semibold leading-none bg-blueGray-50 outline-none"
+                        className={`w-full py-4 text-xs placeholder-blueGray-400 font-semibold leading-none bg-blueGray-50 outline-none ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
                         required
                         disabled={isLoading}
                       />
@@ -106,10 +113,10 @@ export default function ResetPasswordClient() {
                     <div className="flex mb-4 px-4 bg-blueGray-50 rounded border border-gray-200">
                       <input
                         type="password"
-                        placeholder="Confirm new password"
+                        placeholder={t('resetPassword:confirmNewPassword')}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full py-4 text-xs placeholder-blueGray-400 font-semibold leading-none bg-blueGray-50 outline-none"
+                        className={`w-full py-4 text-xs placeholder-blueGray-400 font-semibold leading-none bg-blueGray-50 outline-none ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
                         required
                         disabled={isLoading}
                       />
@@ -140,10 +147,10 @@ export default function ResetPasswordClient() {
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             />
                           </svg>
-                          Resetting Password...
+                          {t('resetPassword:resettingPassword')}
                         </span>
                       ) : (
-                        "Reset Password"
+                        t('resetPassword:resetPasswordButton')
                       )}
                     </button>
                   </form>
@@ -151,10 +158,10 @@ export default function ResetPasswordClient() {
               </div>
 
               <div className="w-full mt-12 mx-auto text-center">
-                <p>
-                  Remember your password?{' '}
+                <p className={isRTL ? 'font-arabic' : ''}>
+                  {t('resetPassword:rememberPassword')}{' '}
                   <Link href="/login" className="inline-block text-xs text-[#a78638] hover:text-[#C19733] font-semibold leading-none wow animate__animated animate__fadeIn animated" data-wow-delay=".1s">
-                    Login now
+                    {t('resetPassword:loginNow')}
                   </Link>
                 </p>
               </div>

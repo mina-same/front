@@ -7,6 +7,7 @@ import Layout from 'components/layout/Layout';
 import { client, urlFor } from '../../../lib/sanity';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 const CompetitionsPage = () => {
   const [competitions, setCompetitions] = useState([]);
@@ -106,10 +107,12 @@ const CompetitionsPage = () => {
               {filteredCompetitions.map((competition, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${competition._id}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                    <img
+                    <Image
                       src={competition.image ? urlFor(competition.image).url() : '/api/placeholder/400/300'}
                       alt={isArabic ? competition.name_ar : competition.name_en}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      width={100}
+                      high={30}
                     />
                   </div>
                   <CardHeader>

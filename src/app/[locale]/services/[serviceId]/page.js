@@ -4,13 +4,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation'; // Import useParams
 import { MapPin, Phone, Mail, Link as LinkIcon, Calendar, Clock, Award, Users, Heart, Share2 } from 'lucide-react';
-import { client, urlFor } from '../../../lib/sanity'; // Import urlFor
+import { client, urlFor } from '../../../../lib/sanity'; // Import urlFor
 import Layout from 'components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Preloader from 'components/elements/Preloader';
 import ReservationPopup from 'components/elements/ReservationPopup';  // Adjust import path as needed
+import Image from 'next/image';
 
 export default function ServiceDetailsPage() {
     const params = useParams(); // Get dynamic route parameters
@@ -107,7 +108,7 @@ export default function ServiceDetailsPage() {
     }, [serviceId]); // Re-fetch when serviceId changes
 
     // Loading and error states
-    if (loading) return <Preloader/>;
+    if (loading) return <Preloader />;
     if (error) return <div>Error: {error.message}</div>;
     if (!service) return <div>Service not found</div>;
 
@@ -115,10 +116,12 @@ export default function ServiceDetailsPage() {
     const CommonInfo = () => (
         <div className="mb-8">
             <div className="relative h-[600px] w-full mb-12 rounded-2xl overflow-hidden group">
-                <img
+                <Image
                     src={service.image ? urlFor(service.image).url() : "/api/placeholder/1600/900"}
                     alt={service.name_en}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    width={100}
+                    height={30}
                 />
 
                 {/* Gradient Overlay */}
@@ -300,10 +303,12 @@ export default function ServiceDetailsPage() {
                                         <p className="text-gray-700">{service.competitions?.sponsor}</p>
                                     </div>
                                     {service.competitions?.sponsorLogo && (
-                                        <img
+                                        <Image
                                             src={service.competitions.sponsorLogo}
                                             alt="Sponsor Logo"
                                             className="h-16 object-contain"
+                                            width={16}
+                                            height={16}
                                         />
                                     )}
                                 </div>

@@ -5,6 +5,7 @@ import Layout from 'components/layout/Layout';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 const PublicServices = () => {
     const { t, i18n } = useTranslation();
@@ -39,7 +40,7 @@ const PublicServices = () => {
                             {/* Veterinarian */}
                             <Link href="/veterinarian">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/veterinarian.png" alt="Veterinarian" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/veterinarian.png" alt="Veterinarian" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:veterinarianTitle')}</h3>
                                         <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:veterinarianDescription')}</p>
@@ -50,7 +51,7 @@ const PublicServices = () => {
                             {/* Housing */}
                             <Link href="/housing">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/housing.png" alt="Housing" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/housing.png" alt="Housing" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:housingTitle')}</h3>
                                         <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:housingDescription')}</p>
@@ -61,7 +62,7 @@ const PublicServices = () => {
                             {/* Horse Trainer - Beginners */}
                             <Link href="/trainer">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/trainer.png" alt="Horse Trainer" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/trainer.png" alt="Horse Trainer" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:trainerTitle')}</h3>
                                         <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:trainerDescription')}</p>
@@ -72,7 +73,7 @@ const PublicServices = () => {
                             {/* Horse Hoof Trimmer - Farrier */}
                             <Link href="/horseTrimmer">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/horseTrimmer.png" alt="Farrier" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/horseTrimmer.png" alt="Farrier" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:farrierTitle')}</h3>
                                         <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:farrierDescription')}</p>
@@ -83,7 +84,7 @@ const PublicServices = () => {
                             {/* Horse Transport Services */}
                             <Link href="/horseTransport">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/horseTransport.png" alt="Horse Transport" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20}   src="/assets/imgs/placeholders/horseTransport.png" alt="Horse Transport" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:transportTitle')}</h3>
                                         <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:transportDescription')}</p>

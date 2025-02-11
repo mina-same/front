@@ -651,10 +651,12 @@ const ProfessionalProfileDashboard = () => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                             >
-                                <img
+                                <Image
                                     src={mainService.image ? urlFor(mainService.image).url() : '/placeholder-service.png'}
                                     alt={mainService.name_en}
                                     className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+                                    width={100}
+                      height={30}
                                 />
                             </motion.div>
 

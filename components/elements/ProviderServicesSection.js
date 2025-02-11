@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Calendar, Clock, MapPin, Phone, Check, X, AlertCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import Image from 'next/image';
 
 const ProviderServicesSection = () => {
   const renderServiceCircles = (services) => {
@@ -13,10 +14,12 @@ const ProviderServicesSection = () => {
         {additionalServices.map((service, index) => (
           <div key={service._id} className="relative group">
             <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-white">
-              <img
+              <Image
                 src={service.image ? urlFor(service.image).url() : '/placeholder-service.png'}
                 alt={service.name_en}
                 className="w-full h-full object-cover"
+                width={100}
+                height={30}
               />
             </div>
             <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
@@ -62,10 +65,12 @@ const ProviderServicesSection = () => {
                 {/* Main Service Display */}
                 <div className="relative rounded-xl overflow-hidden">
                   <div className="aspect-video">
-                    <img
+                    <Image
                       src={provider.servicesRef[0].image ? urlFor(provider.servicesRef[0].image).url() : '/placeholder-service.png'}
                       alt={provider.servicesRef[0].name_en}
                       className="w-full h-full object-cover"
+                      width={100}
+                      height={30}
                     />
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -99,10 +104,12 @@ const ProviderServicesSection = () => {
                         <CardContent className="p-0">
                           <div className="flex items-center p-4">
                             <div className="flex-1 flex items-center gap-4">
-                              <img
+                              <Image
                                 src={reservation.user?.image ? urlFor(reservation.user.image).url() : '/placeholder-user.png'}
                                 alt={reservation.user?.userName}
                                 className="w-12 h-12 rounded-full ring-2 ring-white"
+                                width={12}
+                                height={12}
                               />
                               <div>
                                 <h4 className="font-semibold">{reservation.user?.userName}</h4>

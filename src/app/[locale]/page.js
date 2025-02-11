@@ -10,14 +10,14 @@ import Image from "next/image";
 import { GiHorseHead } from "react-icons/gi";
 import { LuHeartHandshake } from "react-icons/lu";
 import { RiLineChartLine } from "react-icons/ri";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 function Home({ params }) {
 	const { t, i18n } = useTranslation();
 	const [inViewport, setInViewport] = useState(false);
 	const isRTL = i18n.language === 'ar';
 
-	const handleScroll = () => {
+	const handleScroll = useCallback(() => {
 		const elements = document.getElementsByClassName("counterUp");
 		if (elements.length > 0) {
 			const element = elements[0];
@@ -27,14 +27,14 @@ function Home({ params }) {
 				setInViewport(true);
 			}
 		}
-	};
+	}, [inViewport]);
 
 	useEffect(() => {
 		window.addEventListener("scroll", handleScroll);
 		return () => {
 			window.removeEventListener("scroll", handleScroll);
 		};
-	}, []);
+	}, [handleScroll]);
 
 	useEffect(() => {
 		document.documentElement.dir = isRTL ? 'rtl' : 'ltr';

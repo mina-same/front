@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, X, AlertCircle, Calendar, Clock, Phone, MapPin } from "lucide-react";
@@ -17,11 +19,7 @@ const UserReservations = ({ userId }) => {
     const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
     const [newDateTime, setNewDateTime] = useState("");
 
-    useEffect(() => {
-        fetchUserReservations();
-    }, [userId]);
-
-    const fetchUserReservations = async () => {
+    const fetchUserReservations = useCallback(async () => {
         setIsLoading(true);
         try {
             const query = `*[_type == "reservation" && user._ref == $userId]{
@@ -60,7 +58,11 @@ const UserReservations = ({ userId }) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [userId]);
+
+    useEffect(() => {
+        fetchUserReservations();
+    }, [fetchUserReservations]);
 
     const handleReschedule = async () => {
         if (!selectedReservation || !newDateTime) return;
@@ -110,7 +112,6 @@ const UserReservations = ({ userId }) => {
         }
     };
 
-
     const getStatusIcon = (status) => {
         switch (status) {
             case 'approved':
@@ -140,8 +141,6 @@ const UserReservations = ({ userId }) => {
     if (error) {
         return <div>Error: {error}</div>;
     }
-
-
 
     return (
         <>
@@ -179,7 +178,9 @@ const UserReservations = ({ userId }) => {
                             >
                                 <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto" />
                                 <h3 className="text-lg sm:text-xl font-semibold text-gray-700">No Reservations Found</h3>
-                                <p className="text-sm sm:text-base text-gray-500">You haven't made any reservations yet.</p>
+                                <p className="text-sm sm:text-base text-gray-500">
+                                    You haven&apos;t made any reservations yet.
+                                </p>
                             </motion.div>
                         </div>
                     ) : (

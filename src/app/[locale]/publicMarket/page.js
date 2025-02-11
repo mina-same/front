@@ -5,6 +5,7 @@ import Layout from 'components/layout/Layout';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import Image from 'next/image';
 
 const PublicMarket = () => {
     const { t, i18n } = useTranslation();
@@ -39,7 +40,7 @@ const PublicMarket = () => {
                             {/* Contractors */}
                             <Link href="/contractors">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/contractors.png" alt="Contractors" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/contractors.png" alt="Contractors" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:contractorsTitle')}</h3>
                                         <p className="text-gray-600 mb-4">{t('publicMarket:contractorsDescription')}</p>
@@ -50,7 +51,7 @@ const PublicMarket = () => {
                             {/* Suppliers */}
                             <Link href="/suppliers">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/suppliers.png" alt="Suppliers" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/suppliers.png" alt="Suppliers" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:suppliersTitle')}</h3>
                                         <p className="text-gray-600 mb-4">{t('publicMarket:suppliersDescription')}</p>
@@ -61,7 +62,7 @@ const PublicMarket = () => {
                             {/* Horse Catering Services */}
                             <Link href="/catering">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <img src="/assets/imgs/placeholders/catering.png" alt="Horse Catering Services" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/catering.png" alt="Horse Catering Services" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:cateringTitle')}</h3>
                                         <p className="text-gray-600 mb-4">{t('publicMarket:cateringDescription')}</p>

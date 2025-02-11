@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import Image from 'next/image';
 
 const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
   const { t } = useTranslation();
@@ -137,7 +138,7 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
   const filteredServices = services.filter(service =>
     (selectedTypes.length === 0 || selectedTypes.includes(service.serviceType)) &&
     (service.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.providerRef?.name_en.toLowerCase().includes(searchTerm.toLowerCase()))
+      service.providerRef?.name_en.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -257,25 +258,26 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
                 <div
                   key={service._id}
                   onClick={() => setSelectedService(service)}
-                  className={`group cursor-pointer transition-all ${
-                    view === 'grid'
-                      ? 'bg-white rounded-xl border-2 overflow-hidden hover:shadow-lg ' +
-                        (selectedService?._id === service._id
-                          ? 'border-blue-500 ring-2 ring-blue-100'
-                          : 'border-gray-100 hover:border-black')
-                      : 'flex items-center p-4 rounded-xl border-2 ' +
-                        (selectedService?._id === service._id
-                          ? 'border-black'
-                          : 'border-gray-100 hover:border-black')
-                  }`}
+                  className={`group cursor-pointer transition-all ${view === 'grid'
+                    ? 'bg-white rounded-xl border-2 overflow-hidden hover:shadow-lg ' +
+                    (selectedService?._id === service._id
+                      ? 'border-blue-500 ring-2 ring-blue-100'
+                      : 'border-gray-100 hover:border-black')
+                    : 'flex items-center p-4 rounded-xl border-2 ' +
+                    (selectedService?._id === service._id
+                      ? 'border-black'
+                      : 'border-gray-100 hover:border-black')
+                    }`}
                 >
                   {view === 'grid' ? (
                     <>
                       <div className="relative h-48">
-                        <img
+                        <Image
                           src={service.image ? urlFor(service.image).url() : '/placeholder.png'}
                           alt={service.name_en}
                           className="w-full h-full object-cover"
+                          width={100}
+                          height={30}
                         />
                         <div className="absolute top-4 right-4">
                           {serviceTypeIcons[service.serviceType]}
@@ -302,10 +304,12 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
                     </>
                   ) : (
                     <div className="flex items-center gap-4 flex-1">
-                      <img
+                      <Image
                         src={service.image ? urlFor(service.image).url() : '/placeholder.png'}
                         alt={service.name_en}
                         className="w-20 h-20 rounded-lg object-cover"
+                        width={20}
+                        height={20}
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -334,62 +338,62 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
           )}
         </div>
 
-          {/* Footer */}
-          <div className="p-6 border-t bg-gray-50">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={onClose}
-                className="px-6 py-2 border-2 border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100 font-medium"
-              >
-                {t('profile:cancel')}
-              </button>
-              <button
-                onClick={handleJoinRequest}
-                disabled={!selectedService || isSubmitting}
-                className={`px-8 py-2 rounded-lg text-white font-medium flex items-center gap-2 ${!selectedService || isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-                  }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader className="w-5 h-5 animate-spin" />
-                    {t('profile:processing')}
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-5 h-5" />
-                    {t('profile:joinService')}
-                  </>
-                )}
-              </button>
-            </div>
+        {/* Footer */}
+        <div className="p-6 border-t bg-gray-50">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 border-2 border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100 font-medium"
+            >
+              {t('profile:cancel')}
+            </button>
+            <button
+              onClick={handleJoinRequest}
+              disabled={!selectedService || isSubmitting}
+              className={`px-8 py-2 rounded-lg text-white font-medium flex items-center gap-2 ${!selectedService || isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-500 hover:bg-blue-600'
+                }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader className="w-5 h-5 animate-spin" />
+                  {t('profile:processing')}
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  {t('profile:joinService')}
+                </>
+              )}
+            </button>
           </div>
+        </div>
 
-          {/* Notifications */}
-          {successMessage && (
-            <Alert className="absolute bottom-4 right-4 w-96 bg-green-50 border-green-200">
-              <div className="flex items-center gap-2">
-                <Check className="w-6 h-6 text-green-600 mr-2 flex-shrink-0" />
-                <AlertDescription className="text-green-800 font-semibold">
-                  {successMessage}
-                </AlertDescription>
-              </div>
-            </Alert>
-          )}
+        {/* Notifications */}
+        {successMessage && (
+          <Alert className="absolute bottom-4 right-4 w-96 bg-green-50 border-green-200">
+            <div className="flex items-center gap-2">
+              <Check className="w-6 h-6 text-green-600 mr-2 flex-shrink-0" />
+              <AlertDescription className="text-green-800 font-semibold">
+                {successMessage}
+              </AlertDescription>
+            </div>
+          </Alert>
+        )}
 
-          {errorMessage && (
-            <Alert className="absolute bottom-4 right-4 w-96 bg-red-50 border-red-200">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-500" />
-                <AlertDescription className="text-red-700">
-                  {errorMessage}
-                </AlertDescription>
-              </div>
-            </Alert>
-          )}
-        </Card>
-      </div >
+        {errorMessage && (
+          <Alert className="absolute bottom-4 right-4 w-96 bg-red-50 border-red-200">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <AlertDescription className="text-red-700">
+                {errorMessage}
+              </AlertDescription>
+            </div>
+          </Alert>
+        )}
+      </Card>
+    </div >
   );
 };
 
