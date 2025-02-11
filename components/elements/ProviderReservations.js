@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, MessageSquare, BookPlus, Check, X, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Calendar, Clock, Check, X, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import userFallbackImage from "../../public/assets/imgs/elements/user.png";
 import { urlFor } from '@/lib/sanity';
 
-
-
 const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
-    console.log("ProviderReservations received:", reservations);
+    const { t } = useTranslation();
     const [filterStatus, setFilterStatus] = useState('all');
     const [activeTab, setActiveTab] = useState('upcoming');
 
@@ -44,7 +43,6 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
         }
     };
 
-    // Filter reservations based on status and tab
     const filteredReservations = reservations.filter(reservation => {
         if (!reservation.datetime) return false;
 
@@ -59,12 +57,12 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
     });
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+        <div className="space-y-4 md:space-y-6">
+            {/* Header - Made responsive */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-blue-600" />
-                    Reservations
+                    {t('profile:reservations')}
                     <span className="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-sm">
                         {reservations.length}
                     </span>
@@ -72,34 +70,34 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full sm:w-auto px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                    <option value="all">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="all">{t('profile:allStatus')}</option>
+                    <option value="pending">{t('profile:pending')}</option>
+                    <option value="approved">{t('profile:approved')}</option>
+                    <option value="rejected">{t('profile:rejected')}</option>
                 </select>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-4 border-b border-gray-200">
+            {/* Tabs - Made responsive */}
+            <div className="flex gap-4 border-b border-gray-200 overflow-x-auto">
                 {['upcoming', 'past'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 font-medium text-sm transition-colors relative
+                        className={`px-4 py-2 font-medium text-sm transition-colors relative whitespace-nowrap
                             ${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                     >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)} Reservations
+                        {t(`profile:${tab}Reservations`)}
                     </button>
                 ))}
             </div>
 
-            {/* Reservations List or No Reservations Found Message */}
+            {/* Empty State - Made responsive */}
             {filteredReservations.length === 0 ? (
-                <div className="gap-2 flex justify-center items-center bg-gray-50 py-5 rounded-xl">
+                <div className="gap-2 flex flex-col sm:flex-row justify-center items-center bg-gray-50 py-5 rounded-xl">
                     <Calendar className="w-8 h-8 text-gray-600" />
-                    <p className="text-gray-600">No reservations found</p>
+                    <p className="text-gray-600 text-center">{t('profile:noReservationsFound')}</p>
                 </div>
             ) : (
                 <div className="space-y-3">
@@ -108,9 +106,10 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
                             key={reservation._id}
                             className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                         >
-                            <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="relative w-12 h-12">
+                            <div className="flex flex-row    sm:flex-col items-start sm:items-center justify-between gap-4">
+                                {/* User Info - Made responsive */}
+                                <div className="flex justify-end items-center gap-3 w-full sm:w-auto">
+                                    <div className="relative w-12 h-12 flex-shrink-0">
                                         <Image
                                             src={reservation.user?.image ? urlFor(reservation.user.image).url() : userFallbackImage}
                                             alt={reservation.user?.userName || 'User'}
@@ -122,36 +121,36 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
                                             {getStatusIcon(reservation.status)}
                                         </div>
                                     </div>
-                                    <div>
-                                        <h5 className="font-medium text-gray-900">{reservation.user?.userName}</h5>
-                                        <div className="flex gap-2 mt-1 text-sm text-gray-500">
+                                    <div className="min-w-0 flex-1">
+                                        <h5 className="font-medium text-gray-900 truncate">{reservation.user?.userName}</h5>
+                                        <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-500">
                                             <span className="flex items-center gap-1.5">
-                                                <Calendar className="w-4 h-4" />
+                                                <Calendar className="w-4 h-4 flex-shrink-0" />
                                                 {new Date(reservation.datetime).toLocaleDateString()}
                                             </span>
                                             <span className="flex items-center gap-1.5">
-                                                <Clock className="w-4 h-4" />
+                                                <Clock className="w-4 h-4 flex-shrink-0" />
                                                 {new Date(reservation.datetime).toLocaleTimeString()}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Action Buttons or Status */}
-                                <div className="flex items-center gap-3">
+                                {/* Action Buttons - Made responsive */}
+                                <div className="flex justify-end items-center gap-3 w-full sm:w-auto">
                                     {reservation.status === 'pending' ? (
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 w-full sm:w-auto">
                                             <button
                                                 onClick={() => onStatusUpdate(reservation._id, 'approved')}
-                                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium shadow-sm transition-colors"
+                                                className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium shadow-sm transition-colors"
                                             >
-                                                Accept
+                                                {t('profile:accept')}
                                             </button>
                                             <button
                                                 onClick={() => onStatusUpdate(reservation._id, 'rejected')}
-                                                className="px-4 py-2 bg-white text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-300 font-medium transition-colors"
+                                                className="flex-1 sm:flex-none px-4 py-2 bg-white text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-300 font-medium transition-colors"
                                             >
-                                                Decline
+                                                {t('profile:decline')}
                                             </button>
                                         </div>
                                     ) : (

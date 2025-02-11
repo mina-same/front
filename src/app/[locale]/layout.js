@@ -44,7 +44,8 @@ export default async function RootLayout({ children, params }) {
 		"user",
 		"footer",
 		"publicServices",
-		"publicMarket"
+		"publicMarket",
+		"profile"
 	]);
 	return (
 		<html lang="en">

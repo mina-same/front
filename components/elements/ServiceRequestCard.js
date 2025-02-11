@@ -3,12 +3,14 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trash2, Check, X } from 'lucide-react';
-import { createClient } from '@sanity/client';
-import { client, urlFor } from "../../src/lib/sanity";
+import { useTranslation } from 'react-i18next';
+import { client } from "../../src/lib/sanity";
 
 const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDelete }) => {
     const [loading, setLoading] = React.useState(false);
     const [notes, setNotes] = React.useState(request.notes || '');
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.language === 'ar';
     const isRequester = request.requesterProviderRef._ref === currentProviderId;
 
     const getStatusColor = (status) => {
@@ -25,7 +27,7 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
     };
 
     const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this request?')) return;
+        if (!window.confirm(t('profile:cancelRequest'))) return;
         setLoading(true);
         try {
             await client.delete(request._id);
@@ -56,11 +58,11 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
     };
 
     return (
-        <Card className="w-full max-w-2xl mx-auto mb-4">
+        <Card className={`w-full max-w-2xl mx-auto mb-4 ${isRTL ? 'rtl' : ''}`}>
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">
-                        {isRequester ? 'Your Request to Join' : 'Request to Join Your Service'}
+                        {isRequester ? t('profile:yourRequestToJoin') : t('profile:requestToJoinYourService')}
                     </h3>
                     <Badge className={getStatusColor(request.status)}>
                         {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
@@ -74,12 +76,12 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
                         // Requester View
                         <div>
                             <p className="text-sm text-gray-600">
-                                You requested to join service:{' '}
+                                {t('profile:youRequestedToJoinService')}
                                 <span className="font-semibold">{request.requestedServiceRef.name_en}</span>
                             </p>
                             {request.notes && (
                                 <div className="mt-2">
-                                    <p className="text-sm font-medium">Notes:</p>
+                                    <p className="text-sm font-medium">{t('profile:responseNotes')}</p>
                                     <p className="text-sm text-gray-600">{request.notes}</p>
                                 </div>
                             )}
@@ -88,18 +90,18 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
                         // Service Owner View
                         <div className="space-y-4">
                             <p className="text-sm text-gray-600">
-                                Request from provider:{' '}
+                                {t('profile:requestFromProvider')}
                                 <span className="font-semibold">{request.requesterProviderRef.name_en}</span>
                             </p>
                             {request.status === 'pending' && (
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Response Notes:</label>
+                                    <label className="block text-sm font-medium mb-2">{t('profile:responseNotes')}</label>
                                     <textarea
                                         value={notes}
                                         onChange={(e) => setNotes(e.target.value)}
                                         className="w-full p-2 border rounded-md"
                                         rows={3}
-                                        placeholder="Add any notes about your decision..."
+                                        placeholder={t('profile:addNotes')}
                                     />
                                 </div>
                             )}
@@ -118,7 +120,7 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
                             className="flex items-center"
                         >
                             <Trash2 className="w-4 h-4 mr-2" />
-                            Cancel Request
+                            {t('profile:cancelRequest')}
                         </Button>
                     )
                 ) : (
@@ -131,7 +133,7 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
                                 className="flex items-center"
                             >
                                 <X className="w-4 h-4 mr-2" />
-                                Reject
+                                {t('profile:reject')}
                             </Button>
                             <Button
                                 variant="default"
@@ -140,7 +142,7 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
                                 className="flex items-center"
                             >
                                 <Check className="w-4 h-4 mr-2" />
-                                Approve
+                                {t('profile:approve')}
                             </Button>
                         </>
                     )
@@ -153,6 +155,7 @@ const ServiceRequestCard = ({ request, currentProviderId, onStatusUpdate, onDele
 // Container component to handle multiple requests
 const ServiceRequestsList = ({ requests, currentProviderId }) => {
     const [serviceRequests, setServiceRequests] = React.useState(requests);
+    const { t } = useTranslation();
 
     const handleStatusUpdate = (updatedRequest) => {
         setServiceRequests(prev =>
@@ -181,7 +184,7 @@ const ServiceRequestsList = ({ requests, currentProviderId }) => {
             ))}
             {serviceRequests.length === 0 && (
                 <div className="text-center text-gray-500 py-8">
-                    No service requests found
+                    {t('profile:noServiceRequests')}
                 </div>
             )}
         </div>

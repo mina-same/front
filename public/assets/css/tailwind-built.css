@@ -581,6 +581,29 @@ video {
   }
 }
 
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl .ltr-text {
+  direction: ltr;
+  text-align: left;
+}
+
+.rtl .flex-row {
+  flex-direction: row !important;
+}
+
+.rtl .space-x-reverse > * + * {
+  margin-right: 0;
+  margin-left: 0.75rem;
+}
+
+.justify-end {
+  justify-content: flex-end !important;
+}
+
 .pl-10 {
   padding-left: 15px !important;
 }

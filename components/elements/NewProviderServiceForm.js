@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@sanity/client';
 import {
@@ -22,13 +21,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import toast from 'react-hot-toast';
 import { client, urlFor } from '../../src/lib/sanity';
+import { useTranslation } from 'react-i18next';
 
 const NewProviderServiceForm = ({ currentUser }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [confirmDataAccuracy, setConfirmDataAccuracy] = useState(false)
+  const [confirmDataAccuracy, setConfirmDataAccuracy] = useState(false);
 
   const [countries, setCountries] = useState([]);
   const [governorates, setGovernorates] = useState([]);
@@ -36,6 +36,9 @@ const NewProviderServiceForm = ({ currentUser }) => {
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedGovernorate, setSelectedGovernorate] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
   // Helper function to generate unique keys
   const generateKey = () => `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -98,7 +101,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
     tripCoordinator: {
       locationOfHorses: '',
       locationOfTent: '',
-      startDate: null,  // Changed from empty string to null
+      startDate: null,
       endDate: null,
       breakTimes: '',
       meals: [],
@@ -121,7 +124,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
   const [formData, setFormData] = useState(initialFormState);
 
   useEffect(() => {
-    client.fetch('*[_type == "country"]{_id, name_en}')
+    client.fetch('*[_type == "country"]{_id, name_en, name_ar}')
       .then(data => setCountries(data))
       .catch(error => console.error(error));
   }, []);
@@ -129,7 +132,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
   // Fetch governorates based on selected country
   useEffect(() => {
     if (selectedCountry) {
-      client.fetch(`*[_type == "governorate" && country._ref == $countryId]{_id, name_en}`, { countryId: selectedCountry })
+      client.fetch(`*[_type == "governorate" && country._ref == $countryId]{_id, name_en, name_ar}`, { countryId: selectedCountry })
         .then(data => setGovernorates(data))
         .catch(error => console.error(error));
     } else {
@@ -140,13 +143,14 @@ const NewProviderServiceForm = ({ currentUser }) => {
   // Fetch cities based on selected governorate
   useEffect(() => {
     if (selectedGovernorate) {
-      client.fetch(`*[_type == "city" && governorate._ref == $governorateId]{_id, name_en}`, { governorateId: selectedGovernorate })
+      client.fetch(`*[_type == "city" && governorate._ref == $governorateId]{_id, name_en, name_ar}`, { governorateId: selectedGovernorate })
         .then(data => setCities(data))
         .catch(error => console.error(error));
     } else {
       setCities([]);
     }
   }, [selectedGovernorate]);
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -255,13 +259,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Stable Location Details</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:stableLocationDetails')}</label>
               <textarea
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter stable location details"
+                placeholder={t('profile:stableLocationDetails')}
                 required
               />
             </div>
@@ -272,7 +276,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Graduation Certificate</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:graduationCertificate')}</label>
               <div className="flex items-center justify-between px-2 bg-blueGray-50 rounded" htmlFor="graduation-certificate-input">
                 <input
                   type="file"
@@ -280,20 +284,20 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   onChange={(e) => handleNestedChange('graduationDetails', 'graduationCertificate', e.target.files[0])}
                   name="Choose file"
                   id="graduation-certificate-input"
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" // Allow multiple file types
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
                 />
                 {formData.graduationDetails.graduationCertificate ? (
                   <span className="ml-2 text-blueGray-600">
                     {formData.graduationDetails.graduationCertificate.name}
                   </span>
                 ) : (
-                  <span className="ml-2 text-blueGray-600">No file selected</span>
+                  <span className="ml-2 text-blueGray-600">{t('profile:noFileSelected')}</span>
                 )}
                 <div className='py-2'>
                   {formData.graduationDetails.graduationCertificate && (
                     <button
                       type="button"
-                      className="mr-4 justify-center items-center text-red-500" // Assuming text-red-500 is defined
+                      className="mr-4 justify-center items-center text-red-500"
                       onClick={() => handleNestedChange('graduationDetails', 'graduationCertificate', null)}
                     >
                       <Trash size={16} style={{ color: "red" }} />
@@ -303,19 +307,19 @@ const NewProviderServiceForm = ({ currentUser }) => {
                     className="px-4 py-3 text-xs text-white font-semibold leading-none bg-blueGray-500 hover:bg-blueGray-600 rounded cursor-pointer"
                     onClick={() => document.getElementById('graduation-certificate-input').click()}
                   >
-                    Browse
+                    {t('profile:browse')}
                   </span>
                 </div>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Previous Experience</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:previousExperience')}</label>
               <input
                 type="text"
                 value={formData.graduationDetails.previousExperience}
                 onChange={(e) => handleNestedChange('graduationDetails', 'previousExperience', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter previous experience"
+                placeholder={t('profile:previousExperience')}
                 required
               />
             </div>
@@ -327,31 +331,31 @@ const NewProviderServiceForm = ({ currentUser }) => {
           <div className="space-y-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold mb-2">Location of Horses</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:locationOfHorses')}</label>
                 <input
                   type="text"
                   value={formData.tripCoordinator.locationOfHorses}
                   onChange={(e) => handleNestedChange('tripCoordinator', 'locationOfHorses', e.target.value)}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Enter horses location"
+                  placeholder={t('profile:locationOfHorses')}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">Location of Tent</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:locationOfTent')}</label>
                 <input
                   type="text"
                   value={formData.tripCoordinator.locationOfTent}
                   onChange={(e) => handleNestedChange('tripCoordinator', 'locationOfTent', e.target.value)}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Enter tent location"
+                  placeholder={t('profile:locationOfTent')}
                   required
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold mb-2">Start Date</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:startDate')}</label>
                 <input
                   type="datetime-local"
                   value={formData.tripCoordinator.startDate}
@@ -361,7 +365,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">End Date</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:endDate')}</label>
                 <input
                   type="datetime-local"
                   value={formData.tripCoordinator.endDate}
@@ -372,31 +376,31 @@ const NewProviderServiceForm = ({ currentUser }) => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Break Times</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:breakTimes')}</label>
               <input
                 type="text"
                 value={formData.tripCoordinator.breakTimes}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'breakTimes', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter break times"
+                placeholder={t('profile:breakTimes')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Meals</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:meals')}</label>
               {formData.tripCoordinator.meals.map((meal, index) => (
                 <div key={index} className="flex mb-2">
                   <input
                     type="text"
                     value={meal.mealType}
                     onChange={(e) => handleNestedMealChange(index, 'mealType', e.target.value)}
-                    placeholder="Meal Type"
+                    placeholder={t('profile:mealType')}
                     className="w-1/2 p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none mr-2"
                   />
                   <input
                     type="text"
                     value={meal.mealDescription}
                     onChange={(e) => handleNestedMealChange(index, 'mealDescription', e.target.value)}
-                    placeholder="Meal Description"
+                    placeholder={t('profile:mealDescription')}
                     className="w-1/2 p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                   />
                 </div>
@@ -407,13 +411,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   onClick={() => addMeal()}
                   className="text-sm font-semibold bg-primary text-white px-4 py-2 rounded"
                 >
-                  Add Meal
+                  {t('profile:addMeal')}
                 </button>
               </div>
             </div>
             <div>
               <label className="flex items-center">
-                <span className="text-sm font-semibold mr-2">Contains Aid Bag</span>
+                <span className="text-sm font-semibold mr-2">{t('profile:containsAidBag')}</span>
                 <input
                   type="checkbox"
                   checked={formData.tripCoordinator.containsAidBag}
@@ -423,101 +427,101 @@ const NewProviderServiceForm = ({ currentUser }) => {
               </label>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Activities</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:activities')}</label>
               <input
                 type="text"
                 value={formData.tripCoordinator.activities}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'activities', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter activities"
+                placeholder={t('profile:activities')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Price for Family of 2</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:priceForFamilyOf2')}</label>
               <input
                 type="number"
                 value={formData.tripCoordinator.priceForFamilyOf2}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'priceForFamilyOf2', parseFloat(e.target.value))}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter price for family of 2"
+                placeholder={t('profile:priceForFamilyOf2')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Price for Family of 3</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:priceForFamilyOf3')}</label>
               <input
                 type="number"
                 value={formData.tripCoordinator.priceForFamilyOf3}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'priceForFamilyOf3', parseFloat(e.target.value))}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter price for family of 3"
+                placeholder={t('profile:priceForFamilyOf3')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Price for Family of 4</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:priceForFamilyOf4')}</label>
               <input
                 type="number"
                 value={formData.tripCoordinator.priceForFamilyOf4}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'priceForFamilyOf4', parseFloat(e.target.value))}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter price for family of 4"
+                placeholder={t('profile:priceForFamilyOf4')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Trip Program</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:tripProgram')}</label>
               <textarea
                 value={formData.tripCoordinator.tripProgram}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'tripProgram', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter trip program"
+                placeholder={t('profile:tripProgram')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Level of Hardship</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:levelOfHardship')}</label>
               <select
                 value={formData.tripCoordinator.levelOfHardship}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'levelOfHardship', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
               >
-                <option value="">Select Level</option>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
+                <option value="">{t('profile:selectLevel')}</option>
+                <option value="beginner">{t('profile:beginner')}</option>
+                <option value="intermediate">{t('profile:intermediate')}</option>
+                <option value="advanced">{t('profile:advanced')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Conditions & Requirements</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:conditionsAndRequirements')}</label>
               <textarea
                 value={formData.tripCoordinator.conditionsAndRequirements}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'conditionsAndRequirements', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter conditions and requirements"
+                placeholder={t('profile:conditionsAndRequirements')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Safety & Equipment</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:safetyAndEquipment')}</label>
               <textarea
                 value={formData.tripCoordinator.safetyAndEquipment}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'safetyAndEquipment', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter safety and equipment details"
+                placeholder={t('profile:safetyAndEquipment')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Cancellation & Refund Policy</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:cancellationAndRefundPolicy')}</label>
               <textarea
                 value={formData.tripCoordinator.cancellationAndRefundPolicy}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'cancellationAndRefundPolicy', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter cancellation and refund policy"
+                placeholder={t('profile:cancellationAndRefundPolicy')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">More Details</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:moreDetails')}</label>
               <textarea
                 value={formData.tripCoordinator.moreDetails}
                 onChange={(e) => handleNestedChange('tripCoordinator', 'moreDetails', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter more details"
+                placeholder={t('profile:moreDetails')}
               />
             </div>
           </div>
@@ -528,67 +532,67 @@ const NewProviderServiceForm = ({ currentUser }) => {
           <div className="space-y-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold mb-2">Competition Level</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:competitionLevel')}</label>
                 <select
                   value={formData.competitions.level}
                   onChange={(e) => handleNestedChange('competitions', 'level', e.target.value)}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                   required
                 >
-                  <option value="">Select Level</option>
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
+                  <option value="">{t('profile:selectLevel')}</option>
+                  <option value="beginner">{t('profile:beginner')}</option>
+                  <option value="intermediate">{t('profile:intermediate')}</option>
+                  <option value="advanced">{t('profile:advanced')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">Race Type</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:raceType')}</label>
                 <select
                   value={formData.competitions.raceType}
                   onChange={(e) => handleNestedChange('competitions', 'raceType', e.target.value)}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                   required
                 >
-                  <option value="">Select Race Type</option>
-                  <option value="endurance_race">Endurance Race</option>
-                  <option value="shooting_arrows">Shooting Arrows</option>
-                  <option value="pickup_pegs">Pickup Pegs</option>
-                  <option value="dressage">Dressage</option>
+                  <option value="">{t('profile:selectRaceType')}</option>
+                  <option value="endurance_race">{t('profile:enduranceRace')}</option>
+                  <option value="shooting_arrows">{t('profile:shootingArrows')}</option>
+                  <option value="pickup_pegs">{t('profile:pickupPegs')}</option>
+                  <option value="dressage">{t('profile:dressage')}</option>
                 </select>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold mb-2">Organiser Name</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:organiserName')}</label>
                 <input
                   type="text"
                   value={formData.competitions.organiserName}
                   onChange={(e) => handleNestedChange('competitions', 'organiserName', e.target.value)}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Enter organiser name"
+                  placeholder={t('profile:organiserName')}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2">Prize</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:prize')}</label>
                 <input
                   type="text"
                   value={formData.competitions.prize}
                   onChange={(e) => handleNestedChange('competitions', 'prize', e.target.value)}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Enter prize details"
+                  placeholder={t('profile:prize')}
                   required
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Sponsor</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:sponsor')}</label>
               <input
                 type="text"
                 value={formData.competitions.sponsor}
                 onChange={(e) => handleNestedChange('competitions', 'sponsor', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter sponsor name"
+                placeholder={t('profile:sponsor')}
               />
             </div>
             <div className="mb-4 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
@@ -605,70 +609,70 @@ const NewProviderServiceForm = ({ currentUser }) => {
                     {formData.competitions.sponsorLogo.name}
                   </span>
                 ) : (
-                  <span className="ml-2 text-blueGray-600">No file selected</span>
+                  <span className="ml-2 text-blueGray-600">{t('profile:noFileSelected')}</span>
                 )}
                 <div className='py-2'>
                   {formData.competitions.sponsorLogo && (
                     <button
                       type="button"
-                      className="mr-4 justify-center items-center text-red-500" // Assuming text-red-500 is defined
+                      className="mr-4 justify-center items-center text-red-500"
                       onClick={() => handleNestedChange('competitions', 'sponsorLogo', null)}
                     >
                       <Trash size={16} style={{ color: "red" }} />
                     </button>
                   )}
-                  <span className="px-4 py-3 text-xs text-white font-semibold leading-none bg-blueGray-500 hover:bg-blueGray-600 rounded cursor-pointer">Browse</span>
+                  <span className="px-4 py-3 text-xs text-white font-semibold leading-none bg-blueGray-500 hover:bg-blueGray-600 rounded cursor-pointer">{t('profile:browse')}</span>
                 </div>
               </label>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Sponsorship Value</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:sponsorshipValue')}</label>
               <input
                 type="number"
                 value={formData.competitions.sponsorshipValue}
                 onChange={(e) => handleNestedChange('competitions', 'sponsorshipValue', parseFloat(e.target.value))}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter sponsorship value"
+                placeholder={t('profile:sponsorshipValue')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Height Distance</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:heightDistance')}</label>
               <input
                 type="text"
                 value={formData.competitions.heightDistance}
                 onChange={(e) => handleNestedChange('competitions', 'heightDistance', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter height distance"
+                placeholder={t('profile:heightDistance')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Main Referee</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:mainReferee')}</label>
               <input
                 type="text"
                 value={formData.competitions.mainReferee}
                 onChange={(e) => handleNestedChange('competitions', 'mainReferee', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter main referee"
+                placeholder={t('profile:mainReferee')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Co-Referee 1</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:coReferee1')}</label>
               <input
                 type="text"
                 value={formData.competitions.coReferee1}
                 onChange={(e) => handleNestedChange('competitions', 'coReferee1', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter co-referee 1"
+                placeholder={t('profile:coReferee1')}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Co-Referee 2</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:coReferee2')}</label>
               <input
                 type="text"
                 value={formData.competitions.coReferee2}
                 onChange={(e) => handleNestedChange('competitions', 'coReferee2', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter co-referee 2"
+                placeholder={t('profile:coReferee2')}
               />
             </div>
           </div>
@@ -678,25 +682,25 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Number of Horses</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:numberOfHorses')}</label>
               <input
                 type="number"
                 value={formData.transportDetails.numberOfHorses}
                 onChange={(e) => handleNestedChange('transportDetails', 'numberOfHorses', parseInt(e.target.value))}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter number of horses"
+                placeholder={t('profile:numberOfHorses')}
                 required
                 min="1"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Vehicle Type</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:vehicleType')}</label>
               <input
                 type="text"
                 value={formData.transportDetails.vehicleType}
                 onChange={(e) => handleNestedChange('transportDetails', 'vehicleType', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter vehicle type"
+                placeholder={t('profile:vehicleType')}
                 required
               />
             </div>
@@ -707,13 +711,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Housing Details</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:housingDetails')}</label>
               <textarea
                 name="housingDetails"
                 value={formData.housingDetails.housingDetails}
                 onChange={(e) => handleNestedChange('housingDetails', 'housingDetails', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter housing details"
+                placeholder={t('profile:housingDetails')}
                 required
               />
             </div>
@@ -724,13 +728,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Catering Options</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:cateringOptions')}</label>
               <input
                 type="text"
                 value={formData.cateringOptions.join(', ')}
-                onChange={(e) => handleChange({ target: { name: 'cateringOptions', value: e.target.value.split(', ') } })}
+                onChange={(e) => handleChange({ target: { name: 'cateringOptions', value: e.target.value.split('profile:, ') } })}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter catering options"
+                placeholder={t('profile:cateringOptions')}
                 required
               />
             </div>
@@ -741,13 +745,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Contractor Details</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:contractorDetails')}</label>
               <textarea
                 name="contractorDetails"
                 value={formData.contractorDetails}
                 onChange={handleChange}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter contractor details"
+                placeholder={t('profile:contractorDetails')}
                 required
               />
             </div>
@@ -758,13 +762,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Supplier Details</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:supplierDetails')}</label>
               <textarea
                 name="supplierDetails"
                 value={formData.supplierDetails}
                 onChange={handleChange}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter supplier details"
+                placeholder={t('profile:supplierDetails')}
                 required
               />
             </div>
@@ -775,27 +779,27 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 wow animate__animated animate__fadeIn" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Trainer Level</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:trainerLevel')}</label>
               <select
                 value={formData.horseTrainerDetails.trainerLevel}
                 onChange={(e) => handleNestedChange('horseTrainerDetails', 'trainerLevel', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                 required
               >
-                <option value="">Select Level</option>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
+                <option value="">{t('profile:selectLevel')}</option>
+                <option value="beginner">{t('profile:beginner')}</option>
+                <option value="intermediate">{t('profile:intermediate')}</option>
+                <option value="advanced">{t('profile:advanced')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-2">Accreditation Certificate</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:accreditationCertificate')}</label>
               <input
                 type="text"
                 value={formData.horseTrainerDetails.accreditationCertificate}
                 onChange={(e) => handleNestedChange('horseTrainerDetails', 'accreditationCertificate', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter accreditation certificate"
+                placeholder={t('profile:accreditationCertificate')}
                 required
               />
             </div>
@@ -806,13 +810,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
         return (
           <div className="wow animate__animated animate__fadeIn space-y-6" data-wow-delay=".3s">
             <div>
-              <label className="block text-sm font-semibold mb-2">Hoof Trimmer Details</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:hoofTrimmerDetails')}</label>
               <textarea
                 name="hoofTrimmerDetails"
                 value={formData.hoofTrimmerDetails.hoofTrimmerDetails}
                 onChange={(e) => handleNestedChange('hoofTrimmerDetails', 'hoofTrimmerDetails', e.target.value)}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Enter hoof trimmer details"
+                placeholder={t('profile:hoofTrimmerDetails')}
                 required
               />
             </div>
@@ -859,22 +863,22 @@ const NewProviderServiceForm = ({ currentUser }) => {
   const handleSubmit = async (e) => {
     console.log("Submit event triggered");
     e.preventDefault();
-  
+
     if (!currentUser?.userId) {
       toast.error("Please log in to create a service");
       return;
     }
-  
+
     if (!agreedToTerms || !confirmDataAccuracy) {
       toast.error("Please agree to the terms and confirm data accuracy.");
       return;
     }
-  
+
     setIsSubmitting(true);
-  
+
     let providerId = null;
     let createdService = null;
-  
+
     try {
       // Always create a new provider
       const providerDoc = {
@@ -883,21 +887,21 @@ const NewProviderServiceForm = ({ currentUser }) => {
         name_en: formData.name_en,
         userRef: {
           _type: "reference",
-          _ref: currentUser.userId, // Use userId instead of currentUser.user._id
+          _ref: currentUser.userId,
         },
         servicesRef: [],
         mainServiceRef: null,
       };
-  
+
       const createdProvider = await client.create(providerDoc);
       providerId = createdProvider._id;
-  
+
       // Handle image upload
       let imageAsset = null;
       if (formData.image && formData.image instanceof File) {
         imageAsset = await client.assets.upload("image", formData.image);
       }
-  
+
       // Handle graduation certificate upload
       let graduationCertificateAsset = null;
       if (formData.graduationDetails?.graduationCertificate instanceof File) {
@@ -906,7 +910,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
           formData.graduationDetails.graduationCertificate
         );
       }
-  
+
       // Prepare service document
       const serviceDoc = {
         _type: "services",
@@ -948,10 +952,10 @@ const NewProviderServiceForm = ({ currentUser }) => {
             : null,
         },
       };
-  
+
       // Create service
       createdService = await client.create(serviceDoc);
-  
+
       // Update provider with main service reference
       await client
         .patch(providerId)
@@ -962,24 +966,24 @@ const NewProviderServiceForm = ({ currentUser }) => {
           },
         })
         .commit();
-  
+
       toast.success("Service created successfully!");
-  
+
       // Reset form
       setFormData(initialFormState);
       setImagePreview(null);
       setAgreedToTerms(false);
       setConfirmDataAccuracy(false);
-  
+
       // Optional: Refresh or navigate
       setTimeout(() => {
         window.location.reload();
       }, 2000);
-  
+
     } catch (err) {
       console.error("Error in service creation:", err);
       toast.error(err.message || "Failed to create service");
-  
+
       // Cleanup: Delete provider if service creation failed
       if (providerId) {
         try {
@@ -996,7 +1000,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
 
   const handleLinksChange = (e) => {
     const linksValue = e.target.value;
-    const linksArray = linksValue ? linksValue.split(',').map(link => link.trim()) : [];
+    const linksArray = linksValue ? linksValue.split('profile:,').map(link => link.trim()) : [];
     setFormData(prev => ({
       ...prev,
       links: linksArray
@@ -1033,7 +1037,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
   };
 
   return (
-    <div className="max-w-full mx-auto">
+    <div className={`max-w-full mx-auto ${isRTL ? 'rtl' : ''}`}>
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         {error && (
           <Alert variant="destructive" className="m-6">
@@ -1064,7 +1068,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   className="flex flex-col items-center justify-center w-full h-full border-4 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-all duration-300"
                 >
                   <Upload className="w-10 h-10 text-gray-400" />
-                  <span className="mt-2 text-sm text-gray-500">Upload Image</span>
+                  <span className="mt-2 text-sm text-gray-500">{t('profile:uploadImage')}</span>
                   <input
                     type="file"
                     className="hidden"
@@ -1081,34 +1085,34 @@ const NewProviderServiceForm = ({ currentUser }) => {
           <div className="space-y-8">
             {/* Block Title */}
             <div className="flex items-center gap-4">
-              <h2 className="text-xl font-semibold">Service Details</h2>
+              <h2 className="text-xl font-semibold">{t('profile:serviceDetails')}</h2>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
             </div>
 
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".2s">
-                <label className="block text-sm font-semibold mb-2">Service Name Arabic</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:serviceNameArabic')}</label>
                 <input
                   type="text"
                   name="name_ar"
                   value={formData.name_ar}
                   onChange={handleChange}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Name (Arabic)"
+                  placeholder={t('profile:serviceNameArabic')}
                   required
                   dir="rtl"
                 />
               </div>
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".2s">
-                <label className="block text-sm font-semibold mb-2">Service Name English</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:serviceNameEnglish')}</label>
                 <input
                   type="text"
                   name="name_en"
                   value={formData.name_en}
                   onChange={handleChange}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Name (English)"
+                  placeholder={t('profile:serviceNameEnglish')}
                   required
                 />
               </div>
@@ -1117,26 +1121,26 @@ const NewProviderServiceForm = ({ currentUser }) => {
             {/* Contact Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".3s">
-                <label className="block text-sm font-semibold mb-2">Service number</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:serviceNumber')}</label>
                 <input
                   type="tel"
                   name="servicePhone"
                   value={formData.servicePhone}
                   onChange={handleChange}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="country code and phone number (e.g., +966 for Saudi Arabia)"
+                  placeholder={t('profile:serviceNumber')}
                   required
                 />
               </div>
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".3s">
-                <label className="block text-sm font-semibold mb-2">Service Email</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:serviceEmail')}</label>
                 <input
                   type="email"
                   name="serviceEmail"
                   value={formData.serviceEmail}
                   onChange={handleChange}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                  placeholder="Email Address"
+                  placeholder={t('profile:serviceEmail')}
                   required
                 />
               </div>
@@ -1145,25 +1149,25 @@ const NewProviderServiceForm = ({ currentUser }) => {
             {/* Description Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".5s">
-                <label className="block text-sm font-semibold mb-2">Service Description In Arabic</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:serviceDescriptionArabic')}</label>
                 <textarea
                   name="about_ar"
                   value={formData.about_ar}
                   onChange={handleChange}
                   className="w-full h-32 p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none resize-none"
-                  placeholder="About (Arabic)"
+                  placeholder={t('profile:serviceDescriptionArabic')}
                   required
                   dir="rtl"
                 />
               </div>
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".5s">
-                <label className="block text-sm font-semibold mb-2">Service Description In English</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:serviceDescriptionEnglish')}</label>
                 <textarea
                   name="about_en"
                   value={formData.about_en}
                   onChange={handleChange}
                   className="w-full h-32 p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none resize-none"
-                  placeholder="About (English)"
+                  placeholder={t('profile:serviceDescriptionEnglish')}
                   required
                 />
               </div>
@@ -1174,13 +1178,13 @@ const NewProviderServiceForm = ({ currentUser }) => {
           <div className="space-y-8" style={{ borderTop: "1px solid #64748B" }}>
             {/* Block Title */}
             <div className="flex items-center gap-4 mt-6">
-              <h2 className="text-xl font-semibold">Service Type & Pricing</h2>
+              <h2 className="text-xl font-semibold">{t('profile:serviceTypeAndPricing')}</h2>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
             </div>
 
             {/* Service Type Selection */}
             <div className="wow animate__animated animate__fadeIn" data-wow-delay=".1s">
-              <label className="block text-sm font-semibold mb-2">Service Type</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:serviceType')}</label>
               <select
                 name="serviceType"
                 value={formData.serviceType}
@@ -1188,10 +1192,10 @@ const NewProviderServiceForm = ({ currentUser }) => {
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                 required
               >
-                <option value="">Select Service Type</option>
+                <option value="">{t('profile:selectServiceType')}</option>
                 {Object.entries(serviceTypeIcons).map(([value, icon]) => (
                   <option key={value} value={value} className="flex items-center gap-2">
-                    {value.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                    {value.split('profile:_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                   </option>
                 ))}
               </select>
@@ -1202,7 +1206,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
               <div className="pt-2">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   {serviceTypeIcons[formData.serviceType]}
-                  Service Details
+                  {t('profile:serviceDetailsTitle')}
                 </h3>
                 {renderServiceTypeFields()}
               </div>
@@ -1210,14 +1214,14 @@ const NewProviderServiceForm = ({ currentUser }) => {
 
             {/* Price Field */}
             <div className="wow animate__animated animate__fadeIn" data-wow-delay=".6s">
-              <label className="block text-sm font-semibold mb-2">Service Price</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:servicePrice')}</label>
               <input
                 type="number"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
-                placeholder="Price"
+                placeholder={t('profile:servicePrice')}
                 required
                 min="0"
               />
@@ -1228,28 +1232,30 @@ const NewProviderServiceForm = ({ currentUser }) => {
           <div className="space-y-8" style={{ borderTop: "1px solid #64748B" }}>
             {/* Block Title */}
             <div className="flex items-center gap-4 mt-6">
-              <h2 className="text-xl font-semibold">Location & Links</h2>
+              <h2 className="text-xl font-semibold">{t('profile:locationAndLinks')}</h2>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
             </div>
 
             {/* Country, Governorate, and City Selection */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".6s">
-                <label className="block text-sm font-semibold mb-2">Country</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:country')}</label>
                 <select
                   value={selectedCountry}
                   onChange={handleCountryChange}
                   className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                   required
                 >
-                  <option value="">Select Country</option>
+                  <option value="">{t('profile:selectCountry')}</option>
                   {countries.map(country => (
-                    <option key={country._id} value={country._id}>{country.name_en}</option>
+                    <option key={country._id} value={country._id}>
+                      {i18n.language === 'ar' ? country.name_ar : country.name_en}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".6s">
-                <label className="block text-sm font-semibold mb-2">Governorate</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:governorate')}</label>
                 <select
                   value={selectedGovernorate}
                   onChange={handleGovernorateChange}
@@ -1257,14 +1263,16 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   disabled={!selectedCountry}
                   required
                 >
-                  <option value="">Select Governorate</option>
+                  <option value="">{t('profile:selectGovernorate')}</option>
                   {governorates.map(governorate => (
-                    <option key={governorate._id} value={governorate._id}>{governorate.name_en}</option>
+                    <option key={governorate._id} value={governorate._id}>
+                      {i18n.language === 'ar' ? governorate.name_ar : governorate.name_en}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="wow animate__animated animate__fadeIn" data-wow-delay=".6s">
-                <label className="block text-sm font-semibold mb-2">City</label>
+                <label className="block text-sm font-semibold mb-2">{t('profile:city')}</label>
                 <select
                   value={selectedCity}
                   onChange={handleCityChange}
@@ -1272,17 +1280,20 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   disabled={!selectedGovernorate}
                   required
                 >
-                  <option value="">Select City</option>
+                  <option value="">{t('profile:selectCity')}</option>
                   {cities.map(city => (
-                    <option key={city._id} value={city._id}>{city.name_en}</option>
+                    <option key={city._id} value={city._id}>
+                      {i18n.language === 'ar' ? city.name_ar : city.name_en}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
 
+
             {/* Links */}
             <div className="wow animate__animated animate__fadeIn" data-wow-delay=".4s">
-              <label className="block text-sm font-semibold mb-2">Links</label>
+              <label className="block text-sm font-semibold mb-2">{t('profile:links')}</label>
               {formData.links.map((link, index) => (
                 <div key={link._key} className="flex items-center gap-2 mb-2">
                   <input
@@ -1294,7 +1305,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
                         ? 'border-2 border-[#f00]'
                         : ''
                       }`}
-                    placeholder="Enter a valid URL facebook & youtube & website (e.g., https://example.com)"
+                    placeholder={t('profile:enterValidURL')}
                     required={index < 3}
                   />
                   {index >= 3 && (
@@ -1314,7 +1325,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   onClick={addLink}
                   className="mt-2 px-4 py-2 text-sm font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2"
                 >
-                  <Plus size={16} /> Add Another Link
+                  <Plus size={16} /> {t('profile:addAnotherLink')}
                 </button>
               )}
             </div>
@@ -1325,7 +1336,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
           <div className="space-y-8" style={{ borderTop: "1px solid #64748B" }}>
             {/* Block Title */}
             <div className="flex items-center gap-4 mt-6">
-              <h2 className="text-xl font-semibold">Terms and Conditions</h2>
+              <h2 className="text-xl font-semibold">{t('profile:termsAndConditions')}</h2>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
             </div>
 
@@ -1339,7 +1350,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="form-checkbox custom-checkbox h-5 w-5 text-blue-500 rounded"
                 />
-                <span className="text-sm font-semibold">I agree to terms and conditions</span>
+                <span className="text-sm font-semibold">{t('profile:agreeToTerms')}</span>
               </label>
 
               {/* Second Checkbox */}
@@ -1353,7 +1364,7 @@ const NewProviderServiceForm = ({ currentUser }) => {
                   className="form-checkbox custom-checkbox h-5 w-5 text-blue-500 rounded"
                 />
                 <span className="text-sm font-semibold">
-                  I confirm all this data is right, Your service will appear after admin approval and it will take 24 hours.
+                  {t('profile:confirmDataAccuracy')}
                 </span>
               </label>
 
@@ -1389,10 +1400,10 @@ const NewProviderServiceForm = ({ currentUser }) => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    Processing...
+                    {t('profile:processing')}
                   </>
                 ) : (
-                  'Submit'
+                  t('profile:submit')
                 )}
               </button>
 
