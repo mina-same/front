@@ -99,7 +99,7 @@ const HorseTransportPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTransports.map((transport, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${transport._id}`)}>
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/services/${transport._id.replace('drafts.', '')}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <Image
                       src={transport.image ? urlFor(transport.image).url() : '/api/placeholder/400/300'}

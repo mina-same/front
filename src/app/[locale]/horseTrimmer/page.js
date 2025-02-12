@@ -102,7 +102,7 @@ const HoofTrimmerPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTrimmers.map((trimmer, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${trimmer._id}`)}>
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/services/${trimmer._id.replace('drafts.', '')}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <Image
                       src={trimmer.image ? urlFor(trimmer.image).url() : '/api/placeholder/400/300'}

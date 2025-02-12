@@ -99,7 +99,7 @@ const HorseCateringPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCateringServices.map((service, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${service._id}`)}>
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/services/${service._id.replace('drafts.', '')}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <Image
                       src={service.image ? urlFor(service.image).url() : '/api/placeholder/400/300'}

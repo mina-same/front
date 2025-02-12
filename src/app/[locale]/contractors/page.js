@@ -99,7 +99,7 @@ const ContractorsPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredContractors.map((contractor, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${contractor._id}`)}>
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/services/${contractor._id.replace('drafts.', '')}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <Image
                       src={contractor.image ? urlFor(contractor.image).url() : '/api/placeholder/400/300'}

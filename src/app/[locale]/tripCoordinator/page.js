@@ -100,7 +100,7 @@ const TripCoordinatorPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTripCoordinators.map((coordinator, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${coordinator._id}`)}>
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/services/${coordinator._id.replace('drafts.', '')}`)}>
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <Image
                       src={coordinator.image ? urlFor(coordinator.image).url() : '/api/placeholder/400/300'}

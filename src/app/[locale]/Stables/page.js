@@ -47,6 +47,8 @@ const HorseStablesPage = () => {
     fetchStables();
   }, [t]);
 
+  console.log(stables)
+
   const filteredStables = stables.filter(stable =>
     stable.name_en.toLowerCase().includes(searchQuery.toLowerCase()) ||
     stable.name_ar.toLowerCase().includes(searchQuery.toLowerCase())
@@ -98,7 +100,13 @@ const HorseStablesPage = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredStables.map((stable, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow duration-300" onClick={() => route.push(`/${stable._id}`)}>
+
+                <Card
+                  key={index}
+                  className="hover:shadow-lg transition-shadow duration-300"
+                  onClick={() => route.push(`/services/${stable._id.replace('drafts.', '')}`)}
+                >
+
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <Image
                       src={stable.image ? urlFor(stable.image).url() : '/api/placeholder/400/300'}
