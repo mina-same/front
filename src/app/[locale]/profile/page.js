@@ -15,7 +15,6 @@ import ServiceRequestsDashboard from "components/elements/ServiceRequestsDashboa
 import ProviderReservations from "components/elements/ProviderReservations"
 import UserReservations from "components/elements/UserReservations"
 import { useTranslation } from 'react-i18next';
-import i18n from 'i18next';
 
 // Define the delete handlers
 const handleProviderDeletion = async (providerId, client) => {
@@ -695,8 +694,6 @@ const ProfessionalProfileDashboard = () => {
                                         <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{provider.name_en}</h2>
                                         <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 text-white/90">
                                             <div className="flex items-center gap-1.5">
-                                                <Star className="w-4 h-4 text-amber-400 fill-current" />
-                                                <span>4.9</span>
                                                 <span className="text-white/70">(128)</span>
                                             </div>
                                             <span className="hidden sm:inline mx-1">•</span>

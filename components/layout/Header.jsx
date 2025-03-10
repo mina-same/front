@@ -9,6 +9,8 @@ import { client, urlFor } from "../../src/lib/sanity";
 import userFallbackImage from "../../public/assets/imgs/elements/user.png";
 import i18nConfig from "../../i18nConfig";
 import { Globe } from "lucide-react";
+import ServiceSearchPopup from "components/elements/ServiceSearchPopup";
+import { Search } from "lucide-react";
 
 const Header = ({ handleHidden }) => {
   const router = useRouter();
@@ -25,6 +27,8 @@ const Header = ({ handleHidden }) => {
   const [error, setError] = useState(null);
   const [isLangOpen, setIsLangOpen] = useState(false);
 
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   useEffect(() => {
     document.addEventListener("scroll", () => {
       const scrollCheck = window.scrollY > 100;
@@ -32,7 +36,7 @@ const Header = ({ handleHidden }) => {
         setScroll(scrollCheck);
       }
     });
-  },[]);
+  }, []);
 
   useEffect(() => {
     const verifyUser = async () => {
@@ -134,7 +138,7 @@ const Header = ({ handleHidden }) => {
       case "ar":
         return "🇸🇦";
       default:
-        return "🌐";
+        return "";
     }
   };
 
@@ -176,14 +180,20 @@ const Header = ({ handleHidden }) => {
       <div className={styles.container}>
         <nav className={styles.navFlex}>
           <div className={styles.buttonsContainer}>
+            <button onClick={() => setIsSearchOpen(true)}>
+              <Search className="" />
+            </button>
+
             {/* Language Switcher */}
-            <div className={`relative lg:block hidden ${isRTL ? "mr-2" : "ml-2"}`}>
+            <div
+              className={`relative lg:block hidden ${isRTL ? "mr-2" : "ml-2"}`}
+            >
               <div className="relative">
                 <button
                   onClick={() => setIsLangOpen(!isLangOpen)}
                   className={styles.languageButton}
                 >
-                  <Globe className="w-4 h-4 text-gray-600" />
+                 
                   <span className="text-sm font-medium text-gray-700">
                     {getFlagEmoji(currentLocale)}{" "}
                     {getLanguageName(currentLocale)}
@@ -286,7 +296,10 @@ const Header = ({ handleHidden }) => {
             </div>
           </div>
 
-          <Link href="/" className={`text-3xl font-semibold leading-none ${styles.logoContainer}`}>
+          <Link
+            href="/"
+            className={`text-3xl font-semibold leading-none ${styles.logoContainer}`}
+          >
             <Image
               className="h-10"
               src="/assets/imgs/logos/logohorse.svg"
@@ -299,6 +312,14 @@ const Header = ({ handleHidden }) => {
           <ul className={styles.menuSpace}>
             {/* Menu items */}
             <li className="pt-4 pb-4">
+              <Link
+                href="/"
+                className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+              >
+                {t("header:home")}
+              </Link>
+            </li>
+            <li className="group relative pt-4 pb-4">
               <Link
                 href="/Stables"
                 className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
@@ -433,6 +454,10 @@ const Header = ({ handleHidden }) => {
           className="fixed inset-0 z-40"
           onClick={() => setIsLangOpen(false)}
         ></div>
+      )}
+
+      {isSearchOpen && (
+        <ServiceSearchPopup onClose={() => setIsSearchOpen(false)} />
       )}
     </header>
   );

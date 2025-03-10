@@ -50,6 +50,9 @@ const ServiceRequestsSection = ({ providerId }) => {
                                 email
                             }
                         },
+                        requestedServiceRef->{
+                            _id
+                        },
                         status,
                         notes,
                         _createdAt,
@@ -60,7 +63,6 @@ const ServiceRequestsSection = ({ providerId }) => {
                 const result = await client.fetch(query, { providerId });
                 const allRequests = [...result.sent, ...result.received];
 
-                // Sort by date, pending first
                 const sortedRequests = allRequests.sort((a, b) => {
                     if (a.status === 'pending' && b.status !== 'pending') return -1;
                     if (a.status !== 'pending' && b.status === 'pending') return 1;
@@ -80,6 +82,7 @@ const ServiceRequestsSection = ({ providerId }) => {
 
     const handleStatusUpdate = async (requestId, newStatus) => {
         try {
+            // First, update the request status
             await client
                 .patch(requestId)
                 .set({
@@ -88,6 +91,42 @@ const ServiceRequestsSection = ({ providerId }) => {
                 })
                 .commit();
 
+            if (newStatus === 'approved') {
+                // Get the current request data
+                const request = requests.find(r => r._id === requestId);
+                if (!request || !request.requesterProviderRef?._id) return;
+
+                // Get the current provider's services
+                const provider = await client.fetch(
+                    `*[_type == "provider" && _id == $providerId][0]`,
+                    { providerId: request.requesterProviderRef._id }
+                );
+
+                if (!provider) return;
+
+                // Check if the service is already in the array
+                const existingServices = provider.servicesRef || [];
+                const serviceId = request.requestedServiceRef._id;
+                const serviceExists = existingServices.some(
+                    service => service._ref === serviceId
+                );
+
+                if (!serviceExists) {
+                    // Add the new service to the provider's servicesRef array
+                    await client
+                        .patch(request.requesterProviderRef._id)
+                        .setIfMissing({ servicesRef: [] })
+                        .append('servicesRef', [
+                            {
+                                _type: 'reference',
+                                _ref: serviceId
+                            }
+                        ])
+                        .commit();
+                }
+            }
+
+            // Update local state
             setRequests(prev =>
                 prev.map(request =>
                     request._id === requestId
@@ -196,9 +235,11 @@ const ServiceRequestsSection = ({ providerId }) => {
                                             width={48}
                                             height={48}
                                         />
-                                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white
+                                        <div className={`absolute w-5 h-5 rounded-full flex items-center justify-center border-2 border-white
                                             ${request.status === 'pending' ? 'bg-yellow-500' :
-                                                request.status === 'approved' ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                                                request.status === 'approved' ? 'bg-emerald-500' : 'bg-red-500'}`}
+                                            style={{ bottom: "-6px", right: "-2px" }}
+                                        >
                                             {request.status === 'pending' ? (
                                                 <Clock className="w-3 h-3 text-white" />
                                             ) : request.status === 'approved' ? (
@@ -230,7 +271,7 @@ const ServiceRequestsSection = ({ providerId }) => {
                                                 <motion.button
                                                     whileHover={{ scale: 1.05 }}
                                                     onClick={() => handleDeleteRequest(request._id)}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full sm:w-auto"
+                                                    className="p-2 bg-red-500 text-white hover:bg-red-50 rounded-lg transition-colors w-full sm:w-auto"
                                                 >
                                                     <Trash2 className="w-5 h-5 mx-auto" />
                                                 </motion.button>
@@ -255,14 +296,19 @@ const ServiceRequestsSection = ({ providerId }) => {
                                         </>
                                     )}
                                     {request.status !== 'pending' && (
-                                        <span className={`px-3 py-1 rounded-full text-sm font-medium w-full sm:w-auto text-center
-                                            ${request.status === 'approved'
-                                                ? 'bg-emerald-100 text-emerald-800'
-                                                : 'bg-red-100 text-red-800'}`}>
-                                            {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                        <span
+                                            className={`px-3 py-2 rounded-lg text-sm font-medium w-full sm:w-auto text-center
+                        ${request.status === 'approved'
+                                                    ? 'bg-emerald-600/90 text-white'
+                                                    : request.status === 'rejected'
+                                                        ? 'bg-red-100 text-red-800'
+                                                        : 'bg-gray-100 text-gray-800'}`}
+                                        >
+                                            {t(`profile:${request.status}`)}
                                         </span>
                                     )}
                                 </div>
+
                             </div>
                         </motion.div>
                     ))

@@ -60,7 +60,7 @@ const PublicServices = () => {
                             </Link>
 
                             {/* Horse Trainer - Beginners */}
-                            <Link href="/trainer">
+                            <Link href="/horseTrainer">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
                                     <Image width={100} height={20} src="/assets/imgs/placeholders/trainer.png" alt="Horse Trainer" className="w-full h-48 object-cover" />
                                     <div className="p-6">

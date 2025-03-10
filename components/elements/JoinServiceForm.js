@@ -38,17 +38,17 @@ const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {
   };
 
   const serviceTypeLabels = {
-    horse_stable: t('profile:horseStables'),
+    horse_stable: t('profile:horse-stables'),
     veterinary: t('profile:veterinary'),
     competitions: t('profile:competitions'),
     housing: t('profile:housing'),
-    trip_coordinator: t('profile:tripCoordinator'),
-    horse_catering: t('profile:horseCatering'),
-    horse_transport: t('profile:transport'),
+    trip_coordinator: t('profile:trip_coordinator'),
+    horse_catering: t('profile:horse_catering'),
+    horse_transport: t('profile:horse_transport'),
     contractors: t('profile:contractors'),
     suppliers: t('profile:suppliers'),
-    horse_trainer: t('profile:horseTrainers'),
-    hoof_trimmer: t('profile:hoofTrimmer')
+    horse_trainer: t('profile:horse-trainer'),
+    hoof_trimmer: t('profile:hoof-trimmer')
   };
 
   useEffect(() => {

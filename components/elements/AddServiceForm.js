@@ -1174,10 +1174,10 @@ const AddServiceForm = ({ providerId }) => {
                 className="w-full p-4 text-sm font-semibold bg-blueGray-50 rounded outline-none"
                 required
               >
-                <option value="">{t('profile:selectServiceType')}</option>
+                <option value="">{t('profile:selectServiceTypes')}</option>
                 {Object.entries(serviceTypeIcons).map(([value, icon]) => (
                   <option key={value} value={value} className="flex items-center gap-2">
-                    {t(value)}
+                    {t(`profile:${value}`)}
                   </option>
                 ))}
               </select>

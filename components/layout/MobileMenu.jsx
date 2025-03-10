@@ -203,12 +203,22 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
           <ul className="mobile-menu">
             <li className="mb-1 rounded-xl">
               <Link
+                href="/"
+                className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl"
+              >
+                {t("header:home")}
+              </Link>
+            </li>
+
+            <li className="mb-1 rounded-xl">
+              <Link
                 href="/Stables"
                 className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl"
               >
                 {t("header:stables")}
               </Link>
             </li>
+
             <li className="mb-1 rounded-xl">
               <Link
                 href="/competitions"
@@ -217,6 +227,7 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
                 {t("header:competitions")}
               </Link>
             </li>
+
             <li className="mb-1 rounded-xl">
               <Link
                 href="/tripCoordinator"
@@ -225,6 +236,7 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
                 {t("header:trips")}
               </Link>
             </li>
+
             <li
               className={
                 isActive.key == 1
@@ -333,6 +345,15 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
                   </Link>
                 </li>
               </ul>
+            </li>
+
+            <li className="mb-1 rounded-xl">
+              <Link
+                href="/contact"
+                className="block p-4 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500 rounded-xl"
+              >
+                {t("header:contact")}
+              </Link>
             </li>
           </ul>
 

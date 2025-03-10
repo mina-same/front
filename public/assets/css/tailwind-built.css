@@ -632,6 +632,14 @@ video {
   }
 }
 
+.max-h-\[50vh\] {
+  max-height: 50vh;
+}
+
+.z-50 {
+  z-index: 50;
+} 
+
 @media (min-width: 1024px) {
   .lg\:space-x-12 > *:not(:first-child) {
     margin-left: 3rem; /* Equivalent to 12 spacing in Tailwind */
@@ -640,7 +648,7 @@ video {
 
 @media (min-width: 1200px) {
   .container {
-    max-width: 1200px;
+    max-width: 1300px;
   }
 }
 
@@ -2400,6 +2408,10 @@ li.menu-item-has-children .menu-expand {
   font-weight: 300;
 }
 
+.max-h-\[50vh\] {
+  max-height: 50vh;
+}
+
 li.menu-item-has-children .menu-expand.ltr-plus {
   right: 0;
 }
@@ -2411,7 +2423,6 @@ li.menu-item-has-children .menu-expand.rtl-plus {
 li.menu-item-has-children.active .menu-expand {
   transform: rotate(45deg);
 }
-
 
 .min-w-200 {
   min-width: 200px;

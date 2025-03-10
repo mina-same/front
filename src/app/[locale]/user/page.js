@@ -123,7 +123,7 @@ const User = () => {
         throw new Error(t('user:error.uploadFailed'));
       }
 
-      router.push(userType === 'provider' ? '/provider/dashboard' : '/dashboard');
+      router.push(userType === 'provider' ? '/profile' : '/');
       router.refresh();
 
     } catch (err) {
