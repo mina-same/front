@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from "components/layout/Layout";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, CalendarDays, BriefcaseBusiness, CheckCircle, Plus, Users, Briefcase, UserPlus, Sparkles, ShieldCheck, Zap, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle } from 'lucide-react';
+import { Menu, CalendarDays, BriefcaseBusiness, CheckCircle, Plus, Users, Briefcase, UserPlus, Sparkles, ShieldCheck, Zap, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle, Eye, Edit, Horse } from 'lucide-react';
 import { client, urlFor } from '../../../lib/sanity';
 import { useRouter } from 'next/navigation';
 import NewProviderServiceForm from 'components/elements/NewProviderServiceForm';
@@ -15,6 +15,8 @@ import ServiceRequestsDashboard from "components/elements/ServiceRequestsDashboa
 import ProviderReservations from "components/elements/ProviderReservations"
 import UserReservations from "components/elements/UserReservations"
 import { useTranslation } from 'react-i18next';
+import { FaHorse } from 'react-icons/fa';
+import HorseRegistrationForm from 'components/elements/HorseRegistrationForm';
 
 // Define the delete handlers
 const handleProviderDeletion = async (providerId, client) => {
@@ -210,6 +212,11 @@ const ProfessionalProfileDashboard = () => {
     const [windowWidth, setWindowWidth] = useState(0);
     const { t, i18n } = useTranslation();
     const isRTL = i18n.language === 'ar';
+    const [horses, setHorses] = useState([]);
+    const [isLoadingHorses, setIsLoadingHorses] = useState(false);
+    const [showHorseForm, setShowHorseForm] = useState(false);
+    const [horseReservations, setHorseReservations] = useState([]);
+    const [isLoadingHorseReservations, setIsLoadingHorseReservations] = useState(false);
 
     useEffect(() => {
         setWindowWidth(window.innerWidth);
@@ -294,6 +301,7 @@ const ProfessionalProfileDashboard = () => {
     const tabs = [
         { key: 'profile', icon: Users, label: t('profile:profile') },
         ...(user?.userType === 'provider' ? [{ key: 'services', icon: Briefcase, label: t('profile:services') }] : []),
+        { key: 'horses', icon: FaHorse, label: t('profile:horses') },
         { key: 'reservations', icon: Calendar, label: t('profile:reservations') },
         { key: 'settings', icon: Settings, label: t('profile:settings') }
     ];
@@ -386,6 +394,44 @@ const ProfessionalProfileDashboard = () => {
         if (activeTab === 'reservations') {
             fetchReservations();
         }
+    }, [userId, activeTab]);
+
+    useEffect(() => {
+        const fetchHorseReservations = async () => {
+            if (!userId || activeTab !== 'horses') return;
+
+            setIsLoadingHorseReservations(true);
+            try {
+                const query = `*[_type == "horseReservation" && user._ref == $userId && horse->listingPurpose == "rent"]{
+                    _id,
+                    datetime,
+                    status,
+                    horse->{
+                        _id,
+                        fullName,
+                        breed,
+                        birthDate,
+                        images,
+                        listingPurpose
+                    },
+                    user->{
+                        _id,
+                        userName,
+                        email,
+                        image
+                    }
+                }`;
+                const result = await client.fetch(query, { userId });
+                setHorseReservations(result);
+            } catch (error) {
+                console.error('Error fetching horse reservations:', error);
+                setError('Failed to load horse reservations.');
+            } finally {
+                setIsLoadingHorseReservations(false);
+            }
+        };
+
+        fetchHorseReservations();
     }, [userId, activeTab]);
 
     useEffect(() => {
@@ -526,6 +572,36 @@ const ProfessionalProfileDashboard = () => {
         }
     }, [userId, user?.userType, activeTab]);
 
+    // Fetch horses when the "horses" tab is active
+    useEffect(() => {
+        const fetchHorses = async () => {
+            if (!userId || activeTab !== 'horses') return;
+
+            setIsLoadingHorses(true);
+            try {
+                const query = `*[_type == "horse" && owner._ref == $userId]{
+                    _id,
+                    fullName,
+                    breed,
+                    birthDate,
+                    images,
+                    gender,
+                    mainColor,
+                    listingPurpose,
+                }`;
+                const result = await client.fetch(query, { userId });
+                setHorses(result);
+            } catch (error) {
+                console.error('Error fetching horses:', error);
+                setError('Failed to load horses.');
+            } finally {
+                setIsLoadingHorses(false);
+            }
+        };
+
+        fetchHorses();
+    }, [userId, activeTab]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -655,7 +731,7 @@ const ProfessionalProfileDashboard = () => {
                                     alt={mainService.name_en}
                                     className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                                     width={100}
-                      height={30}
+                                    height={30}
                                 />
                             </motion.div>
 
@@ -1076,6 +1152,30 @@ const ProfessionalProfileDashboard = () => {
         </motion.div>
     );
 
+    // No Horses View
+    const NoHorsesView = () => (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16 px-4 bg-gradient-to-br bg-gray-100 rounded-2xl shadow-sm"
+        >
+            <div className="max-w-md mx-auto space-y-6">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg">
+                    <FaHorse className="w-10 h-10 text-black" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">{t("profile:noHorsesYet")}</h3>
+                <p className="text-gray-500">{t("profile:addYourFirstHorse")}</p>
+                <button
+                    onClick={() => setShowHorseForm(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#333] to-[#000] text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                    <Plus className="w-5 h-5" />
+                    {t("profile:addHorse")}
+                </button>
+            </div>
+        </motion.div>
+    );
+
     const PremiumProviderServices = () => {
         if (!providers.length && user?.userType === 'provider') {
             return <NoProvidersView />;
@@ -1138,12 +1238,352 @@ const ProfessionalProfileDashboard = () => {
         );
     };
 
+    const getBreedName = (breedValue) => {
+        const breedMap = {
+            "purebredArabian": "Purebred Arabian",
+            "tibetanPony": "Tibetan Pony",
+            "mongolianHorse": "Mongolian Horse",
+            "andalusian": "Andalusian",
+            "friesian": "Friesian",
+            "hungarianHorse": "Hungarian Horse",
+            "bulgarianHorse": "Bulgarian Horse",
+            "uzbekHorse": "Uzbek Horse",
+            "afghanHorse": "Afghan Horse",
+            "turkishHorse": "Turkish Horse",
+            "persianHorse": "Persian Horse",
+            "kurdishHorse": "Kurdish Horse",
+            "armenianHorse": "Armenian Horse",
+            "georgianHorse": "Georgian Horse",
+            "abkhazianHorse": "Abkhazian Horse",
+            "altaiHorse": "Altai Horse",
+            "bashkirHorse": "Bashkir Horse",
+            "tatarHorse": "Tatar Horse",
+            "kyrgyzHorse": "Kyrgyz Horse",
+            "tajikHorse": "Tajik Horse",
+            "turkmenHorse": "Turkmen Horse",
+            "karakalpakUzbekHorse": "Karakalpak Uzbek Horse",
+            "kazakhHorse": "Kazakh Horse",
+            "donHorse": "Don Horse",
+            "kubanHorse": "Kuban Horse",
+            "belarusianHorse": "Belarusian Horse",
+            "ukrainianHorse": "Ukrainian Horse",
+            "polishHorse": "Polish Horse",
+            "czechHorse": "Czech Horse",
+            "slovakHorse": "Slovak Horse",
+            "hungarianHorse2": "Hungarian Horse",
+            "romanianHorse": "Romanian Horse",
+            "shaggyBulgarianHorse": "Shaggy Bulgarian Horse",
+            "greekHorse": "Greek Horse",
+            "anatolianHorse": "Anatolian Horse",
+            "persianBlueHorse": "Persian Blue Horse",
+            "hazaragiHorse": "Hazaragi Horse",
+            "pashtunHorse": "Pashtun Horse",
+            "marwari": "Marwari",
+            "nepalesePony": "Nepalese Pony",
+            "bhutanesePony": "Bhutanese Pony",
+            "thaiPony": "Thai Pony",
+            "cambodianPony": "Cambodian Pony",
+            "vietnamesePony": "Vietnamese Pony",
+            "laotianPony": "Laotian Pony",
+            "burmesePony": "Burmese Pony",
+            "manchuHorse": "Manchu Horse",
+            "kisoHorse": "Kiso Horse",
+            "koreanHorse": "Korean Horse",
+            "bayankhongorMongolianHorse": "Bayankhongor Mongolian Horse",
+            "khentiiMongolianHorse": "Khentii Mongolian Horse",
+            "tibetanPony2": "Tibetan Pony",
+            "nepalesePony2": "Nepalese Pony",
+            "bhutanesePony2": "Bhutanese Pony",
+            "thaiPony2": "Thai Pony",
+            "cambodianPony2": "Cambodian Pony",
+            "vietnamesePony2": "Vietnamese Pony",
+            "laotianPony2": "Laotian Pony",
+            "burmesePony2": "Burmese Pony",
+            "manchuHorse2": "Manchu Horse",
+            "kisoHorse2": "Kiso Horse",
+            "koreanHorse2": "Korean Horse",
+            "bayankhongorMongolianHorse2": "Bayankhongor Mongolian Horse",
+            "khentiiMongolianHorse2": "Khentii Mongolian Horse",
+            "tibetanPony3": "Tibetan Pony",
+            "nepalesePony3": "Nepalese Pony",
+            "bhutanesePony3": "Bhutanese Pony",
+            "thaiPony3": "Thai Pony",
+            "cambodianPony3": "Cambodian Pony",
+            "vietnamesePony3": "Vietnamese Pony",
+            "laotianPony3": "Laotian Pony",
+            "burmesePony3": "Burmese Pony",
+            "manchuHorse3": "Manchu Horse",
+            "kisoHorse3": "Kiso Horse",
+            "koreanHorse3": "Korean Horse",
+            "arabian": "Arabian",
+            "spanishAndalusian": "Spanish Andalusian",
+            "thoroughbred": "Thoroughbred",
+            "frenchHorse": "French Horse",
+            "germanHorse": "German Horse",
+            "italianHorse": "Italian Horse",
+            "belgianDraft": "Belgian Draft",
+            "dutchHorse": "Dutch Horse",
+            "danishHorse": "Danish Horse",
+            "norwegianFjord": "Norwegian Fjord",
+            "swedishHorse": "Swedish Horse",
+            "finnhorse": "Finnhorse",
+            "estonianHorse": "Estonian Horse",
+            "latvianHorse": "Latvian Horse",
+            "lithuanianHorse": "Lithuanian Horse",
+            "konik": "Konik",
+            "donHorse2": "Don Horse",
+            "kubanHorse2": "Kuban Horse",
+            "ukrainianHorse2": "Ukrainian Horse",
+            "belarusianHorse2": "Belarusian Horse"
+        };
+        return breedMap[breedValue] || breedValue;
+    };
+
+    // Render Horses Content
+    const renderHorsesContent = () => {
+        if (isLoadingHorses || isLoadingHorseReservations) {
+            return (
+                <div className="flex items-center justify-center py-12">
+                    <div className="animate-pulse flex flex-col items-center">
+                        <div className="w-16 h-16 rounded-full bg-gray-200 mb-4"></div>
+                        <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 w-24 bg-gray-200 rounded"></div>
+                    </div>
+                </div>
+            );
+        }
+
+        if (!horses.length) {
+            return (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-8 text-center">
+                    <div className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        {/* <Horse className="w-12 h-12 text-blue-500" /> */}
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{t("profile:noHorsesYet")}</h3>
+                    <p className="text-gray-600 mb-6 max-w-md mx-auto">{t("profile:addYourFirstHorse")}</p>
+                    <button
+                        onClick={() => setShowHorseForm(true)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg"
+                    >
+                        <Plus className="w-5 h-5" />
+                        {t("profile:addFirstHorse")}
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-8 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+            >
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900">{t("profile:yourHorses")}</h2>
+                        <p className="text-gray-500 text-sm">{t("profile:managingCount", { count: horses.length })}</p>
+                    </div>
+                    <button
+                        onClick={() => setShowHorseForm(true)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+                    >
+                        <Plus className="w-5 h-5" />
+                        {t("profile:addHorse")}
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {horses.map((horse, index) => {
+                        const horseReservationsForThisHorse = horseReservations.filter(
+                            reservation => reservation.horse._id === horse._id && horse.listingPurpose === 'rent'
+                        );
+
+                        return (
+                            <motion.div
+                                key={horse._id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="bg-white rounded-xl shadow-lg p-6 flex flex-col relative overflow-hidden border border-gray-100 hover:shadow-xl transition-all"
+                            >
+                                {/* Status ribbon */}
+                                {horse.listingPurpose === 'rent' && (
+                                    <div className="absolute -right-8 top-4 bg-blue-600 text-white px-8 py-1 transform rotate-45 shadow-md">
+                                        {t("profile:forRent")}
+                                    </div>
+                                )}
+
+                                {/* Horse Image and Info */}
+                                <div
+                                    onClick={() => router.push(`horses/${horse._id}`)}
+                                    className="cursor-pointer w-full group"
+                                >
+                                    <div className="relative mb-4">
+                                        <div className="relative mx-auto w-36 h-36">
+                                            <Image
+                                                src={horse?.images?.[0] ? urlFor(horse.images[0]).url() : userFallbackImage}
+                                                alt={horse.fullName}
+                                                className="w-full h-full rounded-full object-cover mx-auto border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
+                                                width={144}
+                                                height={144}
+                                            />
+                                            <span className="absolute bottom-0 right-0 bg-gray-800 text-white text-xs rounded-full w-8 h-8 flex items-center justify-center">
+                                                {horse?.images?.length || 0}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-center mb-4">
+                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{horse.fullName}</h3>
+                                        <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
+                                            <MapPin className="w-3 h-3" />
+                                            <span>{getBreedName(horse.breed)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3 mb-4">
+                                        <div className="bg-gray-50 p-2 rounded-lg">
+                                            <p className="text-xs text-gray-500">{t("profile:listingPurpose")}</p>
+                                            <p className="text-sm font-medium text-gray-800">{horse.listingPurpose}</p>
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded-lg">
+                                            <p className="text-xs text-gray-500">{t("profile:age")}</p>
+                                            <p className="text-sm font-medium text-gray-800">
+                                                {new Date().getFullYear() - new Date(horse.birthDate).getFullYear()} {t("profile:years")}
+                                            </p>
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded-lg">
+                                            <p className="text-xs text-gray-500">{t("profile:gender")}</p>
+                                            <p className="text-sm font-medium text-gray-800">{horse.gender || "-"}</p>
+                                        </div>
+                                        <div className="bg-gray-50 p-2 rounded-lg">
+                                            <p className="text-xs text-gray-500">{t("profile:color")}</p>
+                                            <p className="text-sm font-medium text-gray-800">{horse.mainColor || "-"}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Divider */}
+                                <div className="border-t border-gray-100 my-2"></div>
+
+                                {/* Reservations for Rentable Horses */}
+                                {horse.listingPurpose === 'rent' && (
+                                    <div className="mt-2 w-full">
+                                        <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                                            <CalendarDays className="w-4 h-4 text-blue-500" />
+                                            {t("profile:upcomingReservations")}
+                                        </h4>
+                                        {horseReservationsForThisHorse.length > 0 ? (
+                                            <div className="space-y-3 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                                                {horseReservationsForThisHorse.map(reservation => (
+                                                    <motion.div
+                                                        key={reservation._id}
+                                                        initial={{ opacity: 0, scale: 0.95 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        className={`p-3 rounded-lg border ${getStatusStyles(reservation.status)}`}
+                                                    >
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="flex items-center gap-2">
+                                                                {getStatusIcon(reservation.status)}
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-sm font-medium">
+                                                                        {new Date(reservation.datetime).toLocaleDateString()}
+                                                                    </span>
+                                                                    <span className="text-xs text-gray-500">
+                                                                        {new Date(reservation.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-col items-end">
+                                                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusBadgeColor(reservation.status)}`}>
+                                                                    {reservation.status}
+                                                                </span>
+                                                                {reservation.renter && (
+                                                                    <span className="text-xs text-gray-500 mt-1">
+                                                                        {reservation.renter.name}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-4 bg-gray-50 rounded-lg">
+                                                <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                                <p className="text-gray-500 text-sm">{t("profile:noReservations")}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Actions */}
+                                <div className="mt-4 flex gap-2">
+                                    <button
+                                        onClick={() => router.push(`horses/${horse._id}`)}
+                                        className="flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition-colors"
+                                    >
+                                        <Eye className="w-4 h-4" />
+                                        {t("profile:view")}
+                                    </button>
+                                    <button
+                                        onClick={() => router.push(`horses/${horse._id}/edit`)}
+                                        className="flex-1 flex items-center justify-center gap-2 bg-gray-50 text-gray-600 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                        {t("profile:edit")}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            </motion.div>
+        );
+    };
+
+    // Helper function to get status badge color
+    const getStatusBadgeColor = (status) => {
+        switch (status) {
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'confirmed':
+                return 'bg-green-100 text-green-800';
+            case 'cancelled':
+                return 'bg-red-100 text-red-800';
+            case 'completed':
+                return 'bg-blue-100 text-blue-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+
+    // Add horses to contentMap
     const contentMap = {
         profile: renderProfileContent,
         services: PremiumProviderServices,
         reservations: renderReservationsContent,
-        settings: renderSettingsContent
+        settings: renderSettingsContent,
+        horses: renderHorsesContent, // Add horses tab content
     };
+
+    // Horse Registration Form Modal
+    const renderHorseFormModal = () => (
+        <Modal
+            isOpen={showHorseForm}
+            onClose={() => setShowHorseForm(false)}
+            title={t("profile:registerNewHorse")}
+        >
+            <HorseRegistrationForm
+                userId={userId}
+                onSuccess={(newHorse) => {
+                    setHorses(prevHorses => [...prevHorses, newHorse]);
+                    setShowHorseForm(false);
+                }}
+            />
+        </Modal>
+    );
 
     return (
         <Layout>
@@ -1251,9 +1691,9 @@ const ProfessionalProfileDashboard = () => {
                 </div>
             </div>
             {renderServiceFormModal()}
+            {renderHorseFormModal()} {/* Add the horse form modal */}
         </Layout>
     );
-
 };
 
 export default ProfessionalProfileDashboard;

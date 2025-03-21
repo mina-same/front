@@ -172,5 +172,12 @@
     "enterValidURL": "Enter a valid URL (e.g., https://example.com)",
     "selectCountry": "Select Country",
     "selectGovernorate": "Select Governorate",
-    "selectCity": "Select City"
+    "selectCity": "Select City",
+    "horses": "horses",
+    "noHorsesYet": "No Horses Registered Yet",
+    "addYourFirstHorse": "Add Your First Horse",
+    "addHorse": "Register a Horse",
+    "yourHorses": "Your Horses",
+    "listingPurpose": "listing Purpose",
+    "forRent": "For Rent"
 }

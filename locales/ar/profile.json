@@ -173,5 +173,11 @@
     "enterValidURL": "أدخل عنوان URL صالح (مثل: https://example.com)",
     "selectCountry": "اختر الدولة",
     "selectGovernorate": "اختر المحافظة",
-    "selectCity": "اختر المدينة"
+    "selectCity": "اختر المدينة",
+    "horses": "الخيل",
+    "noHorsesYet": "لا توجد خيول مسجلة بعد",
+    "addYourFirstHorse": "أضف حصانك الأول",
+    "addHorse": "سجّل حصانًا",
+    "listingPurpose": "غرض العرض",
+    "forRent": "للايجار"
 }
