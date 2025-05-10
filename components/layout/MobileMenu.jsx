@@ -145,7 +145,7 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
           >
             <Image
               className="h-10"
-              src="/assets/imgs/logos/logohorse.svg"
+              src="/assets/imgs/logos/logo.png"
               alt="Monst"
               width={125}
               height={40}

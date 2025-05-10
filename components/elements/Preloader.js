@@ -11,7 +11,7 @@ const Preloader = () => {
 							height="0"
 							sizes="100vw"
 							style={{ width: "auto", height: "auto" }} 
-							src="/assets/imgs/logos/logohorse.svg" 
+							src="/assets/imgs/logos/taiarLogo.png" 
 							alt="Monst" 
 						/>
 					</div>

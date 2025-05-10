@@ -1,22 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Layout from "components/layout/Layout";
+import Layout from "../../../../components/layout/Layout";
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, CalendarDays, BriefcaseBusiness, CheckCircle, Plus, Users, Briefcase, UserPlus, Sparkles, ShieldCheck, Zap, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle, Eye, Edit, Horse } from 'lucide-react';
+import { Search, Menu, CalendarDays, BriefcaseBusiness, CheckCircle, Plus, Users, Briefcase, UserPlus, Sparkles, ShieldCheck, Zap, Calendar, Settings, Edit3, Save, Trash, Shield, User, Clock, Star, Phone, MapPin, Check, X, AlertCircle, Eye, Edit, DollarSign, CalendarRange } from 'lucide-react';
 import { client, urlFor } from '../../../lib/sanity';
 import { useRouter } from 'next/navigation';
-import NewProviderServiceForm from 'components/elements/NewProviderServiceForm';
+import NewProviderServiceForm from '../../../../components/elements/NewProviderServiceForm';
 import userFallbackImage from "../../../../public/assets/imgs/elements/user.png";
 import Image from 'next/image';
-import AddServiceForm from "components/elements/AddServiceForm"
-import JoinServiceForm from "components/elements/JoinServiceForm"
-import ServiceRequestsDashboard from "components/elements/ServiceRequestsDashboard"
-import ProviderReservations from "components/elements/ProviderReservations"
-import UserReservations from "components/elements/UserReservations"
+import AddServiceForm from "../../../../components/elements/AddServiceForm"
+import JoinServiceForm from "../../../../components/elements/JoinServiceForm"
+import ServiceRequestsDashboard from "../../../../components/elements/ServiceRequestsDashboard"
+import ProviderReservations from "../../../../components/elements/ProviderReservations"
+import UserReservations from "../../../../components/elements/UserReservations"
 import { useTranslation } from 'react-i18next';
 import { FaHorse } from 'react-icons/fa';
-import HorseRegistrationForm from 'components/elements/HorseRegistrationForm';
+import { LiaHorseHeadSolid } from "react-icons/lia";
+import HorseRegistrationForm from '../../../../components/elements/HorseRegistrationForm';
 
 // Define the delete handlers
 const handleProviderDeletion = async (providerId, client) => {
@@ -470,14 +471,51 @@ const ProfessionalProfileDashboard = () => {
                     _id,
                     email,
                     userName,
+                    fullName,
+                    birthDate,
                     image,
                     phoneNumber,
+                    nationalNumber,
                     userType,
-                    location,
-                    bio,
-                    joinDate,
-                    socialLinks,
-                    isProfileCompleted
+                    kind,
+                    governorate->{
+                        _id,
+                        name_en,
+                        name_ar
+                    },
+                    country->{
+                        _id,
+                        name_en,
+                        name_ar
+                    },
+                    city->{
+                        _id,
+                        name_en,
+                        name_ar
+                    },
+                    addressDetails,
+                    addressLink,
+                    isProfileCompleted,
+                    isEmailVerified,
+                    riderDetails{
+                        eventTypes,
+                        riderLevel,
+                        experienceText,
+                        yearsOfExperience,
+                        certifications[]{
+                            description,
+                            file
+                        },
+                        healthCondition,
+                        medicalCertificates[]
+                    },
+                    providerDetails{
+                        offeredServices
+                    },
+                    horses[]->{
+                        _id,
+                        fullName
+                    }
                 }[0]`;
                 const params = { userId };
                 const userData = await client.fetch(query, params);
@@ -937,12 +975,24 @@ const ProfessionalProfileDashboard = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:fullName")}</label>
                             <input
                                 type="text"
-                                name="userName"
-                                value={formData.userName || ''}
+                                name="fullName"
+                                value={formData.fullName || ''}
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:userName")}</label>
+                            <input
+                                type="text"
+                                name="userName"
+                                value={formData.userName || ''}
+                                onChange={handleChange}
+                                className="w-full px-4(py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:email")}</label>
                             <input
@@ -951,10 +1001,9 @@ const ProfessionalProfileDashboard = () => {
                                 value={formData.email || ''}
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                                disabled // Email typically shouldn't be editable
                             />
                         </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:phone")}</label>
                             <input
@@ -965,27 +1014,201 @@ const ProfessionalProfileDashboard = () => {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
                             />
                         </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:location")}</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:nationalNumber")}</label>
                             <input
                                 type="text"
-                                name="location"
-                                value={formData.location || ''}
+                                name="nationalNumber"
+                                value={formData.nationalNumber || ''}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:birthDate")}</label>
+                            <input
+                                type="date"
+                                name="birthDate"
+                                value={formData.birthDate ? formData.birthDate.split('T')[0] : ''}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:gender")}</label>
+                            <select
+                                name="kind"
+                                value={formData.kind || ''}
+                                onChange={handleChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                            >
+                                <option value="">{t("profile:selectGender")}</option>
+                                <option value="male">{t("profile:male")}</option>
+                                <option value="female">{t("profile:female")}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:addressDetails")}</label>
+                            <input
+                                type="text"
+                                name="addressDetails"
+                                value={formData.addressDetails || ''}
                                 onChange={handleChange}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
                             />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:bio")}</label>
-                        <textarea
-                            name="bio"
-                            value={formData.bio || ''}
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:addressLink")}</label>
+                        <input
+                            type="url"
+                            name="addressLink"
+                            value={formData.addressLink || ''}
                             onChange={handleChange}
-                            rows="4"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
-                        ></textarea>
+                        />
                     </div>
+
+                    {/* Rider Details (Conditional) */}
+                    {user?.userType === 'rider' && (
+                        <div className="space-y-4 border-t pt-6">
+                            <h3 className="text-lg font-semibold">{t("profile:riderDetails")}</h3>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:eventTypes")}</label>
+                                <select
+                                    name="riderDetails.eventTypes"
+                                    multiple
+                                    value={formData.riderDetails?.eventTypes || []}
+                                    onChange={(e) => {
+                                        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            riderDetails: { ...prev.riderDetails, eventTypes: selectedOptions }
+                                        }));
+                                    }}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                                >
+                                    <option value="none">{t("profile:none")}</option>
+                                    <option value="racing">{t("profile:racing")}</option>
+                                    <option value="touring">{t("profile:touring")}</option>
+                                    <option value="training">{t("profile:training")}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:riderLevel")}</label>
+                                <select
+                                    name="riderDetails.riderLevel"
+                                    value={formData.riderDetails?.riderLevel || ''}
+                                    onChange={(e) =>
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            riderDetails: { ...prev.riderDetails, riderLevel: e.target.value }
+                                        }))
+                                    }
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                                >
+                                    <option value="">{t("profile:selectLevel")}</option>
+                                    <option value="beginner">{t("profile:beginner")}</option>
+                                    <option value="intermediate">{t("profile:intermediate")}</option>
+                                    <option value="advanced">{t("profile:advanced")}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:experienceText")}</label>
+                                <textarea
+                                    name="riderDetails.experienceText"
+                                    value={formData.riderDetails?.experienceText || ''}
+                                    onChange={(e) =>
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            riderDetails: { ...prev.riderDetails, experienceText: e.target.value }
+                                        }))
+                                    }
+                                    rows="4"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:yearsOfExperience")}</label>
+                                <input
+                                    type="number"
+                                    name="riderDetails.yearsOfExperience"
+                                    value={formData.riderDetails?.yearsOfExperience || 0}
+                                    onChange={(e) =>
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            riderDetails: { ...prev.riderDetails, yearsOfExperience: Number(e.target.value) }
+                                        }))
+                                    }
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:healthCondition")}</label>
+                                <input
+                                    type="text"
+                                    name="riderDetails.healthCondition"
+                                    value={formData.riderDetails?.healthCondition || ''}
+                                    onChange={(e) =>
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            riderDetails: { ...prev.riderDetails, healthCondition: e.target.value }
+                                        }))
+                                    }
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                                />
+                            </div>
+                            {/* Note: File uploads for certifications and medicalCertificates require a separate UI component */}
+                        </div>
+                    )}
+
+                    {/* Provider Details (Conditional) */}
+                    {user?.userType === 'provider' && (
+                        <div className="space-y-4 border-t pt-6">
+                            <h3 className="text-lg font-semibold">{t("profile:providerDetails")}</h3>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t("profile:offeredServices")}</label>
+                                <select
+                                    name="providerDetails.offeredServices"
+                                    multiple
+                                    value={formData.providerDetails?.offeredServices || []}
+                                    onChange={(e) => {
+                                        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            providerDetails: { ...prev.providerDetails, offeredServices: selectedOptions }
+                                        }));
+                                    }}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                                >
+                                    <option value="horse_stable">{t("profile:horseStable")}</option>
+                                    <option value="veterinary">{t("profile:veterinary")}</option>
+                                    <option value="competitions">{t("profile:competitions")}</option>
+                                    <option value="housing">{t("profile:housing")}</option>
+                                    <option value="trip_coordinator">{t("profile:tripCoordinator")}</option>
+                                    <option value="horse_catering">{t("profile:horseCatering")}</option>
+                                    <option value="horse_transport">{t("profile:horseTransport")}</option>
+                                    <option value="contractors">{t("profile:contractors")}</option>
+                                    <option value="suppliers">{t("profile:suppliers")}</option>
+                                    <option value="horse_trainer">{t("profile:horseTrainer")}</option>
+                                    <option value="hoof_trimmer">{t("profile:hoofTrimmer")}</option>
+                                    <option value="horse_grooming">{t("profile:horseGrooming")}</option>
+                                    <option value="horse_course_provider">{t("profile:horseCourseProvider")}</option>
+                                    <option value="digital_library_services">{t("profile:digitalLibraryServices")}</option>
+                                    <option value="event_judging">{t("profile:eventJudging")}</option>
+                                    <option value="marketing_promotion">{t("profile:marketingPromotion")}</option>
+                                    <option value="event_commentary">{t("profile:eventCommentary")}</option>
+                                    <option value="consulting_services">{t("profile:consultingServices")}</option>
+                                    <option value="photography_services">{t("profile:photographyServices")}</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex space-x-4">
                         <button
                             type="button"
@@ -1013,23 +1236,113 @@ const ProfessionalProfileDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:fullName")}</h4>
-                            <p className="text-lg font-semibold text-gray-900">{user?.userName || 'N/A'}</p>
+                            <p className="text-lg font-semibold text-gray-900">{user?.fullName || 'N/A'}</p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:email")}</h4>
-                            <p className="text-lg font-semibold text-gray-900">{user?.email || 'N/A'}</p>
+                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:userName")}</h4>
+                            <p className="text-lg font-semibold text-gray-900">{user?.userName || 'N/A'}</p>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
+                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:email")}</h4>
+                            <p className="text-lg font-semibold text-gray-900">{user?.email || 'N/A'}</p>
+                        </div>
+                        <div>
                             <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:phone")}</h4>
                             <p className="text-lg font-semibold text-gray-900">{user?.phoneNumber || 'N/A'}</p>
                         </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:location")}</h4>
-                            <p className="text-lg font-semibold text-gray-900">{user?.location || 'N/A'}</p>
+                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:nationalNumber")}</h4>
+                            <p className="text-lg font-semibold text-gray-900">{user?.nationalNumber || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:birthDate")}</h4>
+                            <p className="text-lg font-semibold text-gray-900">
+                                {user?.birthDate ? new Date(user.birthDate).toLocaleDateString() : 'N/A'}
+                            </p>
                         </div>
                     </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:gender")}</h4>
+                            <p className="text-lg font-semibold text-gray-900">
+                                {user?.kind ? t(`profile:${user.kind}`) : 'N/A'}
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:location")}</h4>
+                            <p className="text-lg font-semibold text-gray-900">
+                                {user?.city ? `${user.city[isRTL ? 'name_ar' : 'name_en']}, ${user.governorate[isRTL ? 'name_ar' : 'name_en']}, ${user.country[isRTL ? 'name_ar' : 'name_en']}` : 'N/A'}
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:addressDetails")}</h4>
+                        <p className="text-lg font-semibold text-gray-900">{user?.addressDetails || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:addressLink")}</h4>
+                        <a
+                            href={user?.addressLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-lg font-semibold text-blue-600 hover:underline"
+                        >
+                            {user?.addressLink || 'N/A'}
+                        </a>
+                    </div>
+
+                    {/* Rider Details (Conditional) */}
+                    {user?.userType === 'rider' && (
+                        <div className="space-y-4 border-t pt-6">
+                            <h3 className="text-lg font-semibold">{t("profile:riderDetails")}</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:eventTypes")}</h4>
+                                    <p className="text-lg font-semibold text-gray-900">
+                                        {user?.riderDetails?.eventTypes?.map(type => t(`profile:${type}`)).join(', ') || 'N/A'}
+                                    </p>
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:riderLevel")}</h4>
+                                    <p className="text-lg font-semibold text-gray-900">
+                                        {user?.riderDetails?.riderLevel ? t(`profile:${user.riderDetails.riderLevel}`) : 'N/A'}
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:experienceText")}</h4>
+                                <p className="text-lg font-semibold text-gray-900">{user?.riderDetails?.experienceText || 'N/A'}</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:yearsOfExperience")}</h4>
+                                    <p className="text-lg font-semibold text-gray-900">{user?.riderDetails?.yearsOfExperience || '0'}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:healthCondition")}</h4>
+                                    <p className="text-lg font-semibold text-gray-900">{user?.riderDetails?.healthCondition || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Provider Details (Conditional) */}
+                    {user?.userType === 'provider' && (
+                        <div className="space-y-4 border-t pt-6">
+                            <h3 className="text-lg font-semibold">{t("profile:providerDetails")}</h3>
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-600 mb-2">{t("profile:offeredServices")}</h4>
+                                <p className="text-lg font-semibold text-gray-900">
+                                    {user?.providerDetails?.offeredServices?.map(service => t(`profile:${service}`)).join(', ') || 'N/A'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="border-t pt-6 mt-6">
                         <button
                             onClick={() => setIsEditing(true)}
@@ -1175,6 +1488,58 @@ const ProfessionalProfileDashboard = () => {
             </div>
         </motion.div>
     );
+
+    const handleHorseDeletion = async (horseId, client) => {
+        try {
+            // Check for any reservations (regardless of status)
+            const reservations = await client.fetch(`
+                *[_type == "horseReservation" && horse._ref == $horseId]{
+                    _id,
+                    status
+                }
+            `, { horseId });
+
+            if (reservations.length > 0) {
+                throw new Error('Cannot delete horse with existing reservations');
+            }
+
+            // Delete all horse ratings associated with this horse
+            await client.fetch(`
+                *[_type == "horseRating" && horse._ref == $horseId]{_id}
+            `, { horseId })
+                .then(ratings => {
+                    return Promise.all(ratings.map(rating =>
+                        client.delete(rating._id)
+                    ));
+                });
+
+            // Remove horse reference from user's horses array
+            await client.fetch(`
+                *[_type == "user" && references($horseId)]{_id}
+            `, { horseId })
+                .then(users => {
+                    return Promise.all(users.map(user =>
+                        client.patch(user._id)
+                            .unset([`horses[_ref == "${horseId}"]`])
+                            .commit()
+                    ));
+                });
+
+            // Delete the horse document
+            await client.delete(horseId);
+
+            return {
+                success: true,
+                message: 'Horse deleted successfully'
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message || 'Failed to delete horse',
+                error: error.message
+            };
+        }
+    };
 
     const PremiumProviderServices = () => {
         if (!providers.length && user?.userType === 'provider') {
@@ -1343,11 +1708,11 @@ const ProfessionalProfileDashboard = () => {
     const renderHorsesContent = () => {
         if (isLoadingHorses || isLoadingHorseReservations) {
             return (
-                <div className="flex items-center justify-center py-12">
+                <div className="flex items-center justify-center py-20 h-96">
                     <div className="animate-pulse flex flex-col items-center">
-                        <div className="w-16 h-16 rounded-full bg-gray-200 mb-4"></div>
-                        <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 w-24 bg-gray-200 rounded"></div>
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-r from-[#f5e8b2] via-[#b28a2f] to-[#8c6b23] mb-6"></div>
+                        <div className="h-5 w-48 bg-gradient-to-r from-[#f5e8b2] via-[#b28a2f] to-[#8c6b23] rounded-full mb-4"></div>
+                        <div className="h-4 w-36 bg-gradient-to-r from-[#f5e8b2] via-[#b28a2f] to-[#8c6b23] rounded-full"></div>
                     </div>
                 </div>
             );
@@ -1355,48 +1720,146 @@ const ProfessionalProfileDashboard = () => {
 
         if (!horses.length) {
             return (
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-8 text-center">
-                    <div className="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                        {/* <Horse className="w-12 h-12 text-blue-500" /> */}
+                <div className="bg-gray-50 rounded-2xl p-16 text-center shadow-lg">
+                    <div className="mx-auto w-32 h-32 bg-gradient-to-br from-[#f5e8b2] via-[#b28a2f] to-[#8c6b23] rounded-full flex items-center justify-center mb-7 shadow-inner">
+                        <LiaHorseHeadSolid className="w-16 h-16 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{t("profile:noHorsesYet")}</h3>
-                    <p className="text-gray-600 mb-6 max-w-md mx-auto">{t("profile:addYourFirstHorse")}</p>
+                    <h3 className="text-3xl font-bold text-gray-800 mb-4">{t("profile:noHorsesYet")}</h3>
+                    <p className="text-gray-600 mb-10 max-w-lg mx-auto leading-relaxed text-lg">{t("profile:addYourFirstHorse")}</p>
                     <button
                         onClick={() => setShowHorseForm(true)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg"
+                        className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#8c6b23] via-[#b28a2f] to-[#8c6b23] text-white rounded-xl hover:from-[#70541b] hover:via-[#8c6b23] hover:to-[#70541b] transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-medium"
                     >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-6 h-6" />
                         {t("profile:addFirstHorse")}
                     </button>
                 </div>
             );
         }
 
+        const handleDeleteHorse = async (horseId) => {
+            if (window.confirm(t("profile:confirmDeleteHorse"))) {
+                try {
+                    const result = await handleHorseDeletion(horseId, client);
+                    if (result.success) {
+                        // Update local state to remove the horse
+                        setHorses(prevHorses => prevHorses.filter(horse => horse._id !== horseId));
+                        setHorseReservations(prevReservations =>
+                            prevReservations.filter(reservation => reservation.horse._id !== horseId)
+                        );
+                        toast({
+                            title: t("profile:horseDeleted"),
+                            description: t("profile:horseDeletedSuccess"),
+                            status: "success",
+                            duration: 5000,
+                            isClosable: true,
+                        });
+                    } else {
+                        setError(result.message);
+                        toast({
+                            title: t("profile:deleteFailed"),
+                            description: result.message,
+                            status: "error",
+                            duration: 5000,
+                            isClosable: true,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error deleting horse:', error);
+                    setError('Failed to delete horse.');
+                    toast({
+                        title: t("profile:deleteFailed"),
+                        description: t("profile:genericError"),
+                        status: "error",
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }
+            }
+        };
+
+        // Calculate stats for summary cards
+        const totalHorses = horses.length;
+        const rentableHorses = horses.filter(horse => horse.listingPurpose === 'rent').length;
+        const upcomingReservationsCount = horseReservations.filter(
+            res => new Date(res.datetime) > new Date()
+        ).length;
+
         return (
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="space-y-8 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+                className="space-y-12 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16"
             >
-                <div className="flex justify-between items-center">
+                {/* Dashboard Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">{t("profile:yourHorses")}</h2>
-                        <p className="text-gray-500 text-sm">{t("profile:managingCount", { count: horses.length })}</p>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-[#b28a2f] via-[#8c6b23] to-[#70541b] bg-clip-text text-transparent">{t("profile:yourHorses")}</h2>
+                        <p className="text-gray-500 mt-1">{t("profile:managingCount", { count: horses.length })}</p>
                     </div>
                     <button
                         onClick={() => setShowHorseForm(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#8c6b23] via-[#b28a2f] to-[#8c6b23] text-white rounded-xl hover:from-[#70541b] hover:via-[#8c6b23] hover:to-[#70541b] transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-medium"
                     >
                         <Plus className="w-5 h-5" />
                         {t("profile:addHorse")}
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Stats Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-gradient-to-br from-[#fcfc9e54] to-[#f5e8b2] rounded-2xl p-6 shadow-md border border-[#f5e8b2]">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-[#8c6b23] font-semibold">{t("profile:totalHorses")}</h3>
+                            <div className="bg-[#f5e8b2] p-2 rounded-lg">
+                                <LiaHorseHeadSolid className="w-6 h-6 text-[#8c6b23]" />
+                            </div>
+                        </div>
+                        <p className="text-3xl font-bold text-[#4a3b12]">{totalHorses}</p>
+                        <div className="mt-2 text-[#8c6b23] text-sm font-medium">
+                            {t("profile:stableOverview")}
+                        </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-[#fcfc9e54] to-[#f5e8b2] rounded-2xl p-6 shadow-md border border-[#f5e8b2]">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-[#8c6b23] font-semibold">{t("profile:rentableHorses")}</h3>
+                            <div className="bg-[#f5e8b2] p-2 rounded-lg">
+                                <DollarSign className="w-6 h-6 text-[#8c6b23]" />
+                            </div>
+                        </div>
+                        <p className="text-3xl font-bold text-[#4a3b12]">{rentableHorses}</p>
+                        <div className="mt-2 text-[#8c6b23] text-sm font-medium">
+                            {(rentableHorses / totalHorses * 100).toFixed(0)}% {t("profile:ofYourCollection")}
+                        </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-[#fcfc9e54] to-[#f5e8b2] rounded-2xl p-6 shadow-md border border-[#f5e8b2]">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-[#8c6b23] font-semibold">{t("profile:upcomingBookings")}</h3>
+                            <div className="bg-[#f5e8b2] p-2 rounded-lg">
+                                <Calendar className="w-6 h-6 text-[#8c6b23]" />
+                            </div>
+                        </div>
+                        <p className="text-3xl font-bold text-[#4a3b12]">{upcomingReservationsCount}</p>
+                        <div className="mt-2 text-[#8c6b23] text-sm font-medium">
+                            {t("profile:nextSevenDays")}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Horse Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {horses.map((horse, index) => {
                         const horseReservationsForThisHorse = horseReservations.filter(
                             reservation => reservation.horse._id === horse._id && horse.listingPurpose === 'rent'
                         );
+
+                        // Calculate upcoming reservations
+                        const now = new Date();
+                        const upcomingReservations = horseReservationsForThisHorse.filter(
+                            res => new Date(res.datetime) > now
+                        ).sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 
                         return (
                             <motion.div
@@ -1404,11 +1867,16 @@ const ProfessionalProfileDashboard = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className="bg-white rounded-xl shadow-lg p-6 flex flex-col relative overflow-hidden border border-gray-100 hover:shadow-xl transition-all"
+                                className="bg-white rounded-2xl shadow-xl p-6 flex flex-col relative overflow-hidden border border-gray-100"
+                                whileHover={{
+                                    y: -8,
+                                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+                                    borderColor: "rgba(178, 138, 47, 0.4)"
+                                }}
                             >
                                 {/* Status ribbon */}
                                 {horse.listingPurpose === 'rent' && (
-                                    <div className="absolute -right-8 top-4 bg-blue-600 text-white px-8 py-1 transform rotate-45 shadow-md">
+                                    <div className="absolute -right-12 top-7 bg-gradient-to-r from-[#b28a2f] via-[#8c6b23] to-[#70541b] text-white px-12 py-1.5 transform rotate-45 shadow-lg font-medium text-sm">
                                         {t("profile:forRent")}
                                     </div>
                                 )}
@@ -1418,128 +1886,267 @@ const ProfessionalProfileDashboard = () => {
                                     onClick={() => router.push(`horses/${horse._id}`)}
                                     className="cursor-pointer w-full group"
                                 >
-                                    <div className="relative mb-4">
-                                        <div className="relative mx-auto w-36 h-36">
+                                    <div className="relative mb-7">
+                                        <div className="relative mx-auto w-44 h-44">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-[#f5e8b2] via-[#b28a2f] to-[#8c6b23] opacity-20 rounded-full transform scale-105"></div>
                                             <Image
                                                 src={horse?.images?.[0] ? urlFor(horse.images[0]).url() : userFallbackImage}
                                                 alt={horse.fullName}
-                                                className="w-full h-full rounded-full object-cover mx-auto border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
-                                                width={144}
-                                                height={144}
+                                                className="w-full h-full rounded-full object-cover mx-auto border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-500"
+                                                width={176}
+                                                height={176}
                                             />
-                                            <span className="absolute bottom-0 right-0 bg-gray-800 text-white text-xs rounded-full w-8 h-8 flex items-center justify-center">
-                                                {horse?.images?.length || 0}
-                                            </span>
+                                            <motion.div
+                                                className="absolute bottom-2 right-2 bg-white p-1.5 rounded-full shadow-lg"
+                                                whileHover={{ scale: 1.1 }}
+                                            >
+                                                <span className="bg-gradient-to-r from-[#8c6b23] via-[#b28a2f] to-[#8c6b23] text-white text-xs rounded-full w-8 h-8 flex items-center justify-center font-semibold">
+                                                    {horse?.images?.length || 0}
+                                                </span>
+                                            </motion.div>
                                         </div>
                                     </div>
 
-                                    <div className="text-center mb-4">
-                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{horse.fullName}</h3>
-                                        <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
-                                            <MapPin className="w-3 h-3" />
+                                    <div className="text-center mb-6">
+                                        <h3 className="text-2xl font-bold text-gray-900 group-hover:bg-gradient-to-r group-hover:from-[#8c6b23] group-hover:via-[#b28a2f] group-hover:to-[#8c6b23] group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                                            {horse.fullName}
+                                        </h3>
+                                        <div className="flex items-center justify-center gap-2 text-gray-500 text-sm mt-2">
+                                            <MapPin className="w-4 h-4 text-[#b28a2f]" />
                                             <span>{getBreedName(horse.breed)}</span>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-3 mb-4">
-                                        <div className="bg-gray-50 p-2 rounded-lg">
-                                            <p className="text-xs text-gray-500">{t("profile:listingPurpose")}</p>
-                                            <p className="text-sm font-medium text-gray-800">{horse.listingPurpose}</p>
+                                    <div className="grid grid-cols-2 gap-4 mb-6">
+                                        <div className="bg-gradient-to-br from-gray-50 to-[#fcfc9e54] p-4 rounded-xl shadow-sm border border-[#f5e8b2]">
+                                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t("profile:listingPurpose")}</p>
+                                            <p className="text-sm font-semibold text-gray-800 capitalize mt-1">
+                                                {horse.listingPurpose === 'rent' ? (
+                                                    <span className="flex items-center text-[#8c6b23]">
+                                                        <DollarSign className="w-3.5 h-3.5 mr-1" />
+                                                        {horse.listingPurpose}
+                                                    </span>
+                                                ) : horse.listingPurpose}
+                                            </p>
                                         </div>
-                                        <div className="bg-gray-50 p-2 rounded-lg">
-                                            <p className="text-xs text-gray-500">{t("profile:age")}</p>
-                                            <p className="text-sm font-medium text-gray-800">
+                                        <div className="bg-gradient-to-br from-gray-50 to-[#fcfc9e54] p-4 rounded-xl shadow-sm border border-[#f5e8b2]">
+                                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t("profile:age")}</p>
+                                            <p className="text-sm font-semibold text-gray-800 mt-1">
                                                 {new Date().getFullYear() - new Date(horse.birthDate).getFullYear()} {t("profile:years")}
                                             </p>
                                         </div>
-                                        <div className="bg-gray-50 p-2 rounded-lg">
-                                            <p className="text-xs text-gray-500">{t("profile:gender")}</p>
-                                            <p className="text-sm font-medium text-gray-800">{horse.gender || "-"}</p>
+                                        <div className="bg-gradient-to-br from-gray-50 to-[#fcfc9e54] p-4 rounded-xl shadow-sm border border-[#f5e8b2]">
+                                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t("profile:gender")}</p>
+                                            <p className="text-sm font-semibold text-gray-800 capitalize mt-1">
+                                                {horse.gender === 'male' ? (
+                                                    <span className="flex items-center text-[#8c6b23]">
+                                                        <span className="w-3.5 h-3.5 mr-1 text-[#8c6b23]">♂</span>
+                                                        {horse.gender}
+                                                    </span>
+                                                ) : horse.gender === 'female' ? (
+                                                    <span className="flex items-center text-rose-700">
+                                                        <span className="w-3.5 h-3.5 mr-1 text-rose-600">♀</span>
+                                                        {horse.gender}
+                                                    </span>
+                                                ) : horse.gender || "-"}
+                                            </p>
                                         </div>
-                                        <div className="bg-gray-50 p-2 rounded-lg">
-                                            <p className="text-xs text-gray-500">{t("profile:color")}</p>
-                                            <p className="text-sm font-medium text-gray-800">{horse.mainColor || "-"}</p>
+                                        <div className="bg-gradient-to-br from-gray-50 to-[#fcfc9e54] p-4 rounded-xl shadow-sm border border-[#f5e8b2]">
+                                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{t("profile:color")}</p>
+                                            <div className="flex items-center mt-1">
+                                                <div
+                                                    className="w-3 h-3 rounded-full mr-2"
+                                                    style={{ backgroundColor: getColorHex(horse.mainColor) }}
+                                                ></div>
+                                                <p className="text-sm font-semibold text-gray-800 capitalize">
+                                                    {horse.mainColor || "-"}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Divider */}
-                                <div className="border-t border-gray-100 my-2"></div>
+                                {/* Divider with gradient */}
+                                <div className="h-px bg-gradient-to-r from-transparent via-[#f5e8b2] to-transparent my-4"></div>
 
                                 {/* Reservations for Rentable Horses */}
                                 {horse.listingPurpose === 'rent' && (
-                                    <div className="mt-2 w-full">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                                            <CalendarDays className="w-4 h-4 text-blue-500" />
+                                    <div className="mt-3 w-full">
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                            <CalendarDays className="w-4 h-4 text-[#b28a2f]" />
                                             {t("profile:upcomingReservations")}
                                         </h4>
-                                        {horseReservationsForThisHorse.length > 0 ? (
-                                            <div className="space-y-3 max-h-48 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                                                {horseReservationsForThisHorse.map(reservation => (
-                                                    <motion.div
-                                                        key={reservation._id}
-                                                        initial={{ opacity: 0, scale: 0.95 }}
-                                                        animate={{ opacity: 1, scale: 1 }}
-                                                        className={`p-3 rounded-lg border ${getStatusStyles(reservation.status)}`}
-                                                    >
-                                                        <div className="flex justify-between items-center">
-                                                            <div className="flex items-center gap-2">
-                                                                {getStatusIcon(reservation.status)}
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-sm font-medium">
-                                                                        {new Date(reservation.datetime).toLocaleDateString()}
+                                        {upcomingReservations.length > 0 ? (
+                                            <div className="space-y-3 max-h-52 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-[#b28a2f] scrollbar-track-gray-100 custom-scrollbar">
+                                                {upcomingReservations.slice(0, 3).map(reservation => {
+                                                    const isToday = new Date(reservation.datetime).toDateString() === new Date().toDateString();
+
+                                                    return (
+                                                        <motion.div
+                                                            key={reservation._id}
+                                                            initial={{ opacity: 0, scale: 0.95 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            className={`p-4 rounded-xl border shadow-sm ${getStatusStyles(reservation.status)}`}
+                                                            whileHover={{
+                                                                scale: 1.03,
+                                                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+                                                            }}
+                                                        >
+                                                            <div className="flex justify-between items-center">
+                                                                <div className="flex items-center gap-3">
+                                                                    {getStatusIcon(reservation.status)}
+                                                                    <div className="flex flex-col">
+                                                                        <div className="flex items-center">
+                                                                            <span className="text-sm font-semibold">
+                                                                                {isToday ? 'Today' : new Date(reservation.datetime).toLocaleDateString(undefined,
+                                                                                    { weekday: 'short', month: 'short', day: 'numeric' })}
+                                                                            </span>
+                                                                            {isToday && (
+                                                                                <span className="ml-2 bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                                                                                    Today
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <span className="text-xs text-gray-500 flex items-center">
+                                                                            <Clock className="w-3 h-3 inline mr-1" />
+                                                                            {new Date(reservation.datetime).toLocaleTimeString([],
+                                                                                { hour: '2-digit', minute: '2-digit' })}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex flex-col items-end">
+                                                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${getStatusBadgeColor(reservation.status)}`}>
+                                                                        {reservation.status}
                                                                     </span>
-                                                                    <span className="text-xs text-gray-500">
-                                                                        {new Date(reservation.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                    </span>
+                                                                    {reservation.renter && (
+                                                                        <div className="flex items-center text-xs text-gray-500 mt-1.5">
+                                                                            <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#b28a2f] to-[#8c6b23] mr-1.5 flex items-center justify-center text-white uppercase font-bold text-[10px]">
+                                                                                {reservation.renter.name.charAt(0)}
+                                                                            </div>
+                                                                            {reservation.renter.name}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
-                                                            <div className="flex flex-col items-end">
-                                                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusBadgeColor(reservation.status)}`}>
-                                                                    {reservation.status}
-                                                                </span>
-                                                                {reservation.renter && (
-                                                                    <span className="text-xs text-gray-500 mt-1">
-                                                                        {reservation.renter.name}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
+                                                        </motion.div>
+                                                    )
+                                                })}
+                                                {upcomingReservations.length > 3 && (
+                                                    <button className="w-full text-center py-2 text-sm text-[#8c6b23] hover:text-[#70541b] font-medium bg-[#fcfc9e54] rounded-xl hover:bg-[#f5e8b2] transition-colors">
+                                                        +{upcomingReservations.length - 3} {t("profile:moreReservations")}
+                                                    </button>
+                                                )}
                                             </div>
                                         ) : (
-                                            <div className="text-center py-4 bg-gray-50 rounded-lg">
-                                                <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                                <p className="text-gray-500 text-sm">{t("profile:noReservations")}</p>
+                                            <div className="text-center py-6 bg-gradient-to-br from-gray-50 to-[#fcfc9e54] rounded-xl border border-[#f5e8b2]">
+                                                <Calendar className="w-12 h-12 text-[#b28a2f] mx-auto mb-3 opacity-60" />
+                                                <p className="text-gray-600 font-medium mb-2">{t("profile:noReservations")}</p>
+                                                <button className="mt-1 text-sm text-[#8c6b23] font-medium hover:text-[#70541b] bg-white py-2 px-4 rounded-lg shadow-sm border border-[#f5e8b2] hover:shadow-md transition-all inline-flex items-center">
+                                                    <CalendarRange className="w-4 h-4 mr-1.5" />
+                                                    {t("profile:manageAvailability")}
+                                                </button>
                                             </div>
                                         )}
                                     </div>
                                 )}
 
+                                {/* Horse Rating */}
+                                <div className="mt-5 px-3 py-2 bg-gradient-to-r from-[#fcfc9e54] to-[#f5e8b2] rounded-lg flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <Star className="w-5 h-5 text-[#b28a2f] mr-1.5" fill="#b28a2f" />
+                                        <div className="text-sm font-medium text-gray-700">
+                                            {horse.rating || '4.8'} <span className="text-gray-500 font-normal">({horse.reviewCount || '12'} {t("profile:reviews")})</span>
+                                        </div>
+                                    </div>
+                                    <button className="text-xs text-[#8c6b23] hover:text-[#70541b]">
+                                        {t("profile:viewAll")}
+                                    </button>
+                                </div>
+
                                 {/* Actions */}
-                                <div className="mt-4 flex gap-2">
-                                    <button
+                                <div className="mt-auto pt-5 flex gap-2.5">
+                                    <motion.button
                                         onClick={() => router.push(`horses/${horse._id}`)}
-                                        className="flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-600 py-2 rounded-lg hover:bg-blue-100 transition-colors"
+                                        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#8c6b23] to-[#b28a2f] text-white py-3 rounded-xl hover:from-[#70541b] hover:to-[#8c6b23] transition-colors font-medium shadow-md hover:shadow-lg"
+                                        whileHover={{ y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
                                     >
                                         <Eye className="w-4 h-4" />
                                         {t("profile:view")}
-                                    </button>
-                                    <button
+                                    </motion.button>
+                                    <motion.button
                                         onClick={() => router.push(`horses/${horse._id}/edit`)}
-                                        className="flex-1 flex items-center justify-center gap-2 bg-gray-50 text-gray-600 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 py-3 rounded-xl hover:from-gray-200 hover:to-gray-300 transition-colors font-medium shadow-md hover:shadow-lg"
+                                        whileHover={{ y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
                                     >
                                         <Edit className="w-4 h-4" />
                                         {t("profile:edit")}
-                                    </button>
+                                    </motion.button>
+                                    <div className="group relative">
+                                        <motion.button
+                                            onClick={() => handleDeleteHorse(horse._id)}
+                                            className="w-12 flex items-center justify-center gap-2 bg-gradient-to-r from-red-50 to-red-100 text-red-600 py-3 rounded-xl hover:from-red-100 hover:to-red-200 transition-colors font-medium shadow-md hover:shadow-lg"
+                                            whileHover={{ y: -2 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Trash className="w-5 h-5" />
+                                        </motion.button>
+                                        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1.5 px-3 whitespace-nowrap pointer-events-none z-10">
+                                            {t("profile:deleteHorse")}
+                                        </div>
+                                    </div>
                                 </div>
                             </motion.div>
                         );
                     })}
                 </div>
+
+                {/* Pagination with animated dots */}
+                {horses.length > 6 && (
+                    <div className="flex justify-center mt-8">
+                        <nav className="inline-flex bg-white rounded-full px-1.5 py-1.5 shadow-lg border border-gray-100">
+                            <button className="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:bg-[#fcfc9e54] hover:text-[#8c6b23] transition-colors">
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <button className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-r from-[#8c6b23] to-[#b28a2f] text-white shadow-md">
+                                1
+                            </button>
+                            <button className="w-10 h-10 flex items-center justify-center rounded-full text-gray-700 hover:bg-[#fcfc9e54] hover:text-[#8c6b23] transition-colors">
+                                2
+                            </button>
+                            <button className="w-10 h-10 flex items-center justify-center rounded-full text-gray-700 hover:bg-[#fcfc9e54] hover:text-[#8c6b23] transition-colors">
+                                3
+                            </button>
+                            <button className="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:bg-[#fcfc9e54] hover:text-[#8c6b23] transition-colors">
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </nav>
+                    </div>
+                )}
             </motion.div>
         );
+    };
+
+    // Helper function for horse color hex
+    const getColorHex = (color) => {
+        const colorMap = {
+            'brown': '#8B4513',
+            'black': '#222222',
+            'white': '#f8f9fa',
+            'gray': '#6c757d',
+            'chestnut': '#954535',
+            'bay': '#8B0000',
+            'palomino': '#FFD700',
+            'cremello': '#FFF8DC',
+            'dun': '#D2B48C',
+            'buckskin': '#DEB887',
+            'roan': '#B0C4DE',
+            'pinto': '#8FBC8F',
+            'appaloosa': '#F0E68C',
+        };
+
+        return colorMap[color?.toLowerCase()] || '#8B4513';
     };
 
     // Helper function to get status badge color
@@ -1557,7 +2164,6 @@ const ProfessionalProfileDashboard = () => {
                 return 'bg-gray-100 text-gray-800';
         }
     };
-
 
     // Add horses to contentMap
     const contentMap = {

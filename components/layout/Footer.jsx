@@ -27,7 +27,7 @@ const Footer = () => {
                 sizes="100vw"
                 style={{ width: "auto", height: "auto" }}
                 className="h-10"
-                src="/assets/imgs/logos/logohorse.svg"
+                src="/assets/imgs/logos/logo.png"
                 alt="Monst"
               />
             </Link>

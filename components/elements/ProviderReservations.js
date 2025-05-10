@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Calendar, Clock, Check, X, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import userFallbackImage from "../../public/assets/imgs/elements/user.png";
-import { urlFor } from '@/lib/sanity';
+import { urlFor } from '../../src/lib/sanity';
 
 const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
     const { t } = useTranslation();

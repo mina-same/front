@@ -1,7 +1,15 @@
+// /api/auth/login
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createClient } from 'next-sanity';
+import { OAuth2Client } from 'google-auth-library';
 import { NextResponse } from 'next/server';
+
+const googleClient = new OAuth2Client({
+  clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  redirectUri: process.env.GOOGLE_REDIRECT_URI,
+});
 
 const sanityClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
@@ -10,9 +18,7 @@ const sanityClient = createClient({
   useCdn: false,
 });
 
-// Named export for POST method
 export async function POST(req) {
-  // Check if the request body is empty or malformed
   let body;
   try {
     body = await req.json();
@@ -20,45 +26,82 @@ export async function POST(req) {
     return NextResponse.json({ message: 'Invalid JSON or empty body.' }, { status: 400 });
   }
 
-  const { email, password } = body;
-
-  // Check if email and password are provided
-  if (!email || !password) {
-    return NextResponse.json({ message: 'Email and password are required.' }, { status: 400 });
-  }
+  const { email, password, googleToken } = body;
 
   try {
-    // Fetch the user from the database based on email
+    if (googleToken) {
+      // Verify Google token
+      const ticket = await googleClient.verifyIdToken({
+        idToken: googleToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      const googleId = payload.sub;
+
+      // Find user by googleId
+      const user = await sanityClient.fetch(
+        `*[_type == "user" && googleId == $googleId][0]`,
+        { googleId }
+      );
+
+      if (!user) {
+        return NextResponse.json(
+          { message: 'No account found with this Google ID. Please sign up first.' },
+          { status: 401 }
+        );
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: '1d' }
+      );
+
+      const response = NextResponse.json(
+        { message: 'Login successful with Google', userId: user._id },
+        { status: 200 }
+      );
+      response.cookies.set('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        path: '/',
+        maxAge: 24 * 60 * 60,
+      });
+
+      return response;
+    }
+
+    // Email/Password Login
+    if (!email || !password) {
+      return NextResponse.json({ message: 'Email and password are required.' }, { status: 400 });
+    }
+
     const user = await sanityClient.fetch(`*[_type == "user" && email == $email][0]`, { email });
 
-    // If user doesn't exist or password doesn't match, return an error
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
       return NextResponse.json({ message: 'Invalid credentials.' }, { status: 401 });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '1d' }
     );
 
-    // Create the response
     const response = NextResponse.json({ message: 'Login successful', userId: user._id }, { status: 200 });
-    console.log("user login id", user._id);
-
-    // Set the token in the HTTP-only cookie
     response.cookies.set('token', token, {
-      httpOnly: true, // Prevent access from JavaScript
-      secure: process.env.NODE_ENV === 'production', // Only set secure cookies in production
-      sameSite: 'Strict', // Strict same-site policy for security
-      path: '/', // Make the cookie available across the entire site
-      maxAge: 24 * 60 * 60, // 1 day expiration
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      path: '/',
+      maxAge: 24 * 60 * 60,
     });
 
     return response;
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: 'Internal server error.', error }, { status: 500 });
+    return NextResponse.json({ message: 'Internal server error.', error: error.message }, { status: 500 });
   }
 }

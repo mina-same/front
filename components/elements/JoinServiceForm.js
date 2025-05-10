@@ -6,8 +6,8 @@ import {
   DollarSign, Loader, Home, Stethoscope, Trophy, Building, Map,
   Utensils, Truck, HardHat, Dumbbell, Scissors, ChevronDown
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card } from '../../src/components/ui/card';
+import { Alert, AlertDescription } from '../../src/components/ui/alert';
 import Image from 'next/image';
 
 const JoinServiceForm = ({ currentProviderId, currentUserId, onClose }) => {

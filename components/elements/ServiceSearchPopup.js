@@ -8,10 +8,10 @@ import {
   Utensils, Truck, HardHat, Dumbbell, Scissors, ChevronDown, Sparkles,
   SlidersHorizontal, ChevronUp
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+import { Card } from '../../src/components/ui/card';
+import { Alert, AlertDescription } from '../../src/components/ui/alert';
+import { Slider } from "../../src/components/ui/slider";
+import { Switch } from "../../src/components/ui/switch";
 import Image from 'next/image';
 import { client, urlFor } from '../../src/lib/sanity'; // Make sure this path matches your project structure
 

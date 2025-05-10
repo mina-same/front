@@ -1,18 +1,108 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { MapPin, Phone, Mail, Link as LinkIcon, Calendar, Clock, Award, Users, Heart, Share2 } from 'lucide-react';
+import {
+    MapPin, Phone, Mail, Calendar, Clock, Award, Users,
+    Heart, Share2, Star, Shield, ChevronLeft, ChevronRight,
+    CheckCircle, AlertTriangle, X
+} from 'lucide-react';
 import { client, urlFor } from '../../../../lib/sanity';
 import Layout from 'components/layout/Layout';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import Preloader from 'components/elements/Preloader';
-import ReservationPopup from 'components/elements/ReservationPopup';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import ReservationPopup from 'components/elements/ReservationPopup';
+import Preloader from 'components/elements/Preloader';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Alert component
+const Alert = ({ message, isVisible, onClose, type }) => (
+    <AnimatePresence>
+        {isVisible && (
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-auto"
+            >
+                <div className={`bg-white shadow-xl rounded-lg p-4 flex items-start ${type === "success" ? "border-l-4 border-green-500" : "border-l-4 border-red-500"}`}>
+                    {type === "success" ? (
+                        <CheckCircle className="text-green-500 mr-3" size={24} />
+                    ) : (
+                        <AlertTriangle className="text-red-500 mr-3" size={24} />
+                    )}
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{message}</p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        aria-label="Close alert"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+            </motion.div>
+        )}
+    </AnimatePresence>
+);
+
+// Image Gallery Modal Component
+const ImageGalleryModal = ({ selectedIndex, images, onClose, onNext, onPrev }) => (
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+        onClick={onClose}
+    >
+        <div className="relative max-w-6xl w-full px-6" onClick={e => e.stopPropagation()}>
+            <motion.img
+                key={selectedIndex}
+                initial={{ opacity: 0.5, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0.5, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                src={images[selectedIndex]}
+                alt="Gallery image"
+                className="w-full h-auto max-h-[80vh] object-contain"
+            />
+            <button
+                onClick={onClose}
+                className="absolute top-4 right-4 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all"
+                aria-label="Close gallery"
+            >
+                <X size={24} />
+            </button>
+            <button
+                onClick={onPrev}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-3 rounded-full transition-all"
+                aria-label="Previous image"
+                disabled={selectedIndex === 0}
+            >
+                <ChevronLeft size={28} />
+            </button>
+            <button
+                onClick={onNext}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-3 rounded-full transition-all"
+                aria-label="Next image"
+                disabled={selectedIndex === images.length - 1}
+            >
+                <ChevronRight size={28} />
+            </button>
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
+                {images.map((_, index) => (
+                    <div
+                        key={index}
+                        className={`w-2.5 h-2.5 rounded-full ${selectedIndex === index ? 'bg-white' : 'bg-white bg-opacity-40'}`}
+                    />
+                ))}
+            </div>
+        </div>
+    </motion.div>
+);
 
 export default function ServiceDetailsPage() {
     const { t, i18n } = useTranslation();
@@ -26,93 +116,59 @@ export default function ServiceDetailsPage() {
     const [error, setError] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+    const [activeTab, setActiveTab] = useState('overview');
+    const [alert, setAlert] = useState({ isVisible: false, message: '', type: 'error' });
 
     useEffect(() => {
         if (!serviceId) return;
 
         const fetchServiceAndProvider = async () => {
             try {
-                // First, fetch the service details
                 const serviceQuery = `*[_type == "services" && _id == $serviceId][0]{
-                    ...,
-                    city->{name_ar, name_en},
-                    country->{name_ar, name_en},
-                    government->{name_ar, name_en},
-                    providerRef->{
-                        _id,
-                        name_ar,
-                        name_en,
-                        servicesRef[]->{ // Fetch additional services
-                            _id,
-                            name_ar,
-                            name_en,
-                            image,
-                            serviceType,
-                            price,
-                            statusAdminApproved
-                        }
-                    },
-                    graduationDetails {
-                        graduationCertificate,
-                        previousExperience
-                    },
-                    competitions {
-                        level,
-                        heightDistance,
-                        organiserName,
-                        mainReferee,
-                        coReferee1,
-                        coReferee2,
-                        raceType,
-                        prize,
-                        sponsor,
-                        sponsorLogo,
-                        sponsorshipValue
-                    },
-                    housingDetails {
-                        housingDetails
-                    },
-                    horseTrainerDetails {
-                        trainerLevel,
-                        accreditationCertificate
-                    },
-                    hoofTrimmerDetails {
-                        hoofTrimmerDetails
-                    },
-                    transportDetails {
-                        numberOfHorses,
-                        vehicleType
-                    },
-                    contractorDetails,
-                    supplierDetails,
-                    cateringOptions,
-                    tripCoordinator {
-                        locationOfHorses,
-                        locationOfTent,
-                        startDate,
-                        endDate,
-                        breakTimes,
-                        meals[] {
-                            mealType,
-                            mealDescription
-                        },
-                        containsAidBag,
-                        activities,
-                        priceForFamilyOf2,
-                        priceForFamilyOf3,
-                        priceForFamilyOf4,
-                        tripProgram,
-                        levelOfHardship,
-                        conditionsAndRequirements,
-                        safetyAndEquipment,
-                        cancellationAndRefundPolicy,
-                        moreDetails
-                    }
-                }`;
+          ...,
+          city->{name_ar, name_en},
+          country->{name_ar, name_en},
+          government->{name_ar, name_en},
+          providerRef->{
+            _id,
+            name_ar,
+            name_en,
+            image,
+            servicesRef[]->{
+              _id,
+              name_ar,
+              name_en,
+              image,
+              serviceType,
+              price,
+              statusAdminApproved
+            }
+          },
+          graduationDetails { graduationCertificate, previousExperience },
+          competitions { level, heightDistance, organiserName, mainReferee, coReferee1, coReferee2, raceType, prize, sponsor, sponsorLogo, sponsorshipValue },
+          housingDetails { housingDetails },
+          horseTrainerDetails { trainerLevel, accreditationCertificate },
+          hoofTrimmerDetails { hoofTrimmerDetails },
+          transportDetails { numberOfHorses, vehicleType },
+          contractorDetails,
+          supplierDetails,
+          cateringOptions,
+          tripCoordinator {
+            locationOfHorses, locationOfTent, startDate, endDate, breakTimes, meals[] { mealType, mealDescription },
+            containsAidBag, activities, priceForFamilyOf2, priceForFamilyOf3, priceForFamilyOf4, tripProgram,
+            levelOfHardship, conditionsAndRequirements, safetyAndEquipment, cancellationAndRefundPolicy, moreDetails
+          }
+        }`;
 
                 const serviceData = await client.fetch(serviceQuery, { serviceId });
                 setService(serviceData);
                 setProvider(serviceData.providerRef);
+
+                const likedServices = JSON.parse(localStorage.getItem('likedServices') || '[]');
+                if (likedServices.includes(serviceId)) {
+                    setIsLiked(true);
+                }
             } catch (err) {
                 setError(err);
             } finally {
@@ -123,466 +179,588 @@ export default function ServiceDetailsPage() {
         fetchServiceAndProvider();
     }, [serviceId]);
 
-    if (loading) return <Preloader />;
-    if (error) return <div>Error: {error.message}</div>;
-    if (!service) return <div>{t('serviceDetails:service_not_found')}</div>;
+    const showAlert = useCallback((message, type = 'error') => {
+        setAlert({ isVisible: true, message, type });
+        setTimeout(() => setAlert({ isVisible: false, message: '', type: 'error' }), 3000);
+    }, []);
 
-    const CommonInfo = () => (
-        <div className="mb-8" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="relative h-[600px] w-full mb-12 rounded-2xl overflow-hidden group">
-                <Image
-                    src={service.image ? urlFor(service.image).url() : "/api/placeholder/1600/900"}
-                    alt={isRTL ? service.name_ar : service.name_en}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    width={100}
-                    height={30}
-                />
+    const handleLikeToggle = useCallback(() => {
+        const newIsLiked = !isLiked;
+        setIsLiked(newIsLiked);
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        const likedServices = JSON.parse(localStorage.getItem('likedServices') || '[]');
+        if (newIsLiked) {
+            if (!likedServices.includes(serviceId)) {
+                likedServices.push(serviceId);
+            }
+            showAlert(t('serviceDetails:service_added_to_favorites'), 'success');
+        } else {
+            const updatedLikedServices = likedServices.filter(id => id !== serviceId);
+            localStorage.setItem('likedServices', JSON.stringify(updatedLikedServices));
+            showAlert(t('serviceDetails:service_removed_from_favorites'), 'success');
+        }
+        localStorage.setItem('likedServices', JSON.stringify(likedServices));
+    }, [isLiked, serviceId, showAlert, t]);
 
-                <div className="absolute bottom-0 p-8 text-white">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
-                            <div className="space-y-4">
-                                <h1 className="text-5xl font-bold text-white tracking-tight">
-                                    {isRTL ? service.name_ar : service.name_en}
-                                </h1>
+    const handleShare = async () => {
+        const url = window.location.href;
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: isRTL ? service.name_ar : service.name_en,
+                    url
+                });
+                showAlert(t('serviceDetails:shared_successfully'), 'success');
+            } else {
+                await navigator.clipboard.writeText(url);
+                showAlert(t('serviceDetails:link_copied'), 'success');
+            }
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                showAlert(t('serviceDetails:share_failed'), 'error');
+            }
+        }
+    };
 
-                                <div className="flex flex-wrap items-center gap-6 text-white/90">
-                                    <span className="flex items-center gap-2">
-                                        <MapPin className="w-5 h-5" />
-                                        <span className="text-lg">
-                                            {isRTL ? service.city?.name_ar : service.city?.name_en},
-                                            {isRTL ? service.country?.name_ar : service.country?.name_en}
-                                        </span>
-                                    </span>
-                                    <span className="flex items-center gap-2">
-                                        <Clock className="w-5 h-5" />
-                                        <span>{t('serviceDetails:available')}</span>
-                                    </span>
-                                </div>
+    const handleNextImage = () => {
+        if (images.length > 0) {
+            setSelectedImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : prev));
+        }
+    };
 
-                                <span className="flex text-3xl font-bold gap-6">
-                                    {service.price} {t('serviceDetails:currency')}
-                                </span>
-                            </div>
+    const handlePrevImage = () => {
+        if (images.length > 0) {
+            setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : prev));
+        }
+    };
 
-                            <div className="flex justify-start gap-4">
-                                <Button
-                                    onClick={() => setIsReservationModalOpen(true)}
-                                    size="lg"
-                                    className="bg-blue-500 hover:bg-blue-600 text-white gap-2"
-                                >
-                                    <Calendar className="w-5 h-5" />
-                                    {t('serviceDetails:book_now')}
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="lg"
-                                    className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20"
-                                >
-                                    <Share2 className="w-5 h-5 text-white" />
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    const images = service?.images ? service.images.map(image => urlFor(image).url()) : [];
+
+    if (loading) return <Layout><Preloader /></Layout>;
+    if (error) return (
+        <Layout>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+                <AlertTriangle size={48} className="text-red-500 mb-4" />
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('serviceDetails:error_occurred')}</h1>
+                <p className="text-gray-600">{error.message}</p>
+                <Link href="/services" className="mt-6 px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors">
+                    {t('serviceDetails:back_to_services')}
+                </Link>
             </div>
+        </Layout>
+    );
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {service.servicePhone && (
-                    <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
-                        <Phone className="w-5 h-5 text-primary" />
-                        <a href={`tel:${service.servicePhone}`} className="hover:underline">
-                            {service.servicePhone}
-                        </a>
-                    </div>
-                )}
-                {service.serviceEmail && (
-                    <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
-                        <Mail className="w-5 h-5 text-primary" />
-                        <a href={`mailto:${service.serviceEmail}`} className="hover:underline">
-                            {service.serviceEmail}
-                        </a>
-                    </div>
-                )}
-                {service.links?.length > 0 && (
-                    <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
-                        <LinkIcon className="w-5 h-5 text-primary" />
-                        <a href={service.links[0]} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                            {service.links.length} {t('serviceDetails:links')}
-                        </a>
-                    </div>
-                )}
+    if (!service) return (
+        <Layout>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('serviceDetails:service_not_found')}</h1>
+                <p className="text-gray-600">{t('serviceDetails:service_not_found_message')}</p>
+                <Link href="/services" className="mt-6 px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors">
+                    {t('serviceDetails:browse_services')}
+                </Link>
             </div>
-
-            <div className="prose max-w-none">
-                <h2 className="text-xl font-semibold mb-4">{t('serviceDetails:about')}</h2>
-                <p className="h-32 text-gray-700 flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
-                    {isRTL ? service.about_ar : service.about_en}
-                </p>
-            </div>
-
-            <ReservationPopup
-                isOpen={isReservationModalOpen}
-                onClose={() => setIsReservationModalOpen(false)}
-                serviceId={serviceId}
-                serviceName={isRTL ? service.name_ar : service.name_en}
-                providerRef={service.providerRef?._id}
-            />
-        </div>
+        </Layout>
     );
 
     const ServiceTypeContent = () => {
         switch (service.serviceType) {
-            case 'horse_stable':
-                return (
-                    <div className="bg-white rounded-lg shadow-sm" dir={isRTL ? 'rtl' : 'ltr'}>
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:stable_location')}</h3>
-                        <div className="flex items-start gap-2">
-                            <MapPin className="w-5 h-5 text-primary mt-1" />
-                            <p className="text-gray-700">{service.location}</p>
-                        </div>
-                    </div>
-                );
-
             case 'veterinary':
                 return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm" dir={isRTL ? 'rtl' : 'ltr'}>
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:veterinary_qualifications')}</h3>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-white p-6 rounded-xl shadow-md"
+                    >
+                        <h3 className="text-xl font-bold mb-4">{t('serviceDetails:veterinary_qualifications')}</h3>
                         <div className="space-y-4">
-                            <div className="flex items-start gap-2">
-                                <Award className="w-5 h-5 text-primary mt-1" />
+                            <div className="flex items-start">
+                                <div className="mt-1 mr-3 text-primary">
+                                    <Award size={20} />
+                                </div>
                                 <div>
                                     <p className="font-medium">{t('serviceDetails:graduation_certificate')}</p>
-                                    <p className="text-gray-700">{service.graduationDetails?.graduationCertificate}</p>
+                                    <p className="text-gray-600">{service.graduationDetails?.graduationCertificate || t('serviceDetails:not_specified')}</p>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-2">
-                                <Users className="w-5 h-5 text-primary mt-1" />
+                            <div className="flex items-start">
+                                <div className="mt-1 mr-3 text-primary">
+                                    <Clock size={20} />
+                                </div>
                                 <div>
                                     <p className="font-medium">{t('serviceDetails:previous_experience')}</p>
-                                    <p className="text-gray-700">{service.graduationDetails?.previousExperience}</p>
+                                    <p className="text-gray-600">{service.graduationDetails?.previousExperience || t('serviceDetails:not_specified')}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 );
-
-            case 'competitions':
-                return (
-                    <div className="space-y-6">
-                        <div className="bg-white p-6 rounded-lg shadow-sm">
-                            <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:competition_details')}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <Award className="w-5 h-5 text-primary" />
-                                        <div>
-                                            <p className="font-medium">{t('serviceDetails:level')}</p>
-                                            <p className="text-gray-700">{service.competitions?.level}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p className="font-medium">{t('serviceDetails:height_distance')}</p>
-                                        <p className="text-gray-700">{service.competitions?.heightDistance}</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-medium">{t('serviceDetails:race_type')}</p>
-                                        <p className="text-gray-700">{service.competitions?.raceType}</p>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <p className="font-medium">{t('serviceDetails:prize')}</p>
-                                        <p className="text-gray-700">{service.competitions?.prize}</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-medium">{t('serviceDetails:sponsor')}</p>
-                                        <p className="text-gray-700">{service.competitions?.sponsor}</p>
-                                    </div>
-                                    {service.competitions?.sponsorLogo && (
-                                        <Image
-                                            src={service.competitions.sponsorLogo}
-                                            alt="Sponsor Logo"
-                                            className="h-16 object-contain"
-                                            width={16}
-                                            height={16}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow-sm">
-                            <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:referees')}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:main_referee')}</p>
-                                    <p className="text-gray-700">{service.competitions?.mainReferee}</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:co_referee_1')}</p>
-                                    <p className="text-gray-700">{service.competitions?.coReferee1}</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:co_referee_2')}</p>
-                                    <p className="text-gray-700">{service.competitions?.coReferee2}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
             case 'trip_coordinator':
                 return (
-                    <div className="space-y-6">
-                        <div className="bg-white p-6 rounded-lg shadow-sm">
-                            <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:trip_details')}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="w-5 h-5 text-primary" />
-                                        <div>
-                                            <p className="font-medium">{t('serviceDetails:duration')}</p>
-                                            <p className="text-gray-700">
-                                                {new Date(service.tripCoordinator?.startDate).toLocaleDateString()} -
-                                                {new Date(service.tripCoordinator?.endDate).toLocaleDateString()}
-                                            </p>
-                                        </div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-white p-6 rounded-xl shadow-md"
+                    >
+                        <h3 className="text-xl font-bold mb-4">{t('serviceDetails:trip_details')}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h4 className="font-medium text-primary mb-2">{t('serviceDetails:dates_and_location')}</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center">
+                                        <Calendar size={18} className="mr-2 text-gray-600" />
+                                        <span>
+                                            {service.tripCoordinator?.startDate && service.tripCoordinator?.endDate
+                                                ? `${new Date(service.tripCoordinator.startDate).toLocaleDateString()} - ${new Date(service.tripCoordinator.endDate).toLocaleDateString()}`
+                                                : t('serviceDetails:not_specified')
+                                            }
+                                        </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-5 h-5 text-primary" />
-                                        <div>
-                                            <p className="font-medium">{t('serviceDetails:break_times')}</p>
-                                            <p className="text-gray-700">{service.tripCoordinator?.breakTimes}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <p className="font-medium">{t('serviceDetails:level_of_hardship')}</p>
-                                        <p className="text-gray-700">{service.tripCoordinator?.levelOfHardship}</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-medium">{t('serviceDetails:aid_bag')}</p>
-                                        <p className="text-gray-700">
-                                            {service.tripCoordinator?.containsAidBag ? t('serviceDetails:available') : t('serviceDetails:not_available')}
-                                        </p>
+                                    <div className="flex items-center">
+                                        <MapPin size={18} className="mr-2 text-gray-600" />
+                                        <span>{service.tripCoordinator?.locationOfTent || t('serviceDetails:not_specified')}</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="bg-white p-6 rounded-lg shadow-sm">
-                            <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:pricing')}</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                                    <p className="font-medium">{t('serviceDetails:family_of_2')}</p>
-                                    <p className="text-xl font-bold text-primary">
-                                        {service.tripCoordinator?.priceForFamilyOf2} {t('serviceDetails:currency')}
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                                    <p className="font-medium">{t('serviceDetails:family_of_3')}</p>
-                                    <p className="text-xl font-bold text-primary">
-                                        {service.tripCoordinator?.priceForFamilyOf3} {t('serviceDetails:currency')}
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                                    <p className="font-medium">{t('serviceDetails:family_of_4')}</p>
-                                    <p className="text-xl font-bold text-primary">
-                                        {service.tripCoordinator?.priceForFamilyOf4} {t('serviceDetails:currency')}
-                                    </p>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h4 className="font-medium text-primary mb-2">{t('serviceDetails:pricing')}</h4>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <span>{t('serviceDetails:family_of_2')}</span>
+                                        <span className="font-bold">{service.tripCoordinator?.priceForFamilyOf2 || '-'} {t('serviceDetails:currency')}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span>{t('serviceDetails:family_of_3')}</span>
+                                        <span className="font-bold">{service.tripCoordinator?.priceForFamilyOf3 || '-'} {t('serviceDetails:currency')}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span>{t('serviceDetails:family_of_4')}</span>
+                                        <span className="font-bold">{service.tripCoordinator?.priceForFamilyOf4 || '-'} {t('serviceDetails:currency')}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div className="bg-white p-6 rounded-lg shadow-sm">
-                            <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:additional_information')}</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:trip_program')}</p>
-                                    <p className="text-gray-700">{service.tripCoordinator?.tripProgram}</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:safety_equipment')}</p>
-                                    <p className="text-gray-700">{service.tripCoordinator?.safetyAndEquipment}</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:cancellation_refund_policy')}</p>
-                                    <p className="text-gray-700">{service.tripCoordinator?.cancellationAndRefundPolicy}</p>
-                                </div>
+                        {service.tripCoordinator?.activities && (
+                            <div className="mt-4">
+                                <h4 className="font-medium text-primary mb-2">{t('serviceDetails:activities')}</h4>
+                                <p className="text-gray-600">{service.tripCoordinator.activities}</p>
                             </div>
-                        </div>
-                    </div>
+                        )}
+                    </motion.div>
                 );
-
-            case 'housing':
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:housing_details')}</h3>
-                        <div className="flex items-start gap-2">
-                            <MapPin className="w-5 h-5 text-primary mt-1" />
-                            <p className="text-gray-700">{service.housingDetails?.housingDetails}</p>
-                        </div>
-                    </div>
-                );
-
-            case 'horse_trainer':
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:horse_trainer_details')}</h3>
-                        <div className="space-y-4">
-                            <div className="flex items-start gap-2">
-                                <Award className="w-5 h-5 text-primary mt-1" />
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:trainer_level')}</p>
-                                    <p className="text-gray-700">{service.horseTrainerDetails?.trainerLevel}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-2">
-                                <Users className="w-5 h-5 text-primary mt-1" />
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:accreditation_certificate')}</p>
-                                    <p className="text-gray-700">{service.horseTrainerDetails?.accreditationCertificate}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'hoof_trimmer':
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:hoof_trimmer_details')}</h3>
-                        <div className="flex items-start gap-2">
-                            <MapPin className="w-5 h-5 text-primary mt-1" />
-                            <p className="text-gray-700">{service.hoofTrimmerDetails?.hoofTrimmerDetails}</p>
-                        </div>
-                    </div>
-                );
-
-            case 'horse_transport':
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:horse_transport_details')}</h3>
-                        <div className="space-y-4">
-                            <div className="flex items-start gap-2">
-                                <Users className="w-5 h-5 text-primary mt-1" />
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:number_of_horses')}</p>
-                                    <p className="text-gray-700">{service.transportDetails?.numberOfHorses}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-2">
-                                <MapPin className="w-5 h-5 text-primary mt-1" />
-                                <div>
-                                    <p className="font-medium">{t('serviceDetails:vehicle_type')}</p>
-                                    <p className="text-gray-700">{service.transportDetails?.vehicleType}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-
-            case 'contractors':
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:contractor_details')}</h3>
-                        <div className="flex items-start gap-2">
-                            <MapPin className="w-5 h-5 text-primary mt-1" />
-                            <p className="text-gray-700">{service.contractorDetails}</p>
-                        </div>
-                    </div>
-                );
-
-            case 'suppliers':
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:supplier_details')}</h3>
-                        <div className="flex items-start gap-2">
-                            <MapPin className="w-5 h-5 text-primary mt-1" />
-                            <p className="text-gray-700">{service.supplierDetails}</p>
-                        </div>
-                    </div>
-                );
-
-            case 'horse_catering':
-                return (
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 className="text-xl font-semibold mb-4">{t('serviceDetails:horse_catering_options')}</h3>
-                        <div className="space-y-4">
-                            {service.cateringOptions?.map((option, index) => (
-                                <div key={index} className="flex items-start gap-2">
-                                    <MapPin className="w-5 h-5 text-primary mt-1" />
-                                    <p className="text-gray-700">{option}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-
             default:
-                return null;
+                return (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-white p-6 rounded-xl shadow-md"
+                    >
+                        <h3 className="text-xl font-bold mb-4">{t('serviceDetails:serviceDetails')}</h3>
+                        <p className="text-gray-600 leading-relaxed">{isRTL ? service.description_ar : service.description_en}</p>
+                    </motion.div>
+                );
         }
     };
 
     const AdditionalServices = () => {
         if (!provider?.servicesRef?.length) return null;
-
-        // Filter out the current service and non-approved services
-        const additionalServices = provider.servicesRef.filter(s =>
-            s._id !== serviceId &&
-            s.statusAdminApproved === true
-        );
-
+        const additionalServices = provider.servicesRef.filter(s => s._id !== serviceId && s.statusAdminApproved === true);
         if (!additionalServices.length) return null;
 
         return (
-            <div className="mt-12" dir={isRTL ? 'rtl' : 'ltr'}>
-                <h2 className="text-2xl font-semibold mb-6">
-                    {t('serviceDetails:additional_services')}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-12"
+                dir={isRTL ? 'rtl' : 'ltr'}
+            >
+                <h2 className="text-2xl font-semibold mb-6 flex items-center">
+                    <span className="mr-2">{t('serviceDetails:additionalServices')}</span>
+                    <div className="h-1 flex-grow bg-gray-200 rounded ml-4"></div>
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {additionalServices.map((service) => (
-                        <Link href={`/services/${service._id}`} key={service._id}>
-                            <Card className="group cursor-pointer hover:shadow-lg transition-shadow duration-300">
-                                <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
+                        <Link href={`/services/${service._id}`} key={service._id} className="group">
+                            <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                                <div className="relative h-48 w-full">
                                     <Image
-                                        src={service.image ? urlFor(service.image).url() : "/api/placeholder/400/300"}
+                                        src={service.image ? urlFor(service.image).url() : "/placeholder.jpg"}
                                         alt={isRTL ? service.name_ar : service.name_en}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                        width={400}
-                                        height={300}
+                                        layout="fill"
+                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 </div>
-                                <CardContent className="p-4">
-                                    <h3 className="font-semibold mb-2">
-                                        {isRTL ? service.name_ar : service.name_en}
-                                    </h3>
-                                    <div className="flex items-center justify-between">
-                                        <Badge variant="secondary">
-                                            {t(`serviceTypes:${service.serviceType}`)}
-                                        </Badge>
-                                        <span className="font-medium text-primary">
+                                <div className="p-4">
+                                    <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors duration-300">{isRTL ? service.name_ar : service.name_en}</h3>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-primary font-medium">
                                             {service.price} {t('serviceDetails:currency')}
                                         </span>
+                                        <span className="text-sm text-gray-500">
+                                            {t(`serviceTypes.${service.serviceType}`)}
+                                        </span>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         </Link>
                     ))}
                 </div>
-            </div>
+            </motion.div>
         );
     };
 
     return (
         <Layout>
-            <div className={`max-w-7xl mx-auto px-4 py-8`}>
-                <CommonInfo />
-                <ServiceTypeContent />
-                <AdditionalServices />
+            <div className="bg-gray-50 min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>
+                <Alert
+                    message={alert.message}
+                    isVisible={alert.isVisible}
+                    onClose={() => setAlert({ isVisible: false, message: '', type: 'error' })}
+                    type={alert.type}
+                />
+
+                {/* Hero Section */}
+                <div className="relative h-96 md:h-[500px] overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70"></div>
+                    <img
+                        src={images[0] || '/placeholder.jpg'}
+                        alt={isRTL ? service.name_ar : service.name_en}
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <motion.h1
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 shadow-text"
+                                    >
+                                        {isRTL ? service.name_ar : service.name_en}
+                                    </motion.h1>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.1 }}
+                                        className="flex flex-wrap items-center gap-4 text-white/90"
+                                    >
+                                        <span className="flex items-center">
+                                            <MapPin size={18} className="mr-1" />
+                                            {isRTL ? service.city?.name_ar : service.city?.name_en}
+                                        </span>
+                                        <span className="flex items-center">
+                                            <Star size={18} className="mr-1 text-yellow-400" />
+                                            4.8 <span className="text-sm ml-1">({t('serviceDetails:reviews', { count: 256 })})</span>
+                                        </span>
+                                        <span className="py-1 px-3 bg-primary/80 rounded-full text-sm font-medium">
+                                            {t(`serviceTypes.${service.serviceType}`)}
+                                        </span>
+                                    </motion.div>
+                                </div>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="flex gap-3"
+                                >
+                                    <button
+                                        onClick={handleLikeToggle}
+                                        className="bg-[#ffffff6e] bg-opacity-20 hover:bg-opacity-30 p-2 rounded-full transition-all duration-300 transform hover:scale-110"
+                                        aria-label={isLiked ? t('serviceDetails:remove_from_favorites') : t('serviceDetails:add_to_favorites')}
+                                    >
+                                        <Heart size={24} className={isLiked ? "text-red-500 fill-red-500" : "text-white"} />
+                                    </button>
+                                    <button
+                                        onClick={handleShare}
+                                        className="bg-[#ffffff6e] bg-opacity-20 hover:bg-opacity-30 p-2 rounded-full transition-all duration-300 transform hover:scale-110"
+                                        aria-label={t('serviceDetails:share')}
+                                    >
+                                        <Share2 size={24} className="text-white" />
+                                    </button>
+                                </motion.div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Image Gallery */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-white p-4 flex justify-center gap-4 shadow-md overflow-x-auto"
+                >
+                    {images.map((image, index) => (
+                        <div
+                            key={index}
+                            className="w-20 h-20 rounded-md overflow-hidden cursor-pointer flex-shrink-0 hover:opacity-80 transition-opacity"
+                            onClick={() => setSelectedImageIndex(index)}
+                        >
+                            <img src={image} alt={`${service.name_en || 'Service'} - ${index + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                    ))}
+                </motion.div>
+
+                {/* Image Gallery Modal */}
+                <AnimatePresence>
+                    {selectedImageIndex !== null && (
+                        <ImageGalleryModal
+                            selectedIndex={selectedImageIndex}
+                            images={images}
+                            onClose={() => setSelectedImageIndex(null)}
+                            onNext={handleNextImage}
+                            onPrev={handlePrevImage}
+                        />
+                    )}
+                </AnimatePresence>
+
+                {/* Main Content */}
+                <div className="max-w-7xl mx-auto pt-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                            {/* Tabs */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="bg-white rounded-xl shadow-md overflow-hidden mb-6"
+                            >
+                                <div className="border-b border-gray-200">
+                                    <div className="flex">
+                                        {['overview', 'details', 'pricing'].map((tab) => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setActiveTab(tab)}
+                                                className={`px-6 py-4 font-medium transition-colors duration-300 ${activeTab === tab
+                                                    ? 'text-primary border-b-2 border-primary'
+                                                    : 'text-gray-500 hover:text-gray-800'
+                                                    }`}
+                                            >
+                                                {t(tab)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="p-6">
+                                    {activeTab === 'overview' && (
+                                        <motion.div
+                                            key="overview"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <h2 className="text-2xl font-bold mb-4">{t('serviceDetails:aboutService')}</h2>
+                                            <p className="text-gray-600 mb-6 leading-relaxed">{isRTL ? service.about_ar : service.about_en}</p>
+                                            <ServiceTypeContent />
+                                        </motion.div>
+                                    )}
+
+                                    {activeTab === 'details' && (
+                                        <motion.div
+                                            key="details"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <h2 className="text-2xl font-bold mb-4">{t('serviceDetails:serviceDetails')}</h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="bg-gray-50 p-5 rounded-lg hover:shadow-md transition-shadow">
+                                                    <h3 className="font-semibold mb-3 flex items-center">
+                                                        <Clock className="mr-2 text-primary" size={20} />
+                                                        {t('serviceDetails:availability')}
+                                                    </h3>
+                                                    <div className="ml-7 text-gray-700">
+                                                        <div className="mb-2">
+                                                            <span className="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
+                                                                {t('serviceDetails:openNow')}
+                                                            </span>
+                                                            {service.workingHours}
+                                                        </div>
+                                                        {service.availabilityNotes && (
+                                                            <p className="text-sm text-gray-600">{service.availabilityNotes}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="bg-gray-50 p-5 rounded-lg hover:shadow-md transition-shadow">
+                                                    <h3 className="font-semibold mb-3 flex items-center">
+                                                        <Phone className="mr-2 text-primary" size={20} />
+                                                        {t('serviceTypes:contactInfo')}
+                                                    </h3>
+                                                    <div className="ml-7 space-y-3">
+                                                        {service.servicePhone && (
+                                                            <div className="flex items-center">
+                                                                <Phone className="mr-2 text-gray-500" size={16} />
+                                                                <a href={`tel:${service.servicePhone}`} className="hover:underline text-primary">
+                                                                    {service.servicePhone}
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                        {service.serviceEmail && (
+                                                            <div className="flex items-center">
+                                                                <Mail className="mr-2 text-gray-500" size={16} />
+                                                                <a href={`mailto:${service.serviceEmail}`} className="hover:underline text-primary">
+                                                                    {service.serviceEmail}
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {service.serviceType === 'trip_coordinator' && service.tripCoordinator && (
+                                                    <div className="bg-gray-50 p-5 rounded-lg md:col-span-2 hover:shadow-md transition-shadow">
+                                                        <h3 className="font-semibold mb-3">{t('serviceDetails:additional_trip_details')}</h3>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {service.tripCoordinator.levelOfHardship && (
+                                                                <div className="text-gray-700">
+                                                                    <span className="font-medium">{t('serviceDetails:difficulty_level')}: </span>
+                                                                    {service.tripCoordinator.levelOfHardship}
+                                                                </div>
+                                                            )}
+                                                            {service.tripCoordinator.containsAidBag && (
+                                                                <div className="text-gray-700">
+                                                                    <span className="font-medium">{t('serviceDetails:first_aid')}: </span>
+                                                                    {t('yes')}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {activeTab === 'pricing' && (
+                                        <motion.div
+                                            key="pricing"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <h2 className="text-2xl font-bold mb-4">{t('serviceDetails:pricingPackages')}</h2>
+                                            <div className="space-y-6">
+                                                <div className="bg-gray-50 p-5 rounded-lg hover:shadow-md transition-shadow">
+                                                    <div className="flex justify-between items-center mb-4">
+                                                        <h3 className="font-semibold text-lg">{t('serviceDetails:standardPackage')}</h3>
+                                                        <span className="text-xl font-bold text-primary">
+                                                            {service.price || '-'} {t('serviceDetails:currency')}
+                                                        </span>
+                                                    </div>
+                                                    {service.serviceType === 'trip_coordinator' && (
+                                                        <div className="space-y-3">
+                                                            <div className="flex justify-between items-center">
+                                                                <span>{t('serviceDetails:family_of_2')}</span>
+                                                                <span className="font-medium">
+                                                                    {service.tripCoordinator?.priceForFamilyOf2 || '-'} {t('serviceDetails:currency')}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <span>{t('serviceDetails:family_of_3')}</span>
+                                                                <span className="font-medium">
+                                                                    {service.tripCoordinator?.priceForFamilyOf3 || '-'} {t('serviceDetails:currency')}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <span>{t('serviceDetails:family_of_4')}</span>
+                                                                <span className="font-medium">
+                                                                    {service.tripCoordinator?.priceForFamilyOf4 || '-'} {t('serviceDetails:currency')}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <button
+                                                        onClick={() => setIsReservationModalOpen(true)}
+                                                        className="w-full mt-4 bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
+                                                    >
+                                                        {t('bookNow')}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </div>
+                            </motion.div>
+
+                            <AdditionalServices />
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="lg:col-span-1 space-y-6">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="bg-white rounded-xl shadow-md p-6 sticky top-6"
+                            >
+                                <h3 className="font-bold text-lg mb-4">{t('serviceDetails:quickFacts')}</h3>
+                                <div className="space-y-4">
+                                    <div className="flex items-center">
+                                        <Award className="mr-3 text-primary" size={20} />
+                                        <span className="text-gray-700">{t('serviceDetails:experience')}: 5+ {t('serviceDetails:years')}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <Users className="mr-3 text-primary" size={20} />
+                                        <span className="text-gray-700">{t('serviceDetails:clientsServed')}: 500+</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <Shield className="mr-3 text-primary" size={20} />
+                                        <span className="text-gray-700">{t('serviceDetails:certified')}: {t('serviceDetails:yes')}</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="bg-white rounded-xl shadow-md p-6 sticky top-56"
+                            >
+                                <h3 className="font-bold text-lg mb-4">{t('serviceDetails:contactProvider')}</h3>
+                                <div className="flex items-center mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 overflow-hidden">
+                                        <img
+                                            src={provider?.image ? urlFor(provider.image).url() : "/placeholder.jpg"}
+                                            alt={isRTL ? provider?.name_ar : provider?.name_en}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium">{isRTL ? provider?.name_ar : provider?.name_en}</p>
+                                        <p className="text-sm text-gray-500 flex items-center">
+                                            <Star size={14} className="mr-1 text-yellow-400" /> 5.0 ({t('serviceDetails:ratedBy')} 128 {t('serviceDetails:users')})
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setIsReservationModalOpen(true)}
+                                    className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg mb-3 transition-all duration-300 transform hover:scale-105"
+                                >
+                                    {t('bookNow')}
+                                </button>
+                                <button
+                                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
+                                >
+                                    {t('contactProvider')}
+                                </button>
+                            </motion.div>
+                        </div>
+                    </div>
+
+                    {/* Reservation Modal */}
+                    <ReservationPopup
+                        isOpen={isReservationModalOpen}
+                        onClose={() => setIsReservationModalOpen(false)}
+                        serviceId={serviceId}
+                        serviceName={isRTL ? service.name_ar : service.name_en}
+                        providerRef={service.providerRef?._id}
+                    />
+                </div>
             </div>
         </Layout>
     );

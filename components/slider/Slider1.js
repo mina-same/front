@@ -99,6 +99,71 @@ const Slider1 = () => {
       description: { en: "Professional hoof care.", ar: "رعاية أظافر محترفة." },
       route: "hoofTrimmer",
     },
+    // Newly added services
+    {
+      _id: "12",
+      serviceType: "horse_grooming",
+      name: { en: "Horse Grooming", ar: "العناية بشعر الخيول" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-12.png" } },
+      description: { en: "Premium grooming for horses.", ar: "عناية فاخرة بشعر الخيول." },
+      route: "horseGrooming",
+    },
+    {
+      _id: "13",
+      serviceType: "horse_course_provider",
+      name: { en: "Horse Course Provider", ar: "مزود دورات الخيول" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-13.png" } },
+      description: { en: "Educational horse courses.", ar: "دورات تعليمية عن الخيول." },
+      route: "horseCourseProvider",
+    },
+    {
+      _id: "14",
+      serviceType: "digital_library_services",
+      name: { en: "Digital Library Services", ar: "خدمات المكتبة الرقمية" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-14.png" } },
+      description: { en: "Access to horse resources.", ar: "الوصول لموارد الخيول." },
+      route: "digitalLibraryServices",
+    },
+    {
+      _id: "15",
+      serviceType: "event_judging",
+      name: { en: "Event Judging", ar: "تحكيم الفعاليات" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-15.png" } },
+      description: { en: "Fair event judging.", ar: "تحكيم فعاليات عادل." },
+      route: "eventJudging",
+    },
+    {
+      _id: "16",
+      serviceType: "marketing_promotion",
+      name: { en: "Marketing & Promotion", ar: "التسويق والترويج" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-16.png" } },
+      description: { en: "Promote your horse events.", ar: "ترويج فعاليات الخيول." },
+      route: "marketingPromotion",
+    },
+    {
+      _id: "17",
+      serviceType: "event_commentary",
+      name: { en: "Event Commentary", ar: "التعليق على الفعاليات" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-17.png" } },
+      description: { en: "Live event commentary.", ar: "تعليق مباشر على الفعاليات." },
+      route: "eventCommentary",
+    },
+    {
+      _id: "18",
+      serviceType: "consulting_services",
+      name: { en: "Consulting Services", ar: "خدمات الإستشارات" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-18.png" } },
+      description: { en: "Expert horse advice.", ar: "استشارات متخصصة للخيول." },
+      route: "consultingServices",
+    },
+    {
+      _id: "19",
+      serviceType: "photography_services",
+      name: { en: "Photography Services", ar: "خدمات التصوير" },
+      image: { asset: { url: "/assets/imgs/placeholders/slider-19.png" } },
+      description: { en: "Stunning horse photography.", ar: "تصوير خيول مذهل." },
+      route: "photographyServices",
+    },
   ];
 
   return (
@@ -127,7 +192,12 @@ const Slider1 = () => {
                   width="0"
                   height="0"
                   sizes="100vw"
-                  style={{ width: "auto", height: "auto" }}
+                  style={{
+                    width: '100%',
+                    height: '430px',
+                    objectFit: 'cover',
+                    objectPosition: 'center'
+                  }}
                   className="rounded-xl"
                   src={service.image.asset.url}
                   alt={service.name[i18n.language]}
@@ -146,9 +216,8 @@ const Slider1 = () => {
                   <div>
                     <Link href={`/${service.route}`} legacyBehavior>
                       <a
-                        className={`tracking-wide hover-up-2 inline-block px-4 py-3 text-xs text-blue-500 font-semibold leading-none border border-blue-200 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded ${
-                          isRTL ? "ml-2" : "mr-2"
-                        }`}
+                        className={`tracking-wide hover-up-2 inline-block px-4 py-3 text-xs text-blue-500 font-semibold leading-none border border-blue-200 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded ${isRTL ? "ml-2" : "mr-2"
+                          }`}
                       >
                         {i18n.language === "ar" ? "انظر التفاصيل" : "View details"}
                       </a>
@@ -164,12 +233,11 @@ const Slider1 = () => {
       <div
         id="carausel-2-columns-1-arrows"
         className="flex"
-        style={{ direction: isRTL ? "rtl" : "ltr" , justifyContent:  isRTL ? "flex-end" : "flex-start" }} // Set direction for the arrows container
+        style={{ direction: isRTL ? "rtl" : "ltr", justifyContent: isRTL ? "flex-end" : "flex-start" }} // Set direction for the arrows container
       >
         <span
-          className={`text-blue-500 flex slick-arrow ${
-            isRTL ? "custom_next" : "custom_prev"
-          }`}
+          className={`text-blue-500 flex slick-arrow ${isRTL ? "custom_next" : "custom_prev"
+            }`}
         >
           <svg
             className="w-6 h-6"
@@ -187,9 +255,8 @@ const Slider1 = () => {
           </svg>
         </span>
         <span
-          className={`text-blue-500 flex slick-arrow ${
-            isRTL ? "custom_prev" : "custom_next"
-          }`}
+          className={`text-blue-500 flex slick-arrow ${isRTL ? "custom_prev" : "custom_next"
+            }`}
         >
           <svg
             className="w-6 h-6"

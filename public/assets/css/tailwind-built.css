@@ -3295,3 +3295,304 @@ li.menu-item-has-children.active .menu-expand {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1)) /* #e5e7eb */;
 }
+
+.text-amber-500 {
+  --tw-text-opacity: 1;
+  color: rgb(245 158 11 / var(--tw-text-opacity, 1)) /* #f59e0b */;
+}
+
+.text-orange-400 {
+  --tw-text-opacity: 1;
+  color: rgb(251 146 60 / var(--tw-text-opacity, 1)) /* #fb923c */;
+}
+
+.text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity, 1)) /* #9ca3af */;
+}
+
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity, 1)) /* #4b5563 */;
+}
+
+.bg-yellow-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(234 179 8 / var(--tw-bg-opacity, 1)) /* #eab308 */;
+}
+
+.hover\:bg-yellow-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(202 138 4 / var(--tw-bg-opacity, 1)) /* #ca8a04 */;
+}
+
+.focus\:ring-yellow-400:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(250 204 21 / var(--tw-ring-opacity, 1)) /* #facc15 */;
+}
+
+.text-yellow-400 {
+  --tw-text-opacity: 1;
+  color: rgb(250 204 21 / var(--tw-text-opacity, 1)) /* #facc15 */;
+}
+
+.border-gray-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity, 1)) /* #d1d5db */;
+}
+
+.border-gray-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity, 1)) /* #d1d5db */;
+}
+
+
+.hover\:bg-gray-50:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1)) /* #f9fafb */;
+}
+
+.bg-gray-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1)) /* #d1d5db */;
+}
+
+.text-gray-500 {
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity, 1)) /* #6b7280 */;
+}
+
+.bg-amber-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 158 11 / var(--tw-bg-opacity, 1)) /* #f59e0b */;
+}
+
+.placeholder\:pl-2::placeholder {
+  padding-left: 1.5rem /* 8px */;
+}
+
+
+
+.custom-input {
+  /* rounded-xl: Extra-large border radius (0.75rem or 12px) */
+  border-radius: 0.75rem;
+
+  /* flex: Display as flex */
+  display: flex;
+
+  /* h-10: Height of 2.5rem (40px) */
+  height: 2.5rem;
+
+  /* w-full: Full width */
+  width: 100%;
+
+  /* border: Default border (1px solid) */
+  border: 1px solid;
+
+  /* border-input: Border color (depends on theme, e.g., a neutral color like gray) */
+  border-color: var(--input, #d1d5db); /* Replace with your theme's input color */
+
+  /* bg-background: Background color (depends on theme, e.g., white or dark mode) */
+  background-color: var(--background, #ffffff); /* Replace with your theme's background color */
+
+  /* px-3: Padding-left and padding-right of 0.75rem (12px) */
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+
+  /* py-2: Padding-top and padding-bottom of 0.5rem (8px) */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+
+  /* text-base: Font size of 1rem (16px) */
+  font-size: 1rem;
+
+  /* ring-offset-background: Ring offset color (depends on theme) */
+  --ring-offset-color: var(--background, #ffffff); /* Replace with your theme's background color */
+
+  /* file:border-0: No border for file input */
+  & input[type="file"] {
+    border: 0;
+  }
+
+  /* file:bg-transparent: Transparent background for file input */
+  & input[type="file"] {
+    background-color: transparent;
+  }
+
+  /* file:text-sm: Smaller font size for file input (0.875rem or 14px) */
+  & input[type="file"] {
+    font-size: 0.875rem;
+  }
+
+  /* file:font-medium: Medium font weight for file input */
+  & input[type="file"] {
+    font-weight: 500;
+  }
+
+  /* file:text-foreground: Foreground color for file input (depends on theme) */
+  & input[type="file"] {
+    color: var(--foreground, #000000); /* Replace with your theme's foreground color */
+  }
+
+  /* placeholder:text-muted-foreground: Placeholder text color (depends on theme) */
+  &::placeholder {
+    color: var(--muted-foreground, #6b7280); /* Replace with your theme's muted-foreground color */
+  }
+
+  /* focus-visible:outline-none: No outline on focus */
+  &:focus-visible {
+    outline: none;
+  }
+
+  /* focus-visible:ring-2: 2px ring on focus */
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--ring, #000000); /* Replace with your theme's ring color */
+  }
+
+  /* focus-visible:ring-ring: Ring color (depends on theme) */
+  &:focus-visible {
+    --ring: var(--ring, #000000); /* Replace with your theme's ring color */
+  }
+
+  /* focus-visible:ring-offset-2: 2px ring offset */
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--ring-offset-color), 0 0 0 4px var(--ring);
+  }
+
+  /* disabled:cursor-not-allowed: Cursor style when disabled */
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  /* disabled:opacity-50: 50% opacity when disabled */
+  &:disabled {
+    opacity: 0.5;
+  }
+
+  /* md:text-sm: Smaller font size (0.875rem or 14px) at medium breakpoint */
+  @media (min-width: 768px) {
+    font-size: 0.875rem;
+  }
+}
+
+
+.custom-select {
+  /* rounded-xl: Extra-large border radius (0.75rem or 12px) */
+  border-radius: 0.75rem;
+
+  /* flex: Display as flex */
+  display: flex;
+
+  /* h-10: Height of 2.5rem (40px) */
+  height: 2.5rem;
+
+  /* w-full: Full width */
+  width: 100%;
+
+  /* items-center: Align items vertically centered */
+  align-items: center;
+
+  /* justify-between: Space content horizontally between children */
+  justify-content: space-between;
+
+  /* border: Default border (1px solid) */
+  border: 1px solid;
+
+  /* border-input: Border color (depends on theme, e.g., a neutral gray) */
+  border-color: var(--input, #d1d5db); /* Replace with your theme's input color */
+
+  /* bg-background: Background color (depends on theme, e.g., white or dark mode) */
+  background-color: var(--background, #ffffff); /* Replace with your theme's background color */
+
+  /* px-3: Padding-left and padding-right of 0.75rem (12px) */
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+
+  /* py-2: Padding-top and padding-bottom of 0.5rem (8px) */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+
+  /* text-sm: Font size of 0.875rem (14px) */
+  font-size: 0.875rem;
+
+  /* ring-offset-background: Ring offset color (depends on theme) */
+  --ring-offset-color: var(--background, #ffffff); /* Replace with your theme's background color */
+
+  /* placeholder:text-muted-foreground: Placeholder text color (depends on theme) */
+  &::placeholder {
+    color: var(--muted-foreground, #6b7280); /* Replace with your theme's muted-foreground color */
+  }
+
+  /* focus:outline-none: No outline on focus */
+  &:focus {
+    outline: none;
+  }
+
+  /* focus:ring-2: 2px ring on focus */
+  &:focus {
+    box-shadow: 0 0 0 2px var(--ring, #2563eb); /* Replace with your theme's ring color */
+  }
+
+  /* focus:ring-ring: Ring color (depends on theme) */
+  &:focus {
+    --ring: var(--ring, #2563eb); /* Replace with your theme's ring color */
+  }
+
+  /* focus:ring-offset-2: 2px ring offset */
+  &:focus {
+    box-shadow: 0 0 0 2px var(--ring-offset-color), 0 0 0 4px var(--ring);
+  }
+
+  /* disabled:cursor-not-allowed: Cursor style when disabled */
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  /* disabled:opacity-50: 50% opacity when disabled */
+  &:disabled {
+    opacity: 0.5;
+  }
+
+  /* [&>span]:line-clamp-1: Truncate direct child <span> to one line */
+  & > span {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+
+.accordion-item {
+  /* flex: Display as flex */
+  display: flex;
+
+  /* flex-1: Flex-grow to take available space */
+  flex: 1;
+
+  /* items-center: Align items vertically centered */
+  align-items: center;
+
+  /* justify-between: Space content horizontally between children */
+  justify-content: space-between;
+
+  /* py-4: Padding-top and padding-bottom of 1rem (16px) */
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+
+  /* font-medium: Medium font weight */
+  font-weight: 500;
+
+  /* transition-all: Smooth transition for all properties */
+  transition: all 0.2s ease;
+
+  /* hover:underline: Underline on hover */
+  &:hover {
+    text-decoration: underline;
+  }
+
+  /* [&[data-state=open]>svg]:rotate-180: Rotate SVG child 180deg when data-state="open" */
+  &[data-state="open"] > svg {
+    transform: rotate(180deg);
+  }
+}

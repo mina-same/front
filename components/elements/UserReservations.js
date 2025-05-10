@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "../../src/components/ui/card";
 import { Check, X, AlertCircle, Calendar, Clock, Phone, MapPin } from "lucide-react";
 import Image from "next/image";
 import { urlFor, client } from "../../src/lib/sanity";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../src/components/ui/dialog";
+import { Button } from "../../src/components/ui/button";
 import userFallbackImage from "../../public/assets/imgs/elements/user.png";
 
 const UserReservations = ({ userId }) => {

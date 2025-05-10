@@ -6,32 +6,96 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer components {
   .drop-down-menu {
-    @apply absolute left-0 bg-white rounded-lg shadow-sm w-max mt-14 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:mt-4 transition-all duration-500 py-4 border border-blueGray-200
+    @apply absolute left-0 bg-white rounded-lg shadow-sm w-max mt-14 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:mt-4 transition-all duration-500 py-4 border border-blueGray-200;
   }
   .btn-accent {
-    @apply tracking-wide mr-2 inline-block px-4 py-3 text-xs text-blue-500 hover:text-blue-700 font-semibold leading-none border border-blue-200 hover:border-blue-300 rounded-md
+    @apply tracking-wide mr-2 inline-block px-4 py-3 text-xs text-blue-500 hover:text-blue-700 font-semibold leading-none border border-blue-200 hover:border-blue-300 rounded-md;
   }
   .btn-primary {
-    @apply tracking-wide inline-block px-4 py-3 text-xs font-semibold leading-none bg-blue-400 hover:bg-blue-500 text-white rounded-md
+    @apply tracking-wide inline-block px-4 py-3 text-xs font-semibold leading-none bg-blue-400 hover:bg-blue-500 text-white rounded-md;
   }
   .btn-white {
-    @apply tracking-wide inline-block py-4 px-8 text-xs text-blueGray-500 hover:text-blueGray-600 text-center font-semibold leading-none bg-white rounded-md
+    @apply tracking-wide inline-block py-4 px-8 text-xs text-blueGray-500 hover:text-blueGray-600 text-center font-semibold leading-none bg-white rounded-md;
   }
-  
+
   .card-slider {
-    @apply border border-blueGray-100 bg-white max-w-sm rounded-md overflow-hidden shadow hover:shadow-md transition duration-300 p-8
+    @apply border border-blueGray-100 bg-white max-w-sm rounded-md overflow-hidden shadow hover:shadow-md transition duration-300 p-8;
+  }
+}
+
+@layer base {
+  :root {
+    --input: 0 0% 90%; /* Light gray */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 45 55% 52%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 45 55% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 100%;
   }
 }
 
 /*CUSTOM CSS*/
 :root {
-	--tw-text-opacity: 1;
-	--tw-divide-opacity: 1;
+  --tw-text-opacity: 1;
+  --tw-divide-opacity: 1;
   --tw-border-opacity: 1;
-} 
+}
 /*Common*/
 button:focus {
   border: 0;
@@ -248,7 +312,7 @@ li.menu-item-has-children .menu-expand {
 
 li.menu-item-has-children.active .menu-expand {
   -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .min-w-200 {
@@ -262,7 +326,7 @@ li.menu-item-has-children.active .menu-expand {
 
 .hover-up-5:hover {
   -webkit-transform: translateY(-5px);
-          transform: translateY(-5px);
+  transform: translateY(-5px);
   -webkit-transition: 0.3s;
   transition: 0.3s;
 }
@@ -274,7 +338,7 @@ li.menu-item-has-children.active .menu-expand {
 
 .hover-up-2:hover {
   -webkit-transform: translateY(-2px);
-          transform: translateY(-2px);
+  transform: translateY(-2px);
   -webkit-transition: 0.3s;
   transition: 0.3s;
 }
@@ -283,7 +347,7 @@ li.menu-item-has-children.active .menu-expand {
   top: 50%;
   left: 50%;
   -webkit-transform: translateX(-50%) translateY(-50%);
-          transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
   width: 70%;
 }
 
@@ -337,7 +401,7 @@ li.menu-item-has-children.active .menu-expand {
   top: 50%;
   left: 50%;
   -webkit-transform: translateX(-50%) translateY(-50%);
-          transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
 }
 
 .preloader .logo img {
@@ -348,28 +412,28 @@ li.menu-item-has-children.active .menu-expand {
 @-webkit-keyframes jump {
   0% {
     -webkit-transform: translate3d(0, 15px, 0);
-            transform: translate3d(0, 15px, 0);
+    transform: translate3d(0, 15px, 0);
   }
   100% {
     -webkit-transform: translate3d(0, 0, 0);
-            transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 @keyframes jump {
   0% {
     -webkit-transform: translate3d(0, 15px, 0);
-            transform: translate3d(0, 15px, 0);
+    transform: translate3d(0, 15px, 0);
   }
   100% {
     -webkit-transform: translate3d(0, 0, 0);
-            transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .jump {
   -webkit-transform-origin: 0;
-          transform-origin: 0;
+  transform-origin: 0;
   -webkit-animation: jump 1s linear alternate infinite;
-          animation: jump 1s linear alternate infinite;
+  animation: jump 1s linear alternate infinite;
 }
 /*# sourceMappingURL=main.css.map */

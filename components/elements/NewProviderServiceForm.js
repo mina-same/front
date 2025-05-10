@@ -17,8 +17,8 @@ import {
   Plus,
   Trash
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "../../src/components/ui/card";
+import { Alert, AlertDescription } from "../../src/components/ui/alert";
 import toast from 'react-hot-toast';
 import { client, urlFor } from '../../src/lib/sanity';
 import { useTranslation } from 'react-i18next';

@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, Save, Award, Camera, FileText, Heart, Shield, CreditCard, Clipboard, Star, User, Trophy, Medal, AlertTriangle } from "lucide-react";
+import { ChevronRight, ChevronLeft, Save, Award, Camera, FileText, Heart, Shield, CreditCard, Clipboard, Star, User, Trophy, Medal, AlertTriangle, CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { client } from "../../src/lib/sanity";
 import SearchableBreedDropdown from './SearchableBreedDropdown.js';
 
 // Custom Alert Component
-const Alert = ({ message, isVisible, onClose }) => (
+const Alert = ({ message, isVisible, onClose, type }) => (
   <AnimatePresence>
     {isVisible && (
       <motion.div
@@ -17,8 +17,15 @@ const Alert = ({ message, isVisible, onClose }) => (
         exit={{ opacity: 0, y: -20 }}
         className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-auto"
       >
-        <div className="bg-white border-l-4 border-red-500 shadow-lg rounded-lg p-4 flex items-start">
-          <AlertTriangle className="text-red-500 mr-3" size={24} />
+        <div
+          className={`bg-white shadow-lg rounded-lg p-4 flex items-start ${type === "success" ? "border-l-4 border-green-500" : "border-l-4 border-red-500"
+            }`}
+        >
+          {type === "success" ? (
+            <CheckCircle className="text-green-500 mr-3" size={24} />
+          ) : (
+            <AlertTriangle className="text-red-500 mr-3" size={24} />
+          )}
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-900">{message}</p>
           </div>
@@ -48,7 +55,8 @@ export default function HorseRegistrationForm({ userId }) {
     images: [],
     mainColor: "",
     additionalColors: [],
-    distinctiveMark: "",
+    distinctiveMarkArabic: "",
+    distinctiveMarkEnglish: "",
     electronicChipNumber: "",
     passportNumber: "",
     nationalID: "",
@@ -65,18 +73,23 @@ export default function HorseRegistrationForm({ userId }) {
     internationalTransportPermit: null,
     passportImage: null,
     insurancePolicyNumber: "",
-    insuranceDetails: "",
+    insuranceDetailsArabic: "",
+    insuranceDetailsEnglish: "",
     insuranceEndDate: "",
     horseActivities: [],
     achievements: "",
     trainers: [],
     listingPurpose: "",
     marketValue: 0,
+    loveCounter: 0,
+    profileLevel: "basic",
   });
 
   const [currentStep, setCurrentStep] = useState(1);
   const [completionPercentage, setCompletionPercentage] = useState(0);
-  const [alert, setAlert] = useState({ isVisible: false, message: "" });
+  const [alert, setAlert] = useState({ isVisible: false, message: "", type: "error" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const totalSteps = 6;
 
   useEffect(() => {
@@ -86,7 +99,7 @@ export default function HorseRegistrationForm({ userId }) {
     Object.entries(formData).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         if (value.length > 0) filledFields++;
-      } else if (value !== null && value !== "") {
+      } else if (value !== null && value !== "" && value !== 0 && value !== "basic") {
         filledFields++;
       }
     });
@@ -124,6 +137,7 @@ export default function HorseRegistrationForm({ userId }) {
     if (percentage > 90)
       return {
         name: t("user:horseRegistration.profileTier.gold"),
+        level: "gold",
         color: "text-amber-500",
         message: t("user:horseRegistration.profileTier.goldMessage"),
         icon: <Trophy className="text-amber-500" size={20} />,
@@ -131,6 +145,7 @@ export default function HorseRegistrationForm({ userId }) {
     if (percentage > 75)
       return {
         name: t("user:horseRegistration.profileTier.silver"),
+        level: "silver",
         color: "text-gray-400",
         message: t("user:horseRegistration.profileTier.silverMessage"),
         icon: <Award className="text-gray-400" size={20} />,
@@ -138,12 +153,14 @@ export default function HorseRegistrationForm({ userId }) {
     if (percentage > 50)
       return {
         name: t("user:horseRegistration.profileTier.bronze"),
+        level: "bronze",
         color: "text-orange-400",
         message: t("user:horseRegistration.profileTier.bronzeMessage"),
         icon: <Medal className="text-orange-400" size={20} />,
       };
     return {
       name: t("user:horseRegistration.profileTier.basic"),
+      level: "basic",
       color: "text-gray-600",
       message: t("user:horseRegistration.profileTier.basicMessage"),
       icon: <Shield className="text-gray-600" size={20} />,
@@ -218,32 +235,37 @@ export default function HorseRegistrationForm({ userId }) {
     return response._id;
   };
 
-  const showAlert = (message) => {
-    setAlert({ isVisible: true, message });
-    setTimeout(() => setAlert({ isVisible: false, message: "" }), 5000);
+  const showAlert = (message, type = "error") => {
+    setAlert({ isVisible: true, message, type });
+    setTimeout(() => setAlert({ isVisible: false, message: "", type: "error" }), 5000);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsSubmitting(true);
+  
     const step1RequiredFields = ["fullName", "breed", "birthDate", "gender", "images", "mainColor"];
     const isStep1Complete = step1RequiredFields.every((field) =>
       Array.isArray(formData[field]) ? formData[field].length > 0 : formData[field] !== ""
     );
-
+  
     if (!isStep1Complete) {
-      showAlert(t("user:horseRegistration.alerts.step1Incomplete"));
+      showAlert(t("user:horseRegistration.alerts.step1Incomplete"), "error");
       setCurrentStep(1);
+      setIsSubmitting(false);
       return;
     }
-
+  
     if (!formData.listingPurpose || formData.marketValue <= 0) {
-      showAlert(t("user:horseRegistration.alerts.listingPurposeAndValueRequired"));
+      showAlert(t("user:horseRegistration.alerts.listingPurposeAndValueRequired"), "error");
       setCurrentStep(6);
+      setIsSubmitting(false);
       return;
     }
-
+  
     try {
+      const profileTier = getProfileTier(completionPercentage);
+  
       const horseData = {
         _type: "horse",
         fullName: formData.fullName,
@@ -259,7 +281,8 @@ export default function HorseRegistrationForm({ userId }) {
         ),
         mainColor: formData.mainColor,
         additionalColors: formData.additionalColors,
-        distinctiveMark: formData.distinctiveMark,
+        distinctiveMarkArabic: formData.distinctiveMarkArabic,
+        distinctiveMarkEnglish: formData.distinctiveMarkEnglish,
         electronicChipNumber: formData.electronicChipNumber,
         passportNumber: formData.passportNumber,
         nationalID: formData.nationalID,
@@ -269,7 +292,6 @@ export default function HorseRegistrationForm({ userId }) {
         lineageDetailsEnglish: formData.lineageDetailsEnglish,
         previousOwner: formData.previousOwner,
         owner: { _type: "reference", _ref: userId },
-        stableLocation: formData.stableLocation ? { _type: "reference", _ref: formData.stableLocation } : null,
         healthCertificates: await Promise.all(
           Array.from(formData.healthCertificates).map(async (file) => ({
             _type: "file",
@@ -284,44 +306,82 @@ export default function HorseRegistrationForm({ userId }) {
             asset: { _ref: await uploadFileToSanity(file) },
           }))
         ),
-        geneticAnalysis: formData.geneticAnalysis?.[0]
-          ? { _type: "file", _key: `${Date.now()}-genetic`, asset: { _ref: await uploadFileToSanity(formData.geneticAnalysis[0]) } }
-          : null,
-        ownershipCertificate: formData.ownershipCertificate?.[0]
-          ? { _type: "file", _key: `${Date.now()}-ownership`, asset: { _ref: await uploadFileToSanity(formData.ownershipCertificate[0]) } }
-          : null,
-        internationalTransportPermit: formData.internationalTransportPermit?.[0]
-          ? { _type: "file", _key: `${Date.now()}-transport`, asset: { _ref: await uploadFileToSanity(formData.internationalTransportPermit[0]) } }
-          : null,
-        passportImage: formData.passportImage?.[0]
-          ? { _type: "image", _key: `${Date.now()}-passport`, asset: { _ref: await uploadImageToSanity(formData.passportImage[0]) } }
-          : null,
         insurancePolicyNumber: formData.insurancePolicyNumber,
-        insuranceDetails: formData.insuranceDetails,
+        insuranceDetailsArabic: formData.insuranceDetailsArabic,
+        insuranceDetailsEnglish: formData.insuranceDetailsEnglish,
         insuranceEndDate: formData.insuranceEndDate,
         horseActivities: formData.horseActivities,
         achievements: formData.achievements,
         trainers: formData.trainers,
         listingPurpose: formData.listingPurpose,
         marketValue: Number(formData.marketValue),
+        loveCounter: formData.loveCounter,
+        profileLevel: profileTier.level,
       };
-
+  
+      // Conditionally add stableLocation only if a valid stable is selected
+      if (formData.stableLocation && formData.stableLocation !== "") {
+        horseData.stableLocation = {
+          _type: "reference",
+          _ref: formData.stableLocation,
+        };
+      }
+  
+      // Conditionally add optional file fields
+      if (formData.geneticAnalysis?.[0]) {
+        horseData.geneticAnalysis = {
+          _type: "file",
+          _key: `${Date.now()}-genetic`,
+          asset: { _ref: await uploadFileToSanity(formData.geneticAnalysis[0]) },
+        };
+      }
+  
+      if (formData.ownershipCertificate?.[0]) {
+        horseData.ownershipCertificate = {
+          _type: "file",
+          _key: `${Date.now()}-ownership`,
+          asset: { _ref: await uploadFileToSanity(formData.ownershipCertificate[0]) },
+        };
+      }
+  
+      if (formData.internationalTransportPermit?.[0]) {
+        horseData.internationalTransportPermit = {
+          _type: "file",
+          _key: `${Date.now()}-transport`,
+          asset: { _ref: await uploadFileToSanity(formData.internationalTransportPermit[0]) },
+        };
+      }
+  
+      if (formData.passportImage?.[0]) {
+        horseData.passportImage = {
+          _type: "image",
+          _key: `${Date.now()}-passport`,
+          asset: { _ref: await uploadImageToSanity(formData.passportImage[0]) },
+        };
+      }
+  
       const horseDoc = await client.create(horseData);
       await client
         .patch(userId)
         .setIfMissing({ horses: [] })
         .append("horses", [{ _type: "reference", _ref: horseDoc._id }])
         .commit();
-
+  
       console.log("Horse registered successfully:", horseDoc);
-      showAlert(t("user:horseRegistration.alerts.success"));
-      // Reload the page after a delay to allow the user to see the success alert
+      showAlert(t("user:horseRegistration.alerts.success"), "success");
+      
+      // Show confetti and refresh
+      setShowConfetti(true);
       setTimeout(() => {
+        setShowConfetti(false);
         window.location.reload();
-      }, 2000); // Delay of 2 seconds (2000 milliseconds)
+      }, 3000);
     } catch (error) {
       console.error("Error submitting horse registration:", error);
-      showAlert(t("user:horseRegistration.alerts.error"));
+      showAlert(t("user:horseRegistration.alerts.error"), "error");
+      setIsSubmitting(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -329,6 +389,7 @@ export default function HorseRegistrationForm({ userId }) {
   const formGroupClass = `form-group ${isRTL ? "text-right" : "text-left"}`;
 
   const renderStep = () => {
+    // ... (Previous renderStep content remains unchanged)
     switch (currentStep) {
       case 1:
         return (
@@ -488,14 +549,25 @@ export default function HorseRegistrationForm({ userId }) {
               </div>
             </div>
             <div className={formGroupClass}>
-              <label className="block text-gray-700 font-medium mb-2">{t("user:horseRegistration.distinctiveMark")}</label>
+              <label className="block text-gray-700 font-medium mb-2">{t("user:horseRegistration.distinctiveMarkArabic")}</label>
               <input
                 type="text"
-                name="distinctiveMark"
-                value={formData.distinctiveMark}
+                name="distinctiveMarkArabic"
+                value={formData.distinctiveMarkArabic}
                 onChange={handleChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                dir={isRTL ? "rtl" : "ltr"}
+                dir="rtl"
+              />
+            </div>
+            <div className={formGroupClass}>
+              <label className="block text-gray-700 font-medium mb-2">{t("user:horseRegistration.distinctiveMarkEnglish")}</label>
+              <input
+                type="text"
+                name="distinctiveMarkEnglish"
+                value={formData.distinctiveMarkEnglish}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                dir="ltr"
               />
             </div>
           </motion.div>
@@ -870,14 +942,25 @@ export default function HorseRegistrationForm({ userId }) {
               />
             </div>
             <div className={formGroupClass}>
-              <label className="block text-gray-700 font-medium mb-2">{t("user:horseRegistration.insuranceDetails")}</label>
+              <label className="block text-gray-700 font-medium mb-2">{t("user:horseRegistration.insuranceDetailsArabic")}</label>
               <textarea
-                name="insuranceDetails"
-                value={formData.insuranceDetails}
+                name="insuranceDetailsArabic"
+                value={formData.insuranceDetailsArabic}
                 onChange={handleChange}
                 rows={3}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                dir={isRTL ? "rtl" : "ltr"}
+                dir="rtl"
+              />
+            </div>
+            <div className={formGroupClass}>
+              <label className="block text-gray-700 font-medium mb-2">{t("user:horseRegistration.insuranceDetailsEnglish")}</label>
+              <textarea
+                name="insuranceDetailsEnglish"
+                value={formData.insuranceDetailsEnglish}
+                onChange={handleChange}
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                dir="ltr"
               />
             </div>
             <div className={formGroupClass}>
@@ -1101,7 +1184,8 @@ export default function HorseRegistrationForm({ userId }) {
       <Alert
         message={alert.message}
         isVisible={alert.isVisible}
-        onClose={() => setAlert({ isVisible: false, message: "" })}
+        type={alert.type}
+        onClose={() => setAlert({ isVisible: false, message: "", type: "error" })}
       />
       <div className="bg-white rounded-xl shadow-lg p-6 relative">
         <div className="mb-8">
@@ -1170,15 +1254,49 @@ export default function HorseRegistrationForm({ userId }) {
             ) : (
               <button
                 type="submit"
-                className={`px-6 py-3 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 flex items-center`}
+                disabled={isSubmitting}
+                className={`px-6 py-3 rounded-md flex items-center ${isSubmitting
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  }`}
               >
                 <Save className={`${getIconMargin()}`} size={18} />
-                {t("user:horseRegistration.submitRegistration")}
+                {isSubmitting
+                  ? t("user:horseRegistration.submitting")
+                  : t("user:horseRegistration.submitRegistration")}
               </button>
             )}
           </div>
         </form>
       </div>
+
+      {/* Confetti Animation */}
+      <AnimatePresence>
+        {showConfetti && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none z-50"
+          >
+            <div className="absolute w-full h-full overflow-hidden">
+              {Array.from({ length: 50 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 rounded-full"
+                  style={{
+                    backgroundColor: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    left: `${Math.random() * 100}%`,
+                    top: '-10%',
+                  }}
+                  animate={{ y: '110vh', rotate: Math.random() * 360 }}
+                  transition={{ duration: 2 + Math.random() * 2, ease: 'linear' }}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { client, urlFor } from "../../src/lib/sanity";
 import userFallbackImage from "../../public/assets/imgs/elements/user.png";
 import i18nConfig from "../../i18nConfig";
 import { Globe } from "lucide-react";
-import ServiceSearchPopup from "components/elements/ServiceSearchPopup";
+import ServiceSearchPopup from "../elements/ServiceSearchPopup";
 import { Search } from "lucide-react";
 
 const Header = ({ handleHidden }) => {
@@ -154,7 +154,7 @@ const Header = ({ handleHidden }) => {
     return {
       container: `container bg-transparent ${isRTL ? "rtl" : "ltr"}`,
       navFlex: `bg-transparent flex justify-between items-center py-3 ${isRTL ? "flex-row-reverse" : "flex-row"}`,
-      menuSpace: `hidden lg:flex lg:items-center lg:w-auto ${isRTL ? "lg:space-x-12-reverse" : "lg:space-x-12"}`,
+      menuSpace: `hidden lg:flex lg:items-center lg:w-auto lg:flex-wrap lg:justify-between gap-11`,
       dropdownMenu: `drop-down-menu min-w-200 ${isRTL ? "right-0" : "left-0"}`,
       languageDropdown: `absolute ${isRTL ? "left-0" : "right-0"} mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50`,
       flexContainer: `flex items-center ${isRTL ? "space-x-4-reverse" : "space-x-4"}`,
@@ -193,7 +193,6 @@ const Header = ({ handleHidden }) => {
                   onClick={() => setIsLangOpen(!isLangOpen)}
                   className={styles.languageButton}
                 >
-                 
                   <span className="text-sm font-medium text-gray-700">
                     {getFlagEmoji(currentLocale)}{" "}
                     {getLanguageName(currentLocale)}
@@ -288,7 +287,7 @@ const Header = ({ handleHidden }) => {
                   <Link href="/login" className="btn-accent hover-up-2">
                     {t("header:logIn")}
                   </Link>
-                  <Link href="/signup" className="btn-primary hover-up-2">
+                  <Link href="/user" className="btn-primary hover-up-2">
                     {t("header:signUp")}
                   </Link>
                 </div>
@@ -302,21 +301,29 @@ const Header = ({ handleHidden }) => {
           >
             <Image
               className="h-10"
-              src="/assets/imgs/logos/logohorse.svg"
+              src="/assets/imgs/logos/logo.png"
               alt="Monst"
               width={125}
               height={40}
             />
           </Link>
 
-          <ul className={styles.menuSpace}>
+          <ul className={styles.menuSpace} style={{"gap": "40px"}}>
             {/* Menu items */}
-            <li className="pt-4 pb-4">
+            <li className="group relative pt-4 pb-4">
               <Link
                 href="/"
                 className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
               >
                 {t("header:home")}
+              </Link>
+            </li>
+            <li className="group relative pt-4 pb-4">
+              <Link
+                href="/horses"
+                className="text-sm font-semibold text-blueGray-600 hover:text-blueGray-500"
+              >
+                {t("header:horses")}
               </Link>
             </li>
             <li className="group relative pt-4 pb-4">
