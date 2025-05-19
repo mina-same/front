@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import {
   Package2,
@@ -162,7 +163,7 @@ const ProductDetailsPage = () => {
             {error || "Product Not Found"}
           </h3>
           <p className="text-[#4a4a4a] mb-6">
-            We couldn't find the product you're looking for.
+            We couldn&apos;t find the product you&apos;re looking for.
           </p>
           <Button
             asChild
@@ -258,11 +259,13 @@ const ProductDetailsPage = () => {
               <div className="md:col-span-2">
                 <div className="aspect-square overflow-hidden rounded-xl border border-[#e0d7c8] bg-white shadow-sm transition-all hover:shadow-md">
                   <div className="relative h-full">
-                    <img
-                      src={product.images[activeImageIndex]}
-                      alt={product.name_en}
-                      className="w-full h-full object-contain p-4"
-                    />
+                    <Image
+                    src={product.images[activeImageIndex]}
+                    alt={product.name_en}
+                    width={800}
+                    height={800}
+                    className="w-full h-full object-contain p-4"
+                  />
                     <div className="absolute top-4 right-4 flex gap-2">
                       <Button
                         variant="outline"
@@ -338,9 +341,11 @@ const ProductDetailsPage = () => {
                         }`}
                         onClick={() => setActiveImageIndex(index)}
                       >
-                        <img
+                        <Image
                           src={image}
                           alt={`${product.name_en} thumbnail ${index + 1}`}
+                          width={200}
+                          height={200}
                           className="w-full h-full object-cover"
                         />
                       </button>

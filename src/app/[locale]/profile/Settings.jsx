@@ -940,14 +940,14 @@ export default function SettingsPage({ userData }) {
           <p className="text-sm text-yellow-700">
             When you delete your account, your public profile will be
             deactivated immediately. If you change your mind before the 14 days
-            are up, sign in with your email and password, and we'll send a link
+            are up, sign in with your email and password, and we&apos;ll send a link
             to reactivate account.{" "}
-            <a
+            <Link
               href="/support"
               className="font-semibold text-yellow-700 underline"
             >
               Learn more
-            </a>
+            </Link>
           </p>
         </div>
 

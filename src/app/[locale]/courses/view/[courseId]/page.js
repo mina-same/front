@@ -243,9 +243,9 @@ export default function CourseDetails() {
       showAlert(
         <>
           {t("courseDetails:errors.userNotAuthenticated", "You must be logged in to enroll in this course.")} {" "}
-          <a href="/login" className="text-red-700 hover:underline">
+          <Link href="/login" className="text-red-700 hover:underline">
             {t("courseDetails:login", "Log in here")}
-          </a>
+          </Link>
         </>,
         "error"
       );
@@ -840,7 +840,7 @@ export default function CourseDetails() {
                                 <>
                                   {t("courseDetails:clickToEnroll", "Click")} {" "}
                                   <a href="#" onClick={handlePurchase} className="text-[#b28a2f] hover:underline">
-                                    '{t("courseDetails:enrollFree", "Enroll Free")}'
+                                    {t("courseDetails:enrollFree", "Enroll Free")}
                                   </a>{" "}
                                   {t("courseDetails:toAccessCourse", "to access this course.")}
                                 </>

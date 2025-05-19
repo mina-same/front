@@ -25,7 +25,7 @@ const ResourceNotFound = ({ type }) => {
             {type === "book" ? "Book Not Found" : "Course Not Found"}
           </h2>
           <p className="text-gray-600 mb-8">
-            The {type} you're looking for might have been removed, renamed, or is temporarily unavailable.
+            The {type} you&apos;re looking for might have been removed, renamed, or is temporarily unavailable.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

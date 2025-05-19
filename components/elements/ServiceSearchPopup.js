@@ -165,7 +165,7 @@ const ServiceSearchPopup = ({ onClose }) => {
   // Initial load
   useEffect(() => {
     fetchServices();
-  }, []);
+  }, [fetchServices]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-20 px-4 z-50">

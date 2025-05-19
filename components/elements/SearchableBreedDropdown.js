@@ -122,7 +122,7 @@ const SearchableBreedDropdown = ({ formData, handleChange, t, isRTL, formGroupCl
                 setSelectedBreed(breedOption[currentLang]); // Use current language for display
             }
         }
-    }, [formData.breed, currentLang]); // Re-run if language changes
+    }, [formData.breed, currentLang, breedOptions]); // Re-run if language changes or breed options change
 
     // Close dropdown when clicking outside
     useEffect(() => {

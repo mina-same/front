@@ -84,7 +84,7 @@ const Header = ({ handleHidden }) => {
     };
 
     verifyUser();
-  }, [client]); // Add dependencies if needed (e.g., client)
+  }, []); // No dependencies needed as client is from outer scope
 
   const handleLogout = async () => {
     try {

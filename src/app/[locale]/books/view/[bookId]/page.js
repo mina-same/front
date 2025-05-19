@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
     Book,
     Download,
@@ -212,11 +213,10 @@ export default function BookDetails() {
     const handlePurchase = async () => {
         if (!book || !bookId || !currentUserId) {
             showAlert(
-                <>
-                    You must be logged in to purchase this book.{" "}
-                    <a href="/login" className="text-red-700 hover:underline">
+                <>You must be logged in to purchase this book.{" "}
+                    <Link href="/login" className="text-red-700 hover:underline">
                         Log in here
-                    </a>
+                    </Link>
                 </>,
                 "error"
             );
@@ -749,7 +749,7 @@ export default function BookDetails() {
                                                                 <>
                                                                     Click{" "}
                                                                     <a href="#" onClick={handlePurchase} className="text-[#b28a2f] hover:underline">
-                                                                        'Download Free'
+                                                                        &apos;Download Free&apos;
                                                                     </a>{" "}
                                                                     to access this book.
                                                                 </>
