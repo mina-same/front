@@ -3596,3 +3596,7 @@ li.menu-item-has-children.active .menu-expand {
     transform: rotate(180deg);
   }
 }
+
+.font-medium {
+  font-weight: 500;
+}

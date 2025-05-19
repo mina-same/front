@@ -157,7 +157,7 @@ const Header = ({ handleHidden }) => {
       menuSpace: `hidden lg:flex lg:items-center lg:w-auto lg:flex-wrap lg:justify-between gap-11`,
       dropdownMenu: `drop-down-menu min-w-200 ${isRTL ? "right-0" : "left-0"}`,
       languageDropdown: `absolute ${isRTL ? "left-0" : "right-0"} mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50`,
-      flexContainer: `flex items-center ${isRTL ? "space-x-4-reverse" : "space-x-4"}`,
+      flexContainer: `flex items-center ${isRTL ? "space-x-4-reverse mr-4" : "space-x-4 ml-4"}`,
       languageButton: `flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200
         bg-white/10 backdrop-blur-sm border border-gray-200 hover:border-gray-300
         shadow-sm hover:shadow-md ${isRTL ? "flex-row-reverse" : "flex-row"}`,
@@ -282,12 +282,12 @@ const Header = ({ handleHidden }) => {
                 </div>
               ) : (
                 <div
-                  className={`hidden lg:block ${isRTL ? "space-x-4-reverse" : "space-x-2"}`}
+                  className={`hidden lg:block ${isRTL ? "space-x-4-reverse mr-4" : "space-x-2 ml-4"}`}
                 >
                   <Link href="/login" className="btn-accent hover-up-2">
                     {t("header:logIn")}
                   </Link>
-                  <Link href="/user" className="btn-primary hover-up-2">
+                  <Link href="/signup" className="btn-primary hover-up-2">
                     {t("header:signUp")}
                   </Link>
                 </div>

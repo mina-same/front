@@ -112,5 +112,84 @@
         "pricePerMonth": "${price}/month",
         "visitWebsite": "Visit Website",
         "cateringOptions": "Catering Options:"
+    },
+    "horseGrooming": {
+        "title": "Horse Grooming Services",
+        "subtitle": "Find professional horse grooming services to keep your horses looking their best.",
+        "searchPlaceholder": "Search for groomers...",
+        "error": "Failed to load grooming services. Please try again later.",
+        "noGroomers": "No grooming services found.",
+        "pricePerSession": "${price} per {unit}",
+        "visitWebsite": "Visit Website",
+        "methodsAndTools": "Methods & Tools",
+        "certifications": "Certifications",
+        "certified": "Certified"
+    },
+    "eventJudging": {
+        "title": "Event Judging Services",
+        "subtitle": "Find qualified judges for your equine events.",
+        "searchPlaceholder": "Search for judges...",
+        "error": "Failed to load judging services. Please try again later.",
+        "noJudges": "No judging services found.",
+        "pricePerSession": "${price} per {unit}",
+        "visitWebsite": "Visit Website",
+        "eventTypes": "Event Types",
+        "judgingLevel": "Judging Level",
+        "certifications": "Certifications",
+        "certified": "Certified"
+    },
+    "marketingPromotion": {
+        "title": "Marketing & Promotion Services",
+        "subtitle": "Promote your equine events with expert marketing services.",
+        "searchPlaceholder": "Search for marketers...",
+        "error": "Failed to load marketing services. Please try again later.",
+        "noMarketers": "No marketing services found.",
+        "pricePerSession": "${price} per {unit}",
+        "visitWebsite": "Visit Website",
+        "portfolioLinks": "Portfolio",
+        "certifications": "Certifications",
+        "certified": "Certified"
+    },
+    "eventCommentary": {
+        "title": "Event Commentary Services",
+        "subtitle": "Engage your audience with professional event commentary.",
+        "searchPlaceholder": "Search for commentators...",
+        "error": "Failed to load commentary services. Please try again later.",
+        "noCommentators": "No commentary services found.",
+        "pricePerSession": "${price} per {unit}",
+        "visitWebsite": "Visit Website",
+        "portfolioLink": "Portfolio",
+        "certifications": "Certifications",
+        "certified": "Certified"
+    },
+    "consultingServices": {
+        "title": "Consulting Services",
+        "subtitle": "Get expert advice for your equine projects.",
+        "searchPlaceholder": "Search for consultants...",
+        "error": "Failed to load consulting services. Please try again later.",
+        "noConsultants": "No consulting services found.",
+        "pricePerSession": "${price} per {unit}",
+        "visitWebsite": "Visit Website",
+        "certifications": "Certifications",
+        "certified": "Certified"
+    },
+    "photographyServices": {
+        "title": "Photography Services",
+        "subtitle": "Capture stunning moments with professional equine photography.",
+        "searchPlaceholder": "Search for photographers...",
+        "error": "Failed to load photography services. Please try again later.",
+        "noPhotographers": "No photography services found.",
+        "pricePerSession": "${price} per {unit}",
+        "visitWebsite": "Visit Website",
+        "photographyTypes": "Photography Types",
+        "portfolioLink": "Portfolio",
+        "certifications": "Certifications",
+        "certified": "Certified"
+    },
+    "priceUnits": {
+        "per_half_hour": "half-hour",
+        "per_hour": "hour",
+        "per_day": "day",
+        "per_project": "project"
     }
 }

@@ -15,6 +15,7 @@ const ContactClient = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null); // Add state for userId
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -46,6 +47,7 @@ const ContactClient = () => {
             throw new Error('Invalid user type. Only Educational Services users can access this page.');
           }
 
+          setUserId(data.user.id); // Store userId
           setIsAuthenticated(true);
         } else {
           throw new Error('User not authenticated.');
@@ -60,7 +62,7 @@ const ContactClient = () => {
     };
 
     verifyAuth();
-  }, [router, client]);
+  }, [router]);
 
   if (isLoading) {
     return (
@@ -81,7 +83,7 @@ const ContactClient = () => {
           {t('addBook:authError')}: {error}
         </div>
       )}
-      <ServiceFormWizard />
+      <ServiceFormWizard userId={userId} /> {/* Pass userId as prop */}
     </Layout>
   );
 };

@@ -10,6 +10,7 @@ import ProductImagesStep from "./ProductImagesStep";
 import ProductPricingStep from "./ProductPricingStep";
 import { useTranslation } from "react-i18next";
 import { client } from "../../../../lib/sanity";
+import { useRouter } from "next/navigation";
 
 // Utility function to generate a unique key
 const generateKey = () => Math.random().toString(36).substr(2, 9);
@@ -35,6 +36,7 @@ const defaultFormData = {
 
 export default function ProductFormWizard() {
   const { t, i18n } = useTranslation();
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(defaultFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -152,6 +154,7 @@ export default function ProductFormWizard() {
       setFormData(defaultFormData);
       setCurrentStep(1);
       setErrors({});
+      router.push("/profile?tab=supplier_products"); // Redirect to supplier products tab
     } catch (error) {
       console.error("Error submitting product to Sanity:", error);
       toast.error(t("addProduct:errors.submissionFailed"));

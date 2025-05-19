@@ -1,4 +1,3 @@
-// /api/auth/register
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createClient } from 'next-sanity';
@@ -8,7 +7,7 @@ import { NextResponse } from 'next/server';
 const googleClient = new OAuth2Client({
   clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: process.env.GOOGLE_REDIRECT_URI, // e.g., 'http://localhost:3000/api/auth/callback'
+  redirectUri: process.env.GOOGLE_REDIRECT_URI,
 });
 
 const sanityClient = createClient({
@@ -43,7 +42,28 @@ export async function POST(req) {
       );
 
       if (existingUser) {
-        return NextResponse.json({ message: 'User already exists.' }, { status: 400 });
+        // Generate JWT token for auto-login
+        const token = jwt.sign(
+          { id: existingUser._id, email: existingUser.email },
+          process.env.JWT_SECRET_KEY,
+          { expiresIn: '1d' }
+        );
+
+        const response = NextResponse.json(
+          { message: 'User already exists and logged in successfully.', userId: existingUser._id },
+          { status: 200 }
+        );
+
+        // Set token in cookie
+        response.cookies.set('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'Strict',
+          path: '/',
+          maxAge: 24 * 60 * 60,
+        });
+
+        return response;
       }
 
       // Create user with Google data
@@ -53,7 +73,7 @@ export async function POST(req) {
         userName: googleName || userName || googleEmail.split('@')[0],
         googleId,
         signupMethod: 'google',
-        isEmailVerified: true, // Google verifies email automatically
+        isEmailVerified: true,
       });
 
       // Generate JWT token for auto-login
@@ -91,7 +111,33 @@ export async function POST(req) {
     );
 
     if (existingUser) {
-      return NextResponse.json({ message: 'User already exists.' }, { status: 400 });
+      // Verify password
+      if (!existingUser.password || !(await bcrypt.compare(password, existingUser.password))) {
+        return NextResponse.json({ message: 'Invalid credentials.' }, { status: 401 });
+      }
+
+      // Generate JWT token for auto-login
+      const token = jwt.sign(
+        { id: existingUser._id, email: existingUser.email },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: '1d' }
+      );
+
+      const response = NextResponse.json(
+        { message: 'User already exists and logged in successfully.', userId: existingUser._id },
+        { status: 200 }
+      );
+
+      // Set token in cookie
+      response.cookies.set('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        path: '/',
+        maxAge: 24 * 60 * 60,
+      });
+
+      return response;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

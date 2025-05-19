@@ -361,8 +361,8 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
           <div className="mt-4 pt-6 border-t border-blueGray-100">
             {isAuthenticated ? (
               <div className="space-y-4">
-                <div className="flex items-center space-x-4 px-4">
-                  <div className="w-10 h-10 rounded-full overflow-hidden">
+                <div className="flex items-center space-x-4 ml-4 mr-4">
+                  <div className="w-10 h-10 rounded-full overflow-hidden ml-4 mr-4">
                     <Image
                       src={
                         userImage ? urlFor(userImage).url() : userFallbackImage

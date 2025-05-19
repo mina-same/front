@@ -99,7 +99,6 @@ const Slider1 = () => {
       description: { en: "Professional hoof care.", ar: "رعاية أظافر محترفة." },
       route: "hoofTrimmer",
     },
-    // Newly added services
     {
       _id: "12",
       serviceType: "horse_grooming",
@@ -114,7 +113,7 @@ const Slider1 = () => {
       name: { en: "Horse Course Provider", ar: "مزود دورات الخيول" },
       image: { asset: { url: "/assets/imgs/placeholders/slider-13.png" } },
       description: { en: "Educational horse courses.", ar: "دورات تعليمية عن الخيول." },
-      route: "horseCourseProvider",
+      route: "resources",
     },
     {
       _id: "14",
@@ -122,7 +121,7 @@ const Slider1 = () => {
       name: { en: "Digital Library Services", ar: "خدمات المكتبة الرقمية" },
       image: { asset: { url: "/assets/imgs/placeholders/slider-14.png" } },
       description: { en: "Access to horse resources.", ar: "الوصول لموارد الخيول." },
-      route: "digitalLibraryServices",
+      route: "resources",
     },
     {
       _id: "15",
@@ -187,37 +186,49 @@ const Slider1 = () => {
         {services.map((service) => (
           <SwiperSlide key={service._id}>
             <div className={`px-3 pb-5 ${isRTL ? "text-right" : "text-left"}`}>
-              <div className="card-slider group">
+              <div className="card-slider group" style={{ minHeight: "530px" }}>
                 <Image
                   width="0"
                   height="0"
                   sizes="100vw"
                   style={{
-                    width: '100%',
-                    height: '430px',
-                    objectFit: 'cover',
-                    objectPosition: 'center'
+                    width: "100%",
+                    height: "430px",
+                    objectFit: "cover",
+                    objectPosition: "center",
                   }}
                   className="rounded-xl"
                   src={service.image.asset.url}
                   alt={service.name[i18n.language]}
                 />
-                <div className="flex justify-between items-end">
+                <div className="flex justify-between items-end mt-5">
                   <div>
-                    <h1 className="mt-5 text-sm font-semibold group-hover:text-blue-500">
+                    <h1
+                      className="text-sm font-semibold group-hover:text-blue-500 truncate"
+                      style={{ maxWidth: "150px" }}
+                    >
                       <Link href={`/${service.route}`} legacyBehavior>
                         <a>{service.name[i18n.language]}</a>
                       </Link>
                     </h1>
-                    <p className="mt-2 text-xs text-gray-500">
+                    <p
+                      className="mt-2 text-xs text-gray-500 truncate"
+                      style={{ maxWidth: "150px" }}
+                    >
                       {service.description[i18n.language]}
                     </p>
                   </div>
                   <div>
                     <Link href={`/${service.route}`} legacyBehavior>
                       <a
-                        className={`tracking-wide hover-up-2 inline-block px-4 py-3 text-xs text-blue-500 font-semibold leading-none border border-blue-200 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded ${isRTL ? "ml-2" : "mr-2"
-                          }`}
+                        className={`tracking-wide inline-block px-4 py-3 text-xs text-blue-500 font-semibold leading-none border border-blue-200 hover:border-blue-500 hover:text-white hover:bg-blue-500 rounded ${
+                          isRTL ? "ml-2" : "mr-2"
+                        }`}
+                        style={{
+                          whiteSpace: "nowrap",
+                          minWidth: "120px",
+                          textAlign: "center",
+                        }}
                       >
                         {i18n.language === "ar" ? "انظر التفاصيل" : "View details"}
                       </a>
@@ -233,11 +244,15 @@ const Slider1 = () => {
       <div
         id="carausel-2-columns-1-arrows"
         className="flex"
-        style={{ direction: isRTL ? "rtl" : "ltr", justifyContent: isRTL ? "flex-end" : "flex-start" }} // Set direction for the arrows container
+        style={{
+          direction: isRTL ? "rtl" : "ltr",
+          justifyContent: isRTL ? "flex-end" : "flex-start",
+        }} // Set direction for the arrows container
       >
         <span
-          className={`text-blue-500 flex slick-arrow ${isRTL ? "custom_next" : "custom_prev"
-            }`}
+          className={`text-blue-500 flex slick-arrow ${
+            isRTL ? "custom_next" : "custom_prev"
+          }`}
         >
           <svg
             className="w-6 h-6"
@@ -255,8 +270,9 @@ const Slider1 = () => {
           </svg>
         </span>
         <span
-          className={`text-blue-500 flex slick-arrow ${isRTL ? "custom_prev" : "custom_next"
-            }`}
+          className={`text-blue-500 flex slick-arrow ${
+            isRTL ? "custom_prev" : "custom_next"
+          }`}
         >
           <svg
             className="w-6 h-6"

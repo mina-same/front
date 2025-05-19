@@ -56,22 +56,28 @@
     "nextStep": "Next Step",
     "submitting": "Submitting...",
     "createBook": "Create Book",
-    "addBook": {
-        "errors": {
-            "titleRequired": "Book title is required",
-            "descriptionRequired": "Description is required",
-            "categoryRequired": "Category is required",
-            "priceRequired": "Price is required",
-            "imagesRequired": "At least one cover image is required",
-            "fileOrLinkRequired": "Either a file or an access link is required",
-            "fileOrLinkExclusive": "Cannot provide both a file and an access link",
-            "invalidLink": "Access link must be a valid URL",
-            "userNotAuthenticated": "User authentication failed. Please log in again.",
-            "submissionFailed": "Failed to create book. Please try again.",
-            "formInvalid": "Please fix the errors in the form before submitting."
-        },
-        "fileTooLarge": "File size exceeds 50MB limit",
-        "imageTooLarge": "Image size exceeds 10MB limit",
-        "onlyPDFAndEPUBAllowed": "Only PDF and EPUB files are allowed"
-    }
+    "errors": {
+        "titleRequired": "Book title is required",
+        "descriptionRequired": "Description is required",
+        "categoryRequired": "Category is required",
+        "priceRequired": "Price is required",
+        "imagesRequired": "At least one cover image is required",
+        "fileOrLinkRequired": "Either a file or an access link is required",
+        "fileOrLinkExclusive": "Cannot provide both a file and an access link",
+        "invalidLink": "Access link must be a valid URL",
+        "userNotAuthenticated": "User authentication failed. Please log in again.",
+        "submissionFailed": "Failed to create book. Please try again.",
+        "formInvalid": "Please fix the errors in the form before submitting.",
+        "onlyPDFAndEPUBAllowed": "Only PDF and EPUB files are allowed",
+        "onlyImagesAllowed": "Only images are allowed",
+        "imageTooLarge": "Image is too large (max 10MB)"
+    },
+    "fileTooLarge": "File size exceeds 50MB limit",
+    "imageTooLarge": "Image size exceeds 10MB limit",
+    "onlyPDFAndEPUBAllowed": "Only PDF and EPUB files are allowed",
+    "editBook": "Edit Book",
+    "updateBook": "Update Book",
+    "loading": "Loading...",
+    "authError": "Authentication Error",
+    "bookUpdatedSuccess": "Book updated successfully"
 }

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +8,7 @@ const HorseTransportFields = ({
   errors,
   isRTL
 }) => {
-  // Make sure we're working with a properly initialized transport object
+  // Initialize transportDetails if not present
   React.useEffect(() => {
     if (!formData.service_details.transportDetails) {
       handleNestedChange('transportDetails', '', {});
@@ -51,7 +50,7 @@ const HorseTransportFields = ({
           id="transportDetails.maxLoad"
           type="number"
           value={transportDetails.maxLoad || ""}
-          onChange={(e) => handleNestedChange('transportDetails', 'maxLoad', e.target.value)}
+          onChange={(e) => handleNestedChange('transportDetails', 'maxLoad', parseInt(e.target.value) || '')}
           className={inputClass('transportDetails.maxLoad')}
           placeholder="Number of horses"
           min="1"
@@ -70,7 +69,7 @@ const HorseTransportFields = ({
                 type="checkbox"
                 checked={!!transportDetails[feature.key]}
                 onChange={(e) => handleNestedChange('transportDetails', feature.key, e.target.checked)}
-                className={checkboxClass}
+                className={checkboxClass} // Fixed: Use checkboxClass instead of handleNestedChange
               />
               <label htmlFor={`feature-${feature.key}`} className="ml-2 block text-sm text-gray-700">
                 {feature.label}
@@ -88,7 +87,7 @@ const HorseTransportFields = ({
           id="transportDetails.experienceYears"
           type="number"
           value={transportDetails.experienceYears || ""}
-          onChange={(e) => handleNestedChange('transportDetails', 'experienceYears', e.target.value)}
+          onChange={(e) => handleNestedChange('transportDetails', 'experienceYears', parseInt(e.target.value) || '')}
           className={inputClass('transportDetails.experienceYears')}
           placeholder="Years of experience"
           min="0"
@@ -104,7 +103,7 @@ const HorseTransportFields = ({
           id="certifications"
           onChange={(e) => {
             if (e.target.files) {
-              handleNestedChange('transportDetails', 'certifications', e.target.files);
+              handleNestedChange('transportDetails', 'certifications', Array.from(e.target.files));
             }
           }}
           className={`${inputClass('certifications')} py-2`}
@@ -112,7 +111,7 @@ const HorseTransportFields = ({
           multiple
         />
         <p className="text-xs text-gray-500 mt-1">
-          Accepted formats, DOC, DOCX, JPG, JPEG, PNG, GIF
+          Accepted formats: DOC, DOCX, JPG, JPEG, PNG, GIF
         </p>
       </div>
 

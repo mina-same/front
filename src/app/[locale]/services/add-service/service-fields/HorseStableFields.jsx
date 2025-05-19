@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,18 +10,18 @@ const HorseStableFields = ({
   removeNestedArrayItem,
   handleChange,
   errors,
-  isRTL
+  isRTL,
+  serviceDetailKey = 'horseStabelDetails'
 }) => {
-  // Make sure we're working with a properly initialized horse_stable object
   React.useEffect(() => {
-    if (!formData.service_details.horse_stable) {
-      handleNestedChange('horse_stable', '', {});
+    if (!formData.service_details[serviceDetailKey]) {
+      handleNestedChange(serviceDetailKey, '', {});
     }
-  }, []);
+  }, [serviceDetailKey, formData, handleNestedChange]);
 
-  const stableDetails = formData.service_details.horse_stable || {};
+  const stableDetails = formData.service_details[serviceDetailKey] || {};
   const additionalBenefits = stableDetails.additionalBenefits || [];
-  
+
   return (
     <div className="space-y-6">
       <div className="relative mb-4">
@@ -32,13 +31,13 @@ const HorseStableFields = ({
         <Textarea
           id="stableDescription"
           value={stableDetails.stableDescription || ''}
-          onChange={(e) => handleNestedChange('horse_stable', 'stableDescription', e.target.value)}
+          onChange={(e) => handleNestedChange(serviceDetailKey, 'stableDescription', e.target.value)}
           placeholder="Describe your stable and its facilities..."
-          className={`w-full border-2 rounded-xl p-3 ${errors['horse_stable.stableDescription'] ? 'border-red-500' : 'border-gray-300'}`}
+          className={`w-full border-2 rounded-xl p-3 ${errors[`${serviceDetailKey}.stableDescription`] ? 'border-red-500' : 'border-gray-300'}`}
           rows={4}
         />
-        {errors['horse_stable.stableDescription'] && (
-          <p className="text-red-500 text-sm mt-1">{errors['horse_stable.stableDescription']}</p>
+        {errors[`${serviceDetailKey}.stableDescription`] && (
+          <p className="text-red-500 text-sm mt-1">{errors[`${serviceDetailKey}.stableDescription`]}</p>
         )}
       </div>
 
@@ -50,7 +49,7 @@ const HorseStableFields = ({
           <select
             id="kindOfStable"
             value={stableDetails.kindOfStable || ''}
-            onChange={(e) => handleNestedChange('horse_stable', 'kindOfStable', e.target.value)}
+            onChange={(e) => handleNestedChange(serviceDetailKey, 'kindOfStable', e.target.value)}
             className="w-full border-2 rounded-xl p-3 border-gray-300"
           >
             <option value="">Select Kind</option>
@@ -68,7 +67,7 @@ const HorseStableFields = ({
           <select
             id="listingPurpose"
             value={stableDetails.listingPurpose || ''}
-            onChange={(e) => handleNestedChange('horse_stable', 'listingPurpose', e.target.value)}
+            onChange={(e) => handleNestedChange(serviceDetailKey, 'listingPurpose', e.target.value)}
             className="w-full border-2 rounded-xl p-3 border-gray-300"
           >
             <option value="">Select Purpose</option>
@@ -86,7 +85,7 @@ const HorseStableFields = ({
           type="date"
           id="dateOfEstablishment"
           value={stableDetails.dateOfEstablishment || ''}
-          onChange={(e) => handleNestedChange('horse_stable', 'dateOfEstablishment', e.target.value)}
+          onChange={(e) => handleNestedChange(serviceDetailKey, 'dateOfEstablishment', e.target.value)}
           className="w-full border-2 rounded-xl p-3 border-gray-300"
         />
       </div>
@@ -99,7 +98,7 @@ const HorseStableFields = ({
               <label className="block text-xs text-gray-500 mb-1">Name (Arabic)</label>
               <Input
                 value={benefit.name_ar || ''}
-                onChange={(e) => handleNestedArrayChange('horse_stable.additionalBenefits', index, 'name_ar', e.target.value)}
+                onChange={(e) => handleNestedArrayChange(`${serviceDetailKey}.additionalBenefits`, index, 'name_ar', e.target.value)}
                 placeholder="Benefit name in Arabic"
                 className="w-full border rounded-lg"
               />
@@ -108,7 +107,7 @@ const HorseStableFields = ({
               <label className="block text-xs text-gray-500 mb-1">Name (English)</label>
               <Input
                 value={benefit.name_en || ''}
-                onChange={(e) => handleNestedArrayChange('horse_stable.additionalBenefits', index, 'name_en', e.target.value)}
+                onChange={(e) => handleNestedArrayChange(`${serviceDetailKey}.additionalBenefits`, index, 'name_en', e.target.value)}
                 placeholder="Benefit name in English"
                 className="w-full border rounded-lg"
               />
@@ -118,24 +117,24 @@ const HorseStableFields = ({
               <Input
                 type="number"
                 value={benefit.additional_price || ''}
-                onChange={(e) => handleNestedArrayChange('horse_stable.additionalBenefits', index, 'additional_price', e.target.value)}
+                onChange={(e) => handleNestedArrayChange(`${serviceDetailKey}.additionalBenefits`, index, 'additional_price', e.target.value)}
                 placeholder="0.00"
                 className="w-full border rounded-lg"
               />
               <button
                 type="button"
-                onClick={() => removeNestedArrayItem('horse_stable.additionalBenefits', index)}
+                onClick={() => removeNestedArrayItem(`${serviceDetailKey}.additionalBenefits`, index)}
                 className="absolute right-0 top-7 text-red-500 p-2"
                 aria-label="Remove benefit"
               >
-                &times;
+                ×
               </button>
             </div>
           </div>
         ))}
         <button
           type="button"
-          onClick={() => addNestedArrayItem('horse_stable.additionalBenefits')}
+          onClick={() => addNestedArrayItem(`${serviceDetailKey}.additionalBenefits`)}
           className="mt-2 bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-lg text-sm flex items-center"
         >
           <span className="mr-1">+</span> Add Benefit
@@ -149,13 +148,13 @@ const HorseStableFields = ({
         <Input
           type="file"
           id="licensesAndCertificates"
-          onChange={handleChange}
+          onChange={(e) => handleNestedChange(serviceDetailKey, 'licensesAndCertificates', e.target.files)}
           multiple
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
           className="w-full border-2 rounded-xl p-3 border-gray-300"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Accepted formats, DOC, JPG, PNG, GIF
+          Accepted formats: DOC, JPG, PNG, GIF
         </p>
       </div>
     </div>

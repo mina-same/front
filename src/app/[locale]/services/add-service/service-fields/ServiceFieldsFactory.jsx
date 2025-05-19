@@ -28,7 +28,6 @@ const ServiceFieldsFactory = ({
   errors,
   isRTL
 }) => {
-  // This mapping ensures all service detail keys match the Sanity schema
   const serviceDetailKeyMap = {
     horse_stable: 'horseStabelDetails',
     veterinary: 'VeterinaryDetails',
@@ -46,229 +45,58 @@ const ServiceFieldsFactory = ({
     event_commentary: 'eventCommentaryDetails',
     consulting_services: 'consultingServicesDetails',
     photography_services: 'photographyServicesDetails',
-    suppliers: 'suppliers'
+    suppliers: 'supplierDetails'
   };
 
+  // Initialize service_details for the selected service type
   React.useEffect(() => {
-    // Initialize service details for the service type if not already present
-    // This ensures the service_details[serviceDetailKey] object is always created using the correct key
     if (serviceType && formData && formData.service_details) {
       const serviceDetailKey = serviceDetailKeyMap[serviceType] || serviceType;
       if (!formData.service_details[serviceDetailKey]) {
         handleNestedChange(serviceDetailKey, '', {});
       }
     }
-  }, [serviceType, formData]);
-  
-  // Map service types to their corresponding field components
-  const serviceFieldsMap = {
-    competitions: (
-      <CompetitionsFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    consulting_services: (
-      <ConsultingServicesFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    contractors: (
-      <ContractorsFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    event_commentary: (
-      <EventCommentaryFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    event_judging: (
-      <EventJudgingFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    hoof_trimmer: (
-      <HoofTrimmerFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    horse_catering: (
-      <HorseCateringFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    horse_grooming: (
-      <HorseGroomingFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    horse_stable: (
-      <HorseStableFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    horse_trainer: (
-      <HorseTrainerFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    horse_transport: (
-      <HorseTransportFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    housing: (
-      <HousingFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    marketing_promotion: (
-      <MarketingPromotionFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    photography_services: (
-      <PhotographyServicesFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    trip_coordinator: (
-      <TripCoordinatorFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    veterinary: (
-      <VeterinaryFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
-    suppliers: (
-      <SuppliersFields
-        formData={formData}
-        handleChange={handleChange}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        errors={errors}
-        isRTL={isRTL}
-      />
-    ),
+  }, [serviceType, formData, handleNestedChange]);
+
+  // Define props for child components
+  const componentProps = {
+    formData,
+    handleChange,
+    handleNestedChange,
+    handleNestedArrayChange,
+    addNestedArrayItem,
+    removeNestedArrayItem,
+    errors,
+    isRTL,
+    serviceDetailKey: serviceDetailKeyMap[serviceType] || serviceType
   };
 
-  return serviceFieldsMap[serviceType] || null;
+  // Map service types to their respective components
+  const serviceFieldsMap = {
+    competitions: CompetitionsFields,
+    consulting_services: ConsultingServicesFields,
+    contractors: ContractorsFields,
+    event_commentary: EventCommentaryFields,
+    event_judging: EventJudgingFields,
+    hoof_trimmer: HoofTrimmerFields,
+    horse_catering: HorseCateringFields,
+    horse_grooming: HorseGroomingFields,
+    horse_stable: HorseStableFields,
+    horse_trainer: HorseTrainerFields,
+    horse_transport: HorseTransportFields,
+    housing: HousingFields,
+    marketing_promotion: MarketingPromotionFields,
+    photography_services: PhotographyServicesFields,
+    trip_coordinator: TripCoordinatorFields,
+    veterinary: VeterinaryFields,
+    suppliers: SuppliersFields,
+  };
+
+  // Get the component for the selected service type
+  const SelectedComponent = serviceFieldsMap[serviceType];
+
+  // Render the selected component or null if serviceType is invalid
+  return SelectedComponent ? <SelectedComponent {...componentProps} /> : null;
 };
 
 export default ServiceFieldsFactory;

@@ -110,5 +110,12 @@
         "userNotAuthenticated": "المستخدم غير مصادق عليه",
         "submissionFailed": "فشل إنشاء الدورة. يرجى المحاولة مرة أخرى."
     },
+    "editCourse": "تعديل الدورة",
+    "editCourseDescription": "قم بتحديث تفاصيل دورتك لمشاركة معرفتك.",
+    "courseUpdatedSuccess": "تم تحديث الدورة بنجاح!",
+    "saveChanges": "حفظ التغييرات",
+    "courseNotFound": "الدورة غير موجودة.",
+    "unauthorizedAccess": "غير مصرح لك بتعديل هذه الدورة.",
+    "invalidUserType": "يمكن فقط لمستخدمي الخدمات التعليمية تعديل الدورات.",
     "image": "صورة الدورة"
 }

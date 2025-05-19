@@ -6,7 +6,12 @@ import FormStepContent from "./FormStepContent";
 import FormNavigation from "./FormNavigation";
 import { toast } from "@/components/ui/sonner";
 import ServiceFieldsFactory from "./service-fields/ServiceFieldsFactory";
-import { addService, fetchCountries, fetchGovernorates, fetchCities } from "@/lib/sanity";
+import {
+  addService,
+  fetchCountries,
+  fetchGovernorates,
+  fetchCities,
+} from "@/lib/sanity";
 import { ServiceTypeSelector } from "./ServiceTypeSelector";
 import { ReviewStep } from "./ReviewStep";
 import { SuccessCelebration } from "./SuccessCelebration";
@@ -21,7 +26,27 @@ const FORM_STEPS = [
   "Review & Submit",
 ];
 
-const ServiceFormWizard = () => {
+const serviceDetailKeyMap = {
+  horse_stable: "horseStabelDetails",
+  veterinary: "VeterinaryDetails",
+  competitions: "competitions",
+  housing: "housingDetails",
+  trip_coordinator: "tripCoordinator",
+  horse_catering: "horseCateringDetails",
+  horse_transport: "transportDetails",
+  contractors: "contractorsDetails",
+  horse_trainer: "horseTrainerDetails",
+  hoof_trimmer: "hoofTrimmerDetails",
+  horse_grooming: "horseGroomingDetails",
+  event_judging: "eventJudgingDetails",
+  marketing_promotion: "marketingPromotionDetails",
+  event_commentary: "eventCommentaryDetails",
+  consulting_services: "consultingServicesDetails",
+  photography_services: "photographyServicesDetails",
+  suppliers: "supplierDetails",
+};
+
+const ServiceFormWizard = ({userId}) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [animateDirection, setAnimateDirection] = useState("next");
@@ -118,7 +143,10 @@ const ServiceFormWizard = () => {
             console.log("Governorates data received:", data);
             setGovernorates(data);
           } else {
-            console.log("No governorates received for country:", selectedCountry);
+            console.log(
+              "No governorates received for country:",
+              selectedCountry
+            );
             setGovernorates([]);
           }
         })
@@ -150,7 +178,10 @@ const ServiceFormWizard = () => {
             console.log("Cities data received:", data);
             setCities(data);
           } else {
-            console.log("No cities received for governorate:", selectedGovernorate);
+            console.log(
+              "No cities received for governorate:",
+              selectedGovernorate
+            );
             setCities([]);
           }
         })
@@ -200,7 +231,8 @@ const ServiceFormWizard = () => {
                   ),
         }));
         if (parsedData.country) setSelectedCountry(parsedData.country);
-        if (parsedData.governorate) setSelectedGovernorate(parsedData.governorate);
+        if (parsedData.governorate)
+          setSelectedGovernorate(parsedData.governorate);
         if (parsedData.city) setSelectedCity(parsedData.city);
 
         if (parsedData.imageUrl) setImagePreview(parsedData.imageUrl);
@@ -387,7 +419,9 @@ const ServiceFormWizard = () => {
     const arrayField = categoryParts[1] || "items";
 
     const categoryData = formData.service_details[mainCategory] || {};
-    const items = (categoryData[arrayField] || []).filter((_, i) => i !== index);
+    const items = (categoryData[arrayField] || []).filter(
+      (_, i) => i !== index
+    );
 
     handleNestedChange(mainCategory, arrayField, items);
   };
@@ -410,6 +444,7 @@ const ServiceFormWizard = () => {
       contractors: "Contractors",
       horse_catering: "Horse Catering",
       trip_coordinator: "Trip Coordinator",
+      suppliers: "Suppliers",
     };
 
     return serviceTypesMap[type] || type;
@@ -435,34 +470,42 @@ const ServiceFormWizard = () => {
 
     switch (step) {
       case 1:
-        if (!formData.name_ar) newErrors.name_ar = "Service name in Arabic is required";
-        if (!formData.name_en) newErrors.name_en = "Service name in English is required";
+        if (!formData.name_ar)
+          newErrors.name_ar = "Service name in Arabic is required";
+        if (!formData.name_en)
+          newErrors.name_en = "Service name in English is required";
         if (!formData.years_of_experience)
           newErrors.years_of_experience = "Years of experience is required";
         break;
 
       case 2:
         if (!formData.about_ar || formData.about_ar.length < 50)
-          newErrors.about_ar = "Description in Arabic must be at least 50 characters";
+          newErrors.about_ar =
+            "Description in Arabic must be at least 50 characters";
         if (!formData.about_en || formData.about_en.length < 50)
-          newErrors.about_en = "Description in English must be at least 50 characters";
+          newErrors.about_en =
+            "Description in English must be at least 50 characters";
         if (!formData.past_experience_ar)
-          newErrors.past_experience_ar = "Past experience in Arabic is required";
+          newErrors.past_experience_ar =
+            "Past experience in Arabic is required";
         if (!formData.past_experience_en)
-          newErrors.past_experience_en = "Past experience in English is required";
+          newErrors.past_experience_en =
+            "Past experience in English is required";
         break;
 
       case 3:
         if (!formData.servicePhone)
           newErrors.servicePhone = "Service phone number is required";
-        if (!formData.serviceEmail) newErrors.serviceEmail = "Service email is required";
+        if (!formData.serviceEmail)
+          newErrors.serviceEmail = "Service email is required";
         else if (!/\S+@\S+\.\S+/.test(formData.serviceEmail))
           newErrors.serviceEmail = "Invalid email format";
 
         if (!selectedCountry) newErrors.country = "Country is required";
         if (selectedCountry && !selectedGovernorate)
           newErrors.governorate = "Governorate is required";
-        if (selectedGovernorate && !selectedCity) newErrors.city = "City is required";
+        if (selectedGovernorate && !selectedCity)
+          newErrors.city = "City is required";
         if (!formData.address_details)
           newErrors.address_details = "Address details are required";
         break;
@@ -486,7 +529,30 @@ const ServiceFormWizard = () => {
         break;
 
       case 5:
-        if (!formData.service_type) newErrors.service_type = "Service type is required";
+        if (!formData.service_type)
+          newErrors.service_type = "Service type is required";
+        const serviceDetailKey = serviceDetailKeyMap[formData.service_type];
+        if (serviceDetailKey) {
+          const details = formData.service_details[serviceDetailKey] || {};
+          if (
+            formData.service_type === "horse_stable" &&
+            !details.stableDescription
+          ) {
+            newErrors[`${serviceDetailKey}.stableDescription`] =
+              "Stable description is required";
+          }
+          if (formData.service_type === "hoof_trimmer") {
+            if (!details.specialization) {
+              newErrors[`${serviceDetailKey}.specialization`] =
+                "Specialization is required";
+            }
+            if (!details.methodsAndTools) {
+              newErrors[`${serviceDetailKey}.methodsAndTools`] =
+                "Methods and tools are required";
+            }
+          }
+          // Add validation for other service types as needed
+        }
         break;
 
       case 6:
@@ -496,30 +562,63 @@ const ServiceFormWizard = () => {
         break;
 
       case 7:
-        if (!formData.name_ar) newErrors.name_ar = "Service name in Arabic is required";
-        if (!formData.name_en) newErrors.name_en = "Service name in English is required";
+        if (!formData.name_ar)
+          newErrors.name_ar = "Service name in Arabic is required";
+        if (!formData.name_en)
+          newErrors.name_en = "Service name in English is required";
         if (!formData.years_of_experience)
           newErrors.years_of_experience = "Years of experience is required";
         if (!formData.about_ar || formData.about_ar.length < 50)
-          newErrors.about_ar = "Description in Arabic must be at least 50 characters";
+          newErrors.about_ar =
+            "Description in Arabic must be at least 50 characters";
         if (!formData.about_en || formData.about_en.length < 50)
-          newErrors.about_en = "Description in English must be at least 50 characters";
+          newErrors.about_en =
+            "Description in English must be at least 50 characters";
         if (!formData.past_experience_ar)
-          newErrors.past_experience_ar = "Past experience in Arabic is required";
+          newErrors.past_experience_ar =
+            "Past experience in Arabic is required";
         if (!formData.past_experience_en)
-          newErrors.past_experience_en = "Past experience in English is required";
+          newErrors.past_experience_en =
+            "Past experience in English is required";
         if (!formData.servicePhone)
           newErrors.servicePhone = "Service phone number is required";
-        if (!formData.serviceEmail) newErrors.serviceEmail = "Service email is required";
+        if (!formData.serviceEmail)
+          newErrors.serviceEmail = "Service email is required";
         if (!formData.country) newErrors.country = "Country is required";
-        if (!formData.governorate) newErrors.governorate = "Governorate is required";
+        if (!formData.governorate)
+          newErrors.governorate = "Governorate is required";
         if (!formData.city) newErrors.city = "City is required";
         if (!formData.images || formData.images.length === 0)
           newErrors.images = "At least one image is required";
-        if (!formData.service_type) newErrors.service_type = "Service type is required";
+        if (!formData.service_type)
+          newErrors.service_type = "Service type is required";
         if (!formData.price || isNaN(Number(formData.price)))
           newErrors.price = "Valid price is required";
         if (!formData.priceUnit) newErrors.priceUnit = "Price unit is required";
+        const reviewServiceDetailKey =
+          serviceDetailKeyMap[formData.service_type];
+        if (reviewServiceDetailKey) {
+          const details =
+            formData.service_details[reviewServiceDetailKey] || {};
+          if (
+            formData.service_type === "horse_stable" &&
+            !details.stableDescription
+          ) {
+            newErrors[`${reviewServiceDetailKey}.stableDescription`] =
+              "Stable description is required";
+          }
+          if (formData.service_type === "hoof_trimmer") {
+            if (!details.specialization) {
+              newErrors[`${reviewServiceDetailKey}.specialization`] =
+                "Specialization is required";
+            }
+            if (!details.methodsAndTools) {
+              newErrors[`${reviewServiceDetailKey}.methodsAndTools`] =
+                "Methods and tools are required";
+            }
+          }
+          // Add validation for other service types as needed
+        }
         break;
     }
 
@@ -586,6 +685,7 @@ const ServiceFormWizard = () => {
       service_type: formData.service_type,
       images: imagesWithKeys.map((item) => item.file),
       service_details: formData.service_details,
+      userId: userId, // Include userId
     };
 
     return submitData;
@@ -593,6 +693,12 @@ const ServiceFormWizard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!userId) {
+      toast.error("You must be logged in to submit a service");
+      router.push("/login");
+      return;
+    }
 
     if (!validateStep(currentStep)) {
       toast.error("Please correct the errors before submitting");
@@ -617,19 +723,21 @@ const ServiceFormWizard = () => {
 
         setTimeout(() => {
           setShowCelebration(false);
-          router.push("/");
+          router.push("profile?tab=services");
         }, 3000);
       } else {
         toast.error("Failed to add service", {
           description:
-            result.error || "There was a problem submitting your service. Please try again.",
+            result.error ||
+            "There was a problem submitting your service. Please try again.",
         });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("An error occurred", {
         description:
-          error.message || "Something went wrong while submitting your service.",
+          error.message ||
+          "Something went wrong while submitting your service.",
       });
     } finally {
       setSubmitting(false);
@@ -641,12 +749,15 @@ const ServiceFormWizard = () => {
       <h3 className="text-lg font-semibold">Select Service Type</h3>
       <ServiceTypeSelector
         selectedType={formData.service_type}
-        onSelect={(type) => handleChange({ target: { name: "service_type", value: type } })}
+        onSelect={(type) =>
+          handleChange({ target: { name: "service_type", value: type } })
+        }
       />
       {formData.service_type && (
         <div className="mt-6">
           <h3 className="font-semibold text-lg mb-6 pb-2 border-b">
-            Additional Information for {getServiceTypeLabel(formData.service_type)}
+            Additional Information for{" "}
+            {getServiceTypeLabel(formData.service_type)}
           </h3>
           <ServiceFieldsFactory
             serviceType={formData.service_type}
@@ -665,13 +776,15 @@ const ServiceFormWizard = () => {
   );
 
   const renderReviewStep = () => (
-    <ReviewStep
-      formData={formData}
-      getServiceTypeLabel={getServiceTypeLabel}
-      getPriceUnitLabel={getPriceUnitLabel}
-      additionalImagePreviews={additionalImagePreviews}
-      imagePreview={imagePreview}
-    />
+    <div className="space-y-6">
+      <ReviewStep
+        formData={formData}
+        getServiceTypeLabel={getServiceTypeLabel}
+        getPriceUnitLabel={getPriceUnitLabel}
+        additionalImagePreviews={additionalImagePreviews}
+        imagePreview={imagePreview}
+      />
+    </div>
   );
 
   const renderContent = () => {
@@ -727,7 +840,9 @@ const ServiceFormWizard = () => {
     <div className="bg-white min-h-screen">
       <div className="container max-w-4xl py-8 px-4 sm:px-6">
         <div className="mb-12">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Add Your Service</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-2">
+            Add Your Service
+          </h1>
           <p className="text-muted-foreground text-lg">
             Complete all steps to create your professional service listing
           </p>

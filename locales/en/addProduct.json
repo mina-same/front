@@ -1,5 +1,6 @@
 {
     "addNewProduct": "Add New Product",
+    "editProduct": "Edit Product",
     "productDescription": "List your equestrian product for sale or rent",
     "basicInformation": "Basic Product Information",
     "imagesCategory": "Images & Category",
@@ -18,6 +19,7 @@
     "category": "Product Category",
     "selectCategory": "Select category",
     "dragDrop": "Drag and drop your product images here",
+    "noImagesAvailable": "No images available for this product.",
     "orBrowse": "or click to browse files",
     "selectImages": "Select Images",
     "imageRequirements": "Upload at least one image of your product (JPEG, PNG, or WebP, max 10MB)",
@@ -50,12 +52,14 @@
     "previous": "Previous",
     "nextStep": "Next Step",
     "createProduct": "Create Product",
+    "saveChanges": "Save Changes",
     "submitting": "Submitting...",
     "step": "Step",
     "of": "of",
     "loading": "Loading...",
     "authError": "Authentication Error",
     "productCreatedSuccess": "Product created successfully!",
+    "productUpdatedSuccess": "Product updated successfully!",
     "errors": {
         "nameArRequired": "Product name in Arabic is required",
         "nameEnRequired": "Product name in English is required",
@@ -68,6 +72,7 @@
         "invalidUserType": "Invalid user type. Only suppliers can add products.",
         "submissionFailed": "Failed to create product. Please try again.",
         "formInvalid": "Please fix the errors in the form before submitting.",
-        "authError": "Authentication failed. Please try again."
+        "authError": "Authentication failed. Please try again.",
+        "unauthorizedEdit": "You are not authorized to edit this product."
     }
 }

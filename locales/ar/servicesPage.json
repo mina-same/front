@@ -112,5 +112,84 @@
         "pricePerMonth": "{{price}} دولار/شهر",
         "visitWebsite": "زيارة الموقع",
         "cateringOptions": "خيارات تقديم الطعام:"
+    },
+"horseGrooming": {
+      "title": "خدمات العناية بشعر الخيول",
+      "subtitle": "ابحث عن خدمات العناية الاحتراف  للحفاظ على مظهر خيولك بأفضل حال.",
+      "searchPlaceholder": "ابحث عن مقدمي خدمات العناية...",
+      "error": "فشل في تحميل خدمات العناية. حاول مرة أخرى لاحقًا.",
+      "noGroomers": "لم يتم العثور على خدمات العناية.",
+      "pricePerSession": "{price} دولار لكل {unit}",
+      "visitWebsite": "زيارة الموقع",
+      "methodsAndTools": "الأساليب والأدوات",
+      "certifications": "الشهادات",
+      "certified": "معتمد"
+    },
+    "eventJudging": {
+      "title": "خدمات تحكيم الفعاليات",
+      "subtitle": "ابحث عن حكام مؤهلين لفعاليات الخيول الخاصة بك.",
+      "searchPlaceholder": "ابحث عن الحكام...",
+      "error": "فشل في تحميل خدمات التحكيم. حاول مرة أخرى لاحقًا.",
+      "noJudges": "لم يتم العثور على خدمات التحكيم.",
+      "pricePerSession": "{price} دولار لكل {unit}",
+      "visitWebsite": "زيارة الموقع",
+      "eventTypes": "أنواع الفعاليات",
+      "judgingLevel": "مستوى التحكيم",
+      "certifications": "الشهادات",
+      "certified": "معتمد"
+    },
+    "marketingPromotion": {
+      "title": "خدمات التسويق والترويج",
+      "subtitle": "روّج لفعاليات الخيول الخاصة بك مع خدمات تسويق احترافية.",
+      "searchPlaceholder": "ابحث عن المسوقين...",
+      "error": "فشل في تحميل خدمات التسويق. حاول مرة أخرى لاحقًا.",
+      "noMarketers": "لم يتم العثور على خدمات التسويق.",
+      "pricePerSession": "{price} دولار لكل {unit}",
+      "visitWebsite": "زيارة الموقع",
+      "portfolioLinks": "الملف الشخصي",
+      "certifications": "الشهادات",
+      "certified": "معتمد"
+    },
+    "eventCommentary": {
+      "title": "خدمات التعليق على الفعاليات",
+      "subtitle": "اجذب جمهورك مع تعليق احترافي على الفعاليات.",
+      "searchPlaceholder": "ابحث عن المعلقين...",
+      "error": "فشل في تحميل خدمات التعليق. حاول مرة أخرى لاحقًا.",
+      "noCommentators": "لم يتم العثور على خدمات التعليق.",
+      "pricePerSession": "{price} دولار لكل {unit}",
+      "visitWebsite": "زيارة الموقع",
+      "portfolioLink": "الملف الشخصي",
+      "certifications": "الشهادات",
+      "certified": "معتمد"
+    },
+    "consultingServices": {
+      "title": "خدمات استشارية",
+      "subtitle": "احصل على نصائح متخصصة لمشاريع الخيول الخاصة بك.",
+      "searchPlaceholder": "ابحث عن المستشارين...",
+      "error": "فشل في تحميل الخدمات الاستشارية. حاول مرة أخرى لاحقًا.",
+      "noConsultants": "لم يتم العثور على خدمات استشارية.",
+      "pricePerSession": "{price} دولار لكل {unit}",
+      "visitWebsite": "زيارة الموقع",
+      "certifications": "الشهادات",
+      "certified": "معتمد"
+    },
+    "photographyServices": {
+      "title": "خدمات التصوير",
+      "subtitle": "التقط لحظات مذهلة مع تصوير احترافي للخيول.",
+      "searchPlaceholder": "ابحث عن المصورين...",
+      "error": "فشل في تحميل خدمات التصوير. حاول مرة أخرى لاحقًا.",
+      "noPhotographers": "لم يتم العثور على خدمات التصوير.",
+      "pricePerSession": "{price} دولار لكل {unit}",
+      "visitWebsite": "زيارة الموقع",
+      "photographyTypes": "أنواع التصوير",
+      "portfolioLink": "الملف الشخصي",
+      "certifications": "الشهادات",
+      "certified": "معتمد"
+    },
+    "priceUnits": {
+      "per_half_hour": "نصف ساعة",
+      "per_hour": "ساعة",
+      "per_day": "يوم",
+      "per_project": "مشروع"
     }
 }

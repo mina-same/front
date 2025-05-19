@@ -1,4 +1,5 @@
 {
+    "supplierDetails": "تفاصيل المورد",
     "completeProfile": "إكمال ملفك الشخصي",
     "joinCommunity": "انضم إلى مجتمعنا مع ملف شخصي مخصص",
     "imageUpload": "إسقاط الصورة هنا",
@@ -349,5 +350,6 @@
             "bronzeMessage": "بداية جيدة! استمر.",
             "basicMessage": "أضف المزيد من التفاصيل لتبرز."
         }
-    }
+    },
+    "educational_services": "خدمات التعليمية"
 }

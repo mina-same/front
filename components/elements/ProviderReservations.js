@@ -57,7 +57,7 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
     });
 
     return (
-        <div className="space-y-4 md:space-y-6">
+        <div className="bg-white space-y-4 md:space-y-6">
             {/* Header - Made responsive */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-3">

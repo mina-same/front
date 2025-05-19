@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   FileText,
   Download,
+  ExternalLink,
   Star,
   Lock,
   Calendar,
@@ -23,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../../components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "../../../../../components/ui new/progress";
+import { Progress } from "../../../../../components/ui/progress";
 import { Textarea } from "../../../../../components/ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import ResourceNotFound from "../../../../../../components/shared/ResourceNotFound";
@@ -38,14 +39,13 @@ const AlertNotification = ({ message, isVisible, onClose, type }) => (
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="fixed bottom-4 right-15 transform z-50 max-w-md w-full mx-auto"
+        className="fixed bottom-4 left-2 transform z-50 max-w-md w-full mx-auto"
       >
         <div
-          className={`bg-white shadow-lg rounded-lg p-4 flex items-start ${type === "success" ? "border-l-4 border-green-500" : "border-l-4 border-red-500"
-            }`}
+          className={`bg-white shadow-lg rounded-lg p-4 flex items-start border-l-4 ${type === "success" ? "border-[#b28a2f]" : "border-red-500"}`}
         >
           {type === "success" ? (
-            <svg className="w-6 h-6 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6 text-[#b28a2f] mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
             </svg>
           ) : (
@@ -54,11 +54,11 @@ const AlertNotification = ({ message, isVisible, onClose, type }) => (
             </svg>
           )}
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">{message}</p>
+            <p className="text-sm font-medium text-[#1f2937]">{message}</p>
           </div>
           <button
             onClick={onClose}
-            className="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none"
+            className="ml-4 text-[#e5e7eb] hover:text-[#1f2937] focus:outline-none"
           >
             ×
           </button>
@@ -67,6 +67,23 @@ const AlertNotification = ({ message, isVisible, onClose, type }) => (
     )}
   </AnimatePresence>
 );
+
+function CheckIcon({ className }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
 
 export default function CourseDetails() {
   const { courseId } = useParams();
@@ -84,6 +101,8 @@ export default function CourseDetails() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alert, setAlert] = useState({ isVisible: false, message: "", type: "error" });
   const [showInstructorContact, setShowInstructorContact] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [userOrder, setUserOrder] = useState(null);
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -116,7 +135,7 @@ export default function CourseDetails() {
   }, []);
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchCourseAndOrder = async () => {
       try {
         console.log("Fetching course with ID:", courseId);
 
@@ -132,6 +151,7 @@ export default function CourseDetails() {
           accessLink,
           duration,
           level,
+          materials,
           ratings[]{
             _key,
             value,
@@ -167,7 +187,8 @@ export default function CourseDetails() {
           "images": images[]{
             "_key": _key,
             "url": asset->url
-          }[@.url != null]
+          }[@.url != null],
+          orders
         }`;
 
         const relatedCoursesQuery = `*[_type == "course" && category == $category && _id != $courseId][0...3]{
@@ -177,43 +198,112 @@ export default function CourseDetails() {
           averageRating
         }[images != null]`;
 
+        const orderQuery = `*[_type == "orderCourse" && user._ref == $userId && course._ref == $courseId][0]{
+          _id,
+          status,
+          paymentStatus,
+          price
+        }`;
+
         const sanityCourse = await client.fetch(courseQuery, { courseId });
         console.log("Fetched course data:", JSON.stringify(sanityCourse, null, 2));
+
 
         if (sanityCourse) {
           setCourse(sanityCourse);
           const related = await client.fetch(relatedCoursesQuery, { category: sanityCourse.category || "other", courseId });
-          console.log("Related courses:", JSON.stringify(related, null, 2));
           setRelatedCourses(related.filter(course => course._id && course.image));
+
+          if (currentUserId) {
+            const userOrderData = await client.fetch(orderQuery, {
+              userId: currentUserId,
+              courseId
+            });
+            setUserOrder(userOrderData);
+            setHasPurchased(userOrderData?.status === "completed" && userOrderData?.paymentStatus === "paid");
+          }
         }
       } catch (error) {
-        console.error("Error fetching course:", error);
+        console.error("Error fetching course or order:", error);
       } finally {
         setLoading(false);
       }
     };
 
     if (courseId && typeof courseId === "string") {
-      fetchCourse();
+      fetchCourseAndOrder();
     } else {
       console.warn("Invalid courseId:", courseId);
       setLoading(false);
     }
-  }, [courseId]);
+  }, [courseId, currentUserId]);
 
   const handlePurchase = async () => {
-    if (!course || !courseId) return;
+    if (!course || !courseId || !currentUserId) {
+      showAlert(
+        <>
+          {t("courseDetails:errors.userNotAuthenticated", "You must be logged in to enroll in this course.")} {" "}
+          <a href="/login" className="text-red-700 hover:underline">
+            {t("courseDetails:login", "Log in here")}
+          </a>
+        </>,
+        "error"
+      );
+      return;
+    }
+
+    if (typeof courseId !== "string" || !course._id) {
+      console.error("Invalid course ID or course data:", { courseId, course });
+      showAlert(t("courseDetails:errors.invalidCourse", "Invalid course data. Please try again."), "error");
+      return;
+    }
 
     setOrderLoading(true);
     try {
-      // Placeholder for purchase functionality
-      setTimeout(() => {
-        showAlert("Purchase functionality would go here", "success");
-        setOrderLoading(false);
-      }, 1000);
+      const orderData = {
+        _type: "orderCourse",
+        user: { _type: "reference", _ref: currentUserId },
+        course: { _type: "reference", _ref: courseId },
+        orderDate: new Date().toISOString(),
+        status: "pending",
+        price: course.price || 0,
+        paymentStatus: "pending",
+      };
+
+      console.log("Creating order with data:", orderData);
+      const order = await client.create(orderData);
+      const orderId = order._id;
+      console.log("Order created successfully:", orderId);
+
+      try {
+        await client
+          .patch(courseId)
+          .setIfMissing({ orders: [] })
+          .append("orders", [{ _type: "reference", _ref: orderId }])
+          .commit();
+        console.log("Order linked to course:", courseId);
+      } catch (patchError) {
+        console.warn("Failed to link order to course, proceeding anyway:", patchError.message);
+        // Continue even if linking fails, as the order is still created
+      }
+
+      if (course.price === 0) {
+        await client
+          .patch(orderId)
+          .set({ status: "completed", paymentStatus: "paid" })
+          .commit();
+        setHasPurchased(true);
+        setUserOrder({ ...order, status: "completed", paymentStatus: "paid" });
+        showAlert(t("courseDetails:enrollSuccess", "Enrolled successfully! You can now access the course materials."), "success");
+      } else {
+        showAlert(t("courseDetails:orderCreated", "Order created! Please complete payment on the orders page."), "success");
+        setUserOrder({ ...order, status: "pending", paymentStatus: "pending" });
+        router.push("/profile?tab=orders");
+      }
     } catch (error) {
-      console.error("Error purchasing course:", error);
-      showAlert("Failed to purchase course", "error");
+      console.error("Error enrolling in course:", error.message, error.stack);
+      showAlert(`${t("courseDetails:errors.enrollFailed", "Failed to enroll in course")}: ${error.message}`, "error");
+    } finally {
       setOrderLoading(false);
     }
   };
@@ -230,10 +320,10 @@ export default function CourseDetails() {
     } else {
       navigator.clipboard
         .writeText(window.location.href)
-        .then(() => showAlert("Link copied to clipboard!", "success"))
+        .then(() => showAlert(t("courseDetails:linkCopied", "Link copied to clipboard!"), "success"))
         .catch((err) => {
           console.error("Could not copy text: ", err);
-          showAlert("Failed to copy link", "error");
+          showAlert(t("courseDetails:errors.copyFailed", "Failed to copy link"), "error");
         });
     }
   };
@@ -250,7 +340,7 @@ export default function CourseDetails() {
       return;
     }
     if (userRating < 1 || userRating > 5) {
-      showAlert(t("courseDetails:errors.selectRating"), "error");
+      showAlert(t("courseDetails:errors.selectRating", "Please select a rating between 1 and 5"), "error");
       setIsSubmitting(false);
       return;
     }
@@ -325,7 +415,7 @@ export default function CourseDetails() {
 
   const showAlert = (message, type = "error") => {
     setAlert({ isVisible: true, message, type });
-    setTimeout(() => setAlert({ isVisible: false, message: "", type: "error" }), 3000);
+    setTimeout(() => setAlert({ isVisible: false, message: "", type: "error" }), 5000); // Increased to 5s for visibility
   };
 
   const renderStars = (rating, interactive = false) => {
@@ -338,7 +428,7 @@ export default function CourseDetails() {
         <Star
           key={`star-full-${i}`}
           size={20}
-          className={`cursor-${interactive ? "pointer" : "default"} text-amber-400 fill-amber-400`}
+          className={`cursor-${interactive ? "pointer" : "default"} text-[#d4af37] fill-[#d4af37]`}
           onClick={interactive ? () => setUserRating(i) : null}
           aria-label={interactive ? `Rate ${i} star${i > 1 ? "s" : ""}` : undefined}
           role={interactive ? "button" : undefined}
@@ -353,7 +443,7 @@ export default function CourseDetails() {
         <div key="star-partial" className="relative inline-block">
           <Star
             size={20}
-            className={`cursor-${interactive ? "pointer" : "default"} text-gray-300`}
+            className={`cursor-${interactive ? "pointer" : "default"} text-[#e5e7eb]`}
           />
           <div
             className="absolute top-0 left-0 overflow-hidden"
@@ -361,7 +451,7 @@ export default function CourseDetails() {
           >
             <Star
               size={20}
-              className={`cursor-${interactive ? "pointer" : "default"} text-amber-400 fill-amber-400`}
+              className={`cursor-${interactive ? "pointer" : "default"} text-[#d4af37] fill-[#d4af37]`}
             />
           </div>
         </div>
@@ -373,7 +463,7 @@ export default function CourseDetails() {
         <Star
           key={`star-empty-${i}`}
           size={20}
-          className={`cursor-${interactive ? "pointer" : "default"} text-gray-300`}
+          className={`cursor-${interactive ? "pointer" : "default"} text-[#e5e7eb]`}
           onClick={interactive ? () => setUserRating(i) : null}
           aria-label={interactive ? `Rate ${i} star${i > 1 ? "s" : ""}` : undefined}
           role={interactive ? "button" : undefined}
@@ -410,11 +500,67 @@ export default function CourseDetails() {
     }
   };
 
+  const isValidUrl = (url) => {
+    if (!url || typeof url !== "string") return false;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const getButtonProps = () => {
+    if (!userOrder) {
+      return {
+        text: course?.price > 0 ? `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}` : (
+          <span className="flex items-center gap-2">
+            <Download className="w-4 h-4" />
+            {t("courseDetails:enrollFree", "Enroll Free")}
+          </span>
+        ),
+        onClick: handlePurchase,
+        disabled: orderLoading,
+        show: true
+      };
+    }
+
+    if (userOrder.status === "pending" && userOrder.paymentStatus === "pending") {
+      return {
+        text: t("courseDetails:continuePayment", "Continue Payment"),
+        onClick: () => router.push("/profile?tab=orders"),
+        disabled: false,
+        show: true
+      };
+    }
+
+    if (userOrder.status === "completed" && userOrder.paymentStatus === "paid") {
+      return {
+        text: t("courseDetails:accessMaterials", "Access Materials"),
+        onClick: () => router.push("/profile?tab=orders"),
+        disabled: false,
+        show: true
+      };
+    }
+
+    return {
+      text: course?.price > 0 ? `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}` : (
+        <span className="flex items-center gap-2">
+          <Download className="w-4 h-4" />
+          {t("courseDetails:enrollFree", "Enroll Free")}
+        </span>
+      ),
+      onClick: handlePurchase,
+      disabled: orderLoading,
+      show: true
+    };
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-amber-600"></div>
-        <p className="mt-4 text-amber-700 font-medium">{t("courseDetails:loading", "Loading course details...")}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#b28a2f]"></div>
+        <p className="mt-4 text-[#1f2937] font-medium">{t("courseDetails:loading", "Loading course details...")}</p>
       </div>
     );
   }
@@ -424,6 +570,7 @@ export default function CourseDetails() {
   }
 
   const defaultImage = course.images?.[0]?.url || "/placeholder.svg";
+  const buttonProps = getButtonProps();
 
   const ratingDistribution = [0, 0, 0, 0, 0];
   if (course.ratings && course.ratings.length > 0) {
@@ -437,7 +584,7 @@ export default function CourseDetails() {
 
   return (
     <Layout>
-      <div className={`min-h-screen bg-gradient-to-br from-amber-50 to-white ${i18n.language === "ar" ? "rtl" : "ltr"}`}>
+      <div className={`min-h-screen bg-white ${i18n.language === "ar" ? "rtl" : "ltr"}`}>
         <AlertNotification
           message={alert.message}
           isVisible={alert.isVisible}
@@ -446,17 +593,17 @@ export default function CourseDetails() {
         />
 
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-amber-600 to-yellow-600 text-white">
+        <div className="bg-gradient-to-r from-[#b28a2f] to-[#d4af37] text-white">
           <div className="container mx-auto px-4 py-12">
             <div className="flex flex-row md:flex-row gap-8 items-center">
               <div className="w-full md:w-1/3 flex justify-center">
                 <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
-                  <div className="relative w-64 overflow-hidden rounded-lg shadow-xl">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#d4af37] to-[#b28a2f] rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
+                  <div className="relative aspect-[2/3] w-64 overflow-hidden rounded-lg shadow-xl border border-[#fef3c7]">
                     <img
                       src={course.images?.[activeImage]?.url || defaultImage}
                       alt={course.title || "Course Image"}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
                     />
                   </div>
                 </div>
@@ -465,58 +612,50 @@ export default function CourseDetails() {
               <div className="w-full md:w-2/3 space-y-6">
                 <div>
                   <Badge
-                    className="mb-2 bg-amber-100 text-amber-800 hover:bg-amber-200 cursor-pointer"
+                    className="mb-2 bg-[#fef3c7] text-[#1f2937] hover:bg-[#d4af37] hover:text-white transition-colors"
                     onClick={() => handleCategoryClick(course.category)}
                   >
-                    {course.category || "Uncategorized"}
+                    {course.category || t("courseDetails:uncategorized", "Uncategorized")}
                   </Badge>
-                  <h1 className="text-4xl font-bold tracking-tight">{course.title || "Untitled Course"}</h1>
-                  <p className="text-xl text-amber-100 mt-2">
-                    By {course.instructor?.fullName || course.instructor?.userName || "Unknown Instructor"}
+                  <h1 className="text-4xl font-bold tracking-tight">{course.title || t("courseDetails:untitled", "Untitled Course")}</h1>
+                  <p className="text-xl text-[#fef3c7] mt-2">
+                    {t("courseDetails:byInstructor", "By")} {course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown Instructor")}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
                     {renderStars(course.averageRating)}
-                    <span className="ml-2 text-amber-100">{course.averageRating?.toFixed(1) || "No ratings"}</span>
+                    <span className="ml-2 text-[#fef3c7]">{course.averageRating?.toFixed(1) || t("courseDetails:noRatings", "No ratings")}</span>
                   </div>
-                  <div className="text-amber-100">
-                    {totalRatings} {totalRatings === 1 ? "review" : "reviews"}
+                  <div className="text-[#fef3c7]">
+                    {totalRatings} {totalRatings === 1 ? t("courseDetails:review", "review") : t("courseDetails:reviews", "reviews")}
                   </div>
                 </div>
 
-                <p className="text-amber-100 line-clamp-3">{course.description || "No description available."}</p>
+                <p className="text-[#fef3c7] line-clamp-3">{course.description || t("courseDetails:noDescription", "No description available.")}</p>
 
                 <div className="flex flex-wrap gap-4">
-                  <Button
-                    onClick={handlePurchase}
-                    disabled={orderLoading}
-                    className="bg-white text-amber-700 hover:bg-amber-50"
-                  >
-                    {orderLoading ? (
-                      <span className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-700"></div>
-                        {t("courseDetails:processing", "Processing...")}
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        {course.price > 0 ? (
-                          <>{t("courseDetails:enrollFor", "Enroll for")} ${course.price?.toFixed(2) || "0.00"}</>
-                        ) : (
-                          <>
-                            <Download className="w-4 h-4" />
-                            {t("courseDetails:enrollFree", "Enroll Free")}
-                          </>
-                        )}
-                      </span>
-                    )}
-                  </Button>
-
+                  {buttonProps.show && (
+                    <Button
+                      onClick={buttonProps.onClick}
+                      disabled={buttonProps.disabled}
+                      className="bg-white text-[#b28a2f] hover:bg-[#fef3c7] hover:text-[#1f2937] border border-[#d4af37] transition-colors"
+                    >
+                      {buttonProps.disabled ? (
+                        <span className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#b28a2f]"></div>
+                          {t("courseDetails:processing", "Processing...")}
+                        </span>
+                      ) : (
+                        buttonProps.text
+                      )}
+                    </Button>
+                  )}
                   <Button
                     onClick={handleShare}
                     variant="outline"
-                    className="bg-transparent border-white text-white hover:bg-white/20"
+                    className="bg-transparent border-[#fef3c7] text-[#fef3c7] hover:bg-[#d4af37] hover:text-white hover:border-[#d4af37] transition-colors"
                   >
                     <Share2 className="w-4 h-4 mr-2" /> {t("courseDetails:share", "Share")}
                   </Button>
@@ -528,14 +667,13 @@ export default function CourseDetails() {
 
         {/* Thumbnail Gallery */}
         {course.images && course.images.length > 1 && (
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 py-4 bg-[#f5f5f5]">
             <div className="flex gap-2 overflow-x-auto pb-2">
               {course.images.map((image, index) => (
                 <button
                   key={image._key || `image-${index}`}
                   onClick={() => setActiveImage(index)}
-                  className={`flex-shrink-0 w-16 h-24 rounded-md overflow-hidden border-2 transition-all ${activeImage === index ? "border-amber-600 shadow-md" : "border-transparent opacity-70"
-                    }`}
+                  className={`flex-shrink-0 w-16 h-24 rounded-md overflow-hidden border-2 transition-all ${activeImage === index ? "border-[#b28a2f] shadow-md" : "border-transparent opacity-70 hover:opacity-100"}`}
                 >
                   <img
                     src={image.url || defaultImage}
@@ -554,136 +692,224 @@ export default function CourseDetails() {
             {/* Main content area */}
             <div className="lg:col-span-2 space-y-6">
               <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-4 mb-6">
-                  <TabsTrigger value="overview" className="text-center">{t("courseDetails:overview", "Overview")}</TabsTrigger>
-                  <TabsTrigger value="details" className="text-center">{t("courseDetails:details", "Details")}</TabsTrigger>
-                  <TabsTrigger value="reviews" className="text-center">{t("courseDetails:reviews", "Reviews")}</TabsTrigger>
-                  <TabsTrigger value="instructor" className="text-center">{t("courseDetails:instructor", "Instructor")}</TabsTrigger>
+                <TabsList className="grid grid-cols-4 mb-6 bg-[#f5f5f5] rounded-lg p-1">
+                  <TabsTrigger value="overview" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:overview", "Overview")}</TabsTrigger>
+                  <TabsTrigger value="details" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:details", "Details")}</TabsTrigger>
+                  <TabsTrigger value="reviews" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:reviews", "Reviews")}</TabsTrigger>
+                  <TabsTrigger value="instructor" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:instructor", "Instructor")}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
-                  <Card className="bg-white">
+                  <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-amber-600" />
+                      <CardTitle className="flex items-center gap-2 text-[#1f2937]">
+                        <BookOpen className="w-5 h-5 text-[#b28a2f]" />
                         {t("courseDetails:aboutCourse", "About This Course")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">{course.description || t("courseDetails:noDescription", "No description available.")}</p>
+                      <p className="text-[#1f2937] leading-relaxed whitespace-pre-line">{course.description || t("courseDetails:noDescription", "No description available.")}</p>
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-white">
+                  <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Star className="w-5 h-5 text-amber-600" />
+                      <CardTitle className="flex items-center gap-2 text-[#1f2937]">
+                        <Star className="w-5 h-5 text-[#b28a2f]" />
                         {t("courseDetails:highlights", "Highlights")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="flex items-start gap-3">
-                          <div className="bg-amber-100 p-2 rounded-full text-amber-600">
+                          <div className="bg-[#fef3c7] p-2 rounded-full text-[#b28a2f]">
                             <FileText className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="font-semibold">{t("courseDetails:format", "Format")}</h4>
-                            <p className="text-gray-600">{course.accessLink ? t("courseDetails:onlineCourse", "Online Course") : t("courseDetails:notSpecified", "Not specified")}</p>
+                            <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:format", "Format")}</h4>
+                            <p className="text-[#1f2937]">{course.accessLink || course.materials ? t("courseDetails:onlineCourse", "Online Course") : t("courseDetails:notSpecified", "Not specified")}</p>
                           </div>
                         </div>
 
                         <div className="flex items-start gap-3">
-                          <div className="bg-amber-100 p-2 rounded-full text-amber-600">
+                          <div className="bg-[#fef3c7] p-2 rounded-full text-[#b28a2f]">
                             <Globe className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="font-semibold">{t("courseDetails:language", "Language")}</h4>
-                            <p className="text-gray-600">{course.language || t("courseDetails:english", "English")}</p>
+                            <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:language", "Language")}</h4>
+                            <p className="text-[#1f2937]">{course.language || t("courseDetails:english", "English")}</p>
                           </div>
                         </div>
 
                         <div className="flex items-start gap-3">
-                          <div className="bg-amber-100 p-2 rounded-full text-amber-600">
+                          <div className="bg-[#fef3c7] p-2 rounded-full text-[#b28a2f]">
                             <User className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="font-semibold">{t("courseDetails:instructor", "Instructor")}</h4>
-                            <p className="text-gray-600">{course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown")}</p>
+                            <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:instructor", "Instructor")}</h4>
+                            <p className="text-[#1f2937]">{course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown")}</p>
                           </div>
                         </div>
 
                         <div className="flex items-start gap-3">
-                          <div className="bg-amber-100 p-2 rounded-full text-amber-600">
+                          <div className="bg-[#fef3c7] p-2 rounded-full text-[#b28a2f]">
                             <Calendar className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="font-semibold">{t("courseDetails:startDate", "Start Date")}</h4>
-                            <p className="text-gray-600">{course.startDate || t("courseDetails:flexible", "Flexible")}</p>
+                            <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:startDate", "Start Date")}</h4>
+                            <p className="text-[#1f2937]">{course.startDate || t("courseDetails:flexible", "Flexible")}</p>
                           </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
+
+                  {(course.materials?.length > 0 || course.accessLink) && (
+                    <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-[#1f2937]">
+                          <FileText className="w-5 h-5 text-[#b28a2f]" />
+                          {t("courseDetails:courseMaterials", "Course Materials")}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {hasPurchased ? (
+                          <div className="space-y-4">
+                            {course.materials?.length > 0 ? (
+                              <div className="space-y-2">
+                                {course.materials.map((material, index) => (
+                                  <a
+                                    key={index}
+                                    href={material}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full flex items-center justify-center bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] text-white font-medium py-2 px-4 rounded-md transition-colors disabled:bg-[#e5e7eb] disabled:cursor-not-allowed"
+                                    onClick={(e) => {
+                                      if (!material || !isValidUrl(material)) {
+                                        e.preventDefault();
+                                        showAlert(t("courseDetails:errors.invalidMaterialLink", "Material link is invalid or unavailable. Please try again later."), "error");
+                                      } else {
+                                        console.log("Attempting to open material link:", material);
+                                        window.open(material, "_blank", "noopener,noreferrer");
+                                      }
+                                    }}
+                                    disabled={!material || !isValidUrl(material)}
+                                  >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    {t("courseDetails:accessMaterial", "Access Material")} {index + 1}
+                                  </a>
+                                ))}
+                              </div>
+                            ) : (
+                              <Alert className="bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
+                                <AlertDescription className="flex items-center gap-2">
+                                  <Lock className="w-4 h-4 text-[#b28a2f]" />
+                                  {t("courseDetails:noMaterials", "No downloadable materials available for this course.")}
+                                </AlertDescription>
+                              </Alert>
+                            )}
+                            {course.accessLink && (
+                              <a
+                                href={course.accessLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full flex items-center justify-center bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] text-white font-medium py-2 px-4 rounded-md transition-colors disabled:bg-[#e5e7eb] disabled:cursor-not-allowed"
+                                onClick={(e) => {
+                                  if (!course.accessLink || !isValidUrl(course.accessLink)) {
+                                    e.preventDefault();
+                                    showAlert(t("courseDetails:errors.invalidAccessLink", "Online access link is invalid or unavailable. Please try again later."), "error");
+                                  } else {
+                                    console.log("Attempting to open access link:", course.accessLink);
+                                    window.open(course.accessLink, "_blank", "noopener,noreferrer");
+                                  }
+                                }}
+                                disabled={!course.accessLink || !isValidUrl(course.accessLink)}
+                              >
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                {t("courseDetails:accessOnline", "Access Online")}
+                              </a>
+                            )}
+                          </div>
+                        ) : (
+                          <Alert className="bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
+                            <AlertDescription className="flex items-center gap-2">
+                              <Lock className="w-4 h-4 text-[#b28a2f]" />
+                              {course.price > 0 ? (
+                                t("courseDetails:enrollToAccess", "Enroll in this course to access its full content and materials.")
+                              ) : (
+                                <>
+                                  {t("courseDetails:clickToEnroll", "Click")} {" "}
+                                  <a href="#" onClick={handlePurchase} className="text-[#b28a2f] hover:underline">
+                                    '{t("courseDetails:enrollFree", "Enroll Free")}'
+                                  </a>{" "}
+                                  {t("courseDetails:toAccessCourse", "to access this course.")}
+                                </>
+                              )}
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="details" className="space-y-6">
-                  <Card className="bg-white">
+                  <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-amber-600" />
+                      <CardTitle className="flex items-center gap-2 text-[#1f2937]">
+                        <FileText className="w-5 h-5 text-[#b28a2f]" />
                         {t("courseDetails:courseSpecifications", "Course Specifications")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:title", "Title")}</h4>
-                          <p className="text-gray-900 font-medium">{course.title || t("courseDetails:untitled", "Untitled")}</p>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:title", "Title")}</h4>
+                          <p className="text-[#1f2937] font-medium">{course.title || t("courseDetails:untitled", "Untitled")}</p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:instructor", "Instructor")}</h4>
-                          <p className="text-gray-900 font-medium">{course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown")}</p>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:instructor", "Instructor")}</h4>
+                          <p className="text-[#1f2937] font-medium">{course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown")}</p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:category", "Category")}</h4>
-                          <Badge variant="outline" className="mt-1">{course.category || t("courseDetails:uncategorized", "Uncategorized")}</Badge>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:category", "Category")}</h4>
+                          <Badge variant="outline" className="mt-1 bg-[#fef3c7] text-[#1f2937] border-[#d4af37] hover:bg-[#d4af37] hover:text-white">{course.category || t("courseDetails:uncategorized", "Uncategorized")}</Badge>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:language", "Language")}</h4>
-                          <p className="text-gray-900 font-medium">{course.language || t("courseDetails:english", "English")}</p>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:language", "Language")}</h4>
+                          <p className="text-[#1f2937] font-medium">{course.language || t("courseDetails:english", "English")}</p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:duration", "Duration")}</h4>
-                          <p className="text-gray-900 font-medium">{course.duration || t("courseDetails:notSpecified", "Not specified")}</p>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:duration", "Duration")}</h4>
+                          <p className="text-[#1f2937] font-medium">{course.duration || t("courseDetails:notSpecified", "Not specified")}</p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:startDate", "Start Date")}</h4>
-                          <p className="text-gray-900 font-medium">{course.startDate || t("courseDetails:flexible", "Flexible")}</p>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:startDate", "Start Date")}</h4>
+                          <p className="text-[#1f2937] font-medium">{course.startDate || t("courseDetails:flexible", "Flexible")}</p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:level", "Level")}</h4>
-                          <p className="text-gray-900 font-medium">{course.level || t("courseDetails:notSpecified", "Not specified")}</p>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:level", "Level")}</h4>
+                          <p className="text-[#1f2937] font-medium">{course.level || t("courseDetails:notSpecified", "Not specified")}</p>
                         </div>
 
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">{t("courseDetails:price", "Price")}</h4>
-                          <p className="text-gray-900 font-medium">
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:price", "Price")}</h4>
+                          <p className="text-[#1f2937] font-medium">
                             {course.price > 0 ? `$${course.price?.toFixed(2) || "0.00"}` : t("courseDetails:free", "Free")}
                           </p>
                         </div>
                       </div>
 
-                      {course.price > 0 && (
-                        <Alert className="mt-8 bg-amber-50 border-amber-200 text-amber-700">
+                      {course.price > 0 && !hasPurchased && (
+                        <Alert className="mt-8 bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
                           <AlertDescription className="flex items-center gap-2">
-                            <Lock className="w-4 h-4" />
+                            <Lock className="w-4 h-4 text-[#b28a2f]" />
                             {t("courseDetails:enrollToAccess", "Enroll in this course to access its full content and materials.")}
                           </AlertDescription>
                         </Alert>
@@ -693,11 +919,11 @@ export default function CourseDetails() {
                 </TabsContent>
 
                 <TabsContent value="reviews" className="space-y-6">
-                  <Card className="bg-white dark:bg-gray-800 border-amber-100">
+                  <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-gray-800 dark:text-gray-100">
-                        <Star className="w-5 h-5 text-amber-600" />
-                        Learner Reviews
+                      <CardTitle className="flex items-center gap-2 text-[#1f2937]">
+                        <Star className="w-5 h-5 text-[#b28a2f]" />
+                        {t("courseDetails:learnerReviews", "Learner Reviews")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -705,12 +931,12 @@ export default function CourseDetails() {
                         <div>
                           <div className="flex flex-row lg:flex-row gap-8 mb-8">
                             <div className="flex flex-col items-center justify-center text-center">
-                              <div className="text-5xl font-bold text-amber-800 dark:text-amber-300">
+                              <div className="text-5xl font-bold text-[#b28a2f]">
                                 {course.averageRating?.toFixed(1) || "0.0"}
                               </div>
                               <div className="mt-2">{renderStars(course.averageRating || 0)}</div>
-                              <div className="mt-1 text-gray-500 dark:text-gray-400">
-                                {totalRatings} {totalRatings === 1 ? "review" : "reviews"}
+                              <div className="mt-1 text-[#1f2937]/70">
+                                {totalRatings} {totalRatings === 1 ? t("courseDetails:review", "review") : t("courseDetails:reviews", "reviews")}
                               </div>
                             </div>
 
@@ -721,12 +947,13 @@ export default function CourseDetails() {
 
                                 return (
                                   <div key={star} className="flex items-center gap-4 my-1">
-                                    <div className="w-8 text-sm text-gray-700 dark:text-gray-300">{`${star} star`}</div>
+                                    <div className="w-8 text-sm text-[#1f2937]">{`${star} star`}</div>
                                     <Progress
                                       value={percentage}
-                                      className="h-2 flex-grow bg-gray-200 dark:bg-gray-600"
+                                      className="h-2 flex-grow bg-[#e5e7eb]"
+                                      indicatorClassName="bg-[#b28a2f]"
                                     />
-                                    <div className="w-12 text-sm text-gray-700 dark:text-gray-300 text-right">
+                                    <div className="w-12 text-sm text-[#1f2937] text-right">
                                       {percentage.toFixed(0)}%
                                     </div>
                                   </div>
@@ -735,41 +962,41 @@ export default function CourseDetails() {
                             </div>
                           </div>
 
-                          <div className="bg-amber-50 p-5 rounded-lg shadow-sm border border-amber-200 mb-6 dark:bg-gray-700 dark:border-amber-900">
-                            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
-                              <MessageSquare size={20} className="text-amber-500" />
-                              Rate This Course
+                          <div className="bg-[#fef3c7] p-5 rounded-lg shadow-sm border border-[#d4af37] mb-6">
+                            <h4 className="text-lg font-semibold text-[#1f2937] mb-3 flex items-center gap-2">
+                              <MessageSquare size={20} className="text-[#b28a2f]" />
+                              {t("courseDetails:rateCourse", "Rate This Course")}
                             </h4>
                             <form onSubmit={handleRatingSubmit}>
                               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-                                <div className="flex items-center bg-white dark:bg-gray-800 py-2 px-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
+                                <div className="flex items-center bg-white py-2 px-3 rounded-md border border-[#e5e7eb] shadow-sm">
                                   {renderStars(userRating, true)}
-                                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-300 min-w-20">
-                                    {userRating ? `${userRating}/5` : "Select a rating"}
+                                  <span className="ml-2 text-sm text-[#1f2937] min-w-20">
+                                    {userRating ? `${userRating}/5` : t("courseDetails:selectRating", "Select a rating")}
                                   </span>
                                 </div>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">Click to rate</span>
+                                <span className="text-xs text-[#1f2937]/70">{t("courseDetails:clickToRate", "Click to rate")}</span>
                               </div>
                               <div className="relative mb-4">
-                                <textarea
+                                <Textarea
                                   value={userComment}
                                   onChange={(e) => setUserComment(e.target.value)}
-                                  placeholder="Leave a comment"
+                                  placeholder={t("courseDetails:leaveComment", "Leave a comment")}
                                   maxLength={200}
-                                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white dark:bg-gray-800 text-black"
+                                  className="w-full p-3 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#d4af37] bg-white text-[#1f2937]"
                                   rows={3}
                                 />
-                                <div className="absolute bottom-2 right-2 text-xs text-gray-400 dark:text-gray-500">
+                                <div className="absolute bottom-2 right-2 text-xs text-[#1f2937]/70">
                                   {userComment.length}/200
                                 </div>
                               </div>
                               <Button
                                 type="submit"
                                 disabled={!userRating || isSubmitting}
-                                className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium"
+                                className="w-full bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] disabled:bg-[#e5e7eb] disabled:cursor-not-allowed text-white font-medium"
                               >
                                 <Star size={18} className="mr-2" />
-                                {isSubmitting ? "Submitting..." : "Submit Rating"}
+                                {isSubmitting ? t("courseDetails:submitting", "Submitting...") : t("courseDetails:submitRating", "Submit Rating")}
                               </Button>
                             </form>
                           </div>
@@ -778,23 +1005,23 @@ export default function CourseDetails() {
                             {course.ratings.map((rating, index) => (
                               <div
                                 key={rating._key || index}
-                                className="border-b border-gray-100 dark:border-gray-700 last:border-0 pb-6 last:pb-0 bg-amber-50/50 dark:bg-gray-900/50 p-4 rounded-md"
+                                className="border-b border-[#e5e7eb] last:border-0 pb-6 last:pb-0 bg-[#fef3c7]/50 p-4 rounded-md"
                               >
                                 <div className="flex justify-between items-start mb-2">
                                   <div>
-                                    <div className="font-medium text-gray-800 dark:text-gray-200">
-                                      {rating.user?.userName || rating.user?.name || "Anonymous Learner"}
+                                    <div className="font-medium text-[#1f2937]">
+                                      {rating.user?.userName || rating.user?.fullName || t("courseDetails:anonymousLearner", "Anonymous Learner")}
                                     </div>
                                     <div className="flex items-center gap-2 mt-1">
                                       {renderStars(rating.value)}
-                                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                                        {rating.date ? new Date(rating.date).toLocaleDateString() : "No date"}
+                                      <span className="text-sm text-[#1f2937]/70">
+                                        {rating.date ? new Date(rating.date).toLocaleDateString() : t("courseDetails:noDate", "No date")}
                                       </span>
                                     </div>
                                   </div>
                                 </div>
                                 {rating.message && (
-                                  <p className="text-gray-700 dark:text-gray-300 mt-2 whitespace-pre-line">{rating.message}</p>
+                                  <p className="text-[#1f2937] mt-2 whitespace-pre-line">{rating.message}</p>
                                 )}
                               </div>
                             ))}
@@ -802,43 +1029,43 @@ export default function CourseDetails() {
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 text-amber-600 mb-4">
+                          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#fef3c7] text-[#b28a2f] mb-4">
                             <MessageSquareOff className="w-10 h-10" />
                           </div>
-                          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">No Reviews Yet</h3>
-                          <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                            Be the first to review this course and share your thoughts with other learners.
+                          <h3 className="text-lg font-medium text-[#1f2937] mb-2">{t("courseDetails:noReviews", "No Reviews Yet")}</h3>
+                          <p className="text-[#1f2937]/70 max-w-md mx-auto">
+                            {t("courseDetails:firstToReview", "Be the first to review this course and share your thoughts with other learners.")}
                           </p>
                           <form onSubmit={handleRatingSubmit} className="mt-6">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-                              <div className="flex items-center bg-white dark:bg-gray-800 py-2 px-3 rounded-md border border-gray-200 dark:border-gray-600 shadow-sm">
+                              <div className="flex items-center bg-white py-2 px-3 rounded-md border border-[#e5e7eb] shadow-sm">
                                 {renderStars(userRating, true)}
-                                <span className="ml-2 text-sm text-gray-600 dark:text-gray-300 min-w-20">
-                                  {userRating ? `${userRating}/5` : "Select a rating"}
+                                <span className="ml-2 text-sm text-[#1f2937] min-w-20">
+                                  {userRating ? `${userRating}/5` : t("courseDetails:selectRating", "Select a rating")}
                                 </span>
                               </div>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">Click to rate</span>
+                              <span className="text-xs text-[#1f2937]/70">{t("courseDetails:clickToRate", "Click to rate")}</span>
                             </div>
                             <div className="relative mb-4">
-                              <textarea
+                              <Textarea
                                 value={userComment}
                                 onChange={(e) => setUserComment(e.target.value)}
-                                placeholder="Leave a comment"
+                                placeholder={t("courseDetails:leaveComment", "Leave a comment")}
                                 maxLength={200}
-                                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white dark:bg-gray-800 text-black"
+                                className="w-full p-3 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#d4af37] bg-white text-[#1f2937]"
                                 rows={3}
                               />
-                              <div className="absolute bottom-2 right-2 text-xs text-gray-400 dark:text-gray-500">
+                              <div className="absolute bottom-2 right-2 text-xs text-[#1f2937]/70">
                                 {userComment.length}/200
                               </div>
                             </div>
                             <Button
                               type="submit"
                               disabled={!userRating || isSubmitting}
-                              className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium"
+                              className="w-full bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] disabled:bg-[#e5e7eb] disabled:cursor-not-allowed text-white font-medium"
                             >
                               <Star size={18} className="mr-2" />
-                              {isSubmitting ? "Submitting..." : "Submit Rating"}
+                              {isSubmitting ? t("courseDetails:submitting", "Submitting...") : t("courseDetails:submitRating", "Submit Rating")}
                             </Button>
                           </form>
                         </div>
@@ -849,18 +1076,18 @@ export default function CourseDetails() {
 
                 <TabsContent value="instructor" className="space-y-6">
                   {course.instructor && (
-                    <Card className="bg-white">
+                    <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <User className="w-5 h-5 text-amber-600" />
-                          About the Instructor
+                        <CardTitle className="flex items-center gap-2 text-[#1f2937]">
+                          <User className="w-5 h-5 text-[#b28a2f]" />
+                          {t("courseDetails:aboutInstructor", "About the Instructor")}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="flex flex-row justify-center items-center md:flex-row gap-6">
                           {course.instructor?.image && (
                             <div className="flex justify-center">
-                              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-amber-100">
+                              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-[#d4af37] shadow-md">
                                 <img
                                   src={course.instructor.image}
                                   alt={course.instructor?.fullName || course.instructor?.userName}
@@ -871,14 +1098,14 @@ export default function CourseDetails() {
                           )}
 
                           <div className={`flex flex-col justify-center w-full ${course.instructor?.image ? "md:w-3/4" : ""}`}>
-                            <h3 className="text-xl font-semibold mb-2">
-                              {course.instructor?.fullName || course.instructor?.userName || "Unknown Instructor"}
+                            <h3 className="text-xl font-semibold text-[#1f2937] mb-2">
+                              {course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknownInstructor", "Unknown Instructor")}
                             </h3>
                             {course.instructor?.userName && (
-                              <p className="text-gray-600 mb-2">@{course.instructor.userName}</p>
+                              <p className="text-[#1f2937]/70 mb-2">@{course.instructor.userName}</p>
                             )}
                             {course.instructor?.educationalDetails?.yearsOfExperience && (
-                              <p className="text-gray-600">{course.instructor.educationalDetails.yearsOfExperience} years of experience</p>
+                              <p className="text-[#1f2937]">{course.instructor.educationalDetails.yearsOfExperience} {t("courseDetails:yearsExperience", "years of experience")}</p>
                             )}
                           </div>
                         </div>
@@ -887,33 +1114,33 @@ export default function CourseDetails() {
                           <div className="mt-6">
                             <Button
                               onClick={() => setShowInstructorContact(!showInstructorContact)}
-                              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium"
+                              className="w-full bg-[#fef3c7] hover:bg-[#d4af37] text-[#1f2937] hover:text-white font-medium border border-[#d4af37] transition-colors"
                               variant="outline"
                             >
                               <MessageSquare size={18} className="mr-2" />
-                              {showInstructorContact ? "Hide Contact" : "See Contact Details"}
+                              {showInstructorContact ? t("courseDetails:hideContact", "Hide Contact") : t("courseDetails:seeContact", "See Contact Details")}
                             </Button>
                             {showInstructorContact && (
-                              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                              <div className="mt-4 p-4 bg-[#fef3c7] rounded-lg border border-[#d4af37] shadow-sm">
                                 {course.instructor?.email && (
-                                  <p className="flex items-center text-sm text-gray-700 mb-2">
-                                    <Mail className="w-4 h-4 mr-2 text-gray-500" />
-                                    <span className="font-medium">Email:</span>
+                                  <p className="flex items-center text-sm text-[#1f2937] mb-2">
+                                    <Mail className="w-4 h-4 mr-2 text-[#b28a2f]" />
+                                    <span className="font-medium">{t("courseDetails:email", "Email")}:</span>
                                     <a
                                       href={`mailto:${course.instructor.email}`}
-                                      className="ml-1 text-amber-600 hover:text-amber-800 hover:underline"
+                                      className="ml-1 text-[#b28a2f] hover:text-[#d4af37] hover:underline"
                                     >
                                       {course.instructor.email}
                                     </a>
                                   </p>
                                 )}
                                 {course.instructor?.phoneNumber && (
-                                  <p className="flex items-center text-sm text-gray-700">
-                                    <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                                    <span className="font-medium">Phone:</span>
+                                  <p className="flex items-center text-sm text-[#1f2937]">
+                                    <Phone className="w-4 h-4 mr-2 text-[#b28a2f]" />
+                                    <span className="font-medium">{t("courseDetails:phone", "Phone")}:</span>
                                     <a
                                       href={`tel:${course.instructor.phoneNumber}`}
-                                      className="ml-1 text-amber-600 hover:text-amber-800 hover:underline"
+                                      className="ml-1 text-[#b28a2f] hover:text-[#d4af37] hover:underline"
                                     >
                                       {course.instructor.phoneNumber}
                                     </a>
@@ -926,12 +1153,12 @@ export default function CourseDetails() {
 
                         {course.instructor?.educationalDetails?.certifications?.length > 0 && (
                           <div className="mt-6">
-                            <h4 className="text-lg font-semibold mb-4">Certifications</h4>
+                            <h4 className="text-lg font-semibold text-[#1f2937] mb-4">{t("courseDetails:certifications", "Certifications")}</h4>
                             <ul className="list-disc pl-5">
                               {course.instructor.educationalDetails.certifications.map((cert, index) => (
                                 <li key={index}>
-                                  <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline">
-                                    Certification {index + 1}
+                                  <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-[#b28a2f] hover:text-[#d4af37] hover:underline">
+                                    {t("courseDetails:certification", "Certification")} {index + 1}
                                   </a>
                                 </li>
                               ))}
@@ -941,15 +1168,15 @@ export default function CourseDetails() {
 
                         {course.instructor?.otherCourses && course.instructor.otherCourses.length > 0 && (
                           <div className="mt-6">
-                            <h4 className="text-lg font-semibold mb-4">Other Courses by This Instructor</h4>
+                            <h4 className="text-lg font-semibold text-[#1f2937] mb-4">{t("courseDetails:otherCourses", "Other Courses by This Instructor")}</h4>
                             <div className="space-y-4">
                               {course.instructor.otherCourses.map((otherCourse) => (
                                 <div
                                   key={otherCourse._id}
-                                  className="flex gap-3 cursor-pointer"
+                                  className="flex gap-3 cursor-pointer hover:bg-[#fef3c7] p-2 rounded-md transition-colors"
                                   onClick={() => navigateToCourse(otherCourse._id)}
                                 >
-                                  <div className="w-12 h-16 bg-gray-100 rounded flex-shrink-0 overflow-hidden">
+                                  <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
                                     <img
                                       src={otherCourse.image || "/placeholder.svg"}
                                       alt={otherCourse.title}
@@ -957,11 +1184,11 @@ export default function CourseDetails() {
                                     />
                                   </div>
                                   <div>
-                                    <h4 className="font-medium line-clamp-1">{otherCourse.title}</h4>
+                                    <h4 className="font-medium text-[#1f2937] line-clamp-1">{otherCourse.title}</h4>
                                     <div className="flex items-center gap-1 mt-1">
                                       {renderStars(otherCourse.averageRating || 0)}
-                                      <span className="text-xs text-gray-500">
-                                        {otherCourse.averageRating?.toFixed(1) || "No ratings"}
+                                      <span className="text-xs text-[#1f2937]/70">
+                                        {otherCourse.averageRating?.toFixed(1) || t("courseDetails:noRatings", "No ratings")}
                                       </span>
                                     </div>
                                   </div>
@@ -974,12 +1201,12 @@ export default function CourseDetails() {
                       <CardFooter>
                         <Button
                           variant="outline"
-                          className="w-full"
+                          className="w-full bg-[#fef3c7] text-[#b28a2f] hover:bg-[#d4af37] hover:text-white border-[#d4af37] transition-colors"
                           onClick={() => navigateToInstructor(course.instructor?._id)}
                           disabled={!course.instructor?._id}
                         >
                           <span className="flex items-center justify-center gap-2">
-                            View Instructor Profile
+                            {t("courseDetails:viewInstructorProfile", "View Instructor Profile")}
                             <ChevronRight className="w-4 h-4" />
                           </span>
                         </Button>
@@ -991,84 +1218,112 @@ export default function CourseDetails() {
             </div>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1 space-y-6">
-              <Card className="bg-white sticky top-4">
-                <CardHeader>
-                  <CardTitle>{t("courseDetails:courseInfo", "Course Info")}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-amber-600" />
-                    <span>{t("courseDetails:level", "Level")}: {course.level || t("courseDetails:notSpecified", "Not specified")}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-amber-600" />
-                    <span>{t("courseDetails:duration", "Duration")}: {course.duration || t("courseDetails:notSpecified", "Not specified")}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-amber-600" />
-                    <span>{t("courseDetails:language", "Language")}: {course.language || t("courseDetails:english", "English")}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-amber-600" />
-                    <span>{t("courseDetails:rating", "Rating")}: {course.averageRating?.toFixed(1) || "0.0"} ({totalRatings} {t("courseDetails:reviews", "reviews")})</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-amber-600" />
-                    <span>{t("courseDetails:instructor", "Instructor")}: {course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown")}</span>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    onClick={handlePurchase}
-                    disabled={orderLoading}
-                    className="w-full bg-amber-600 text-white hover:bg-amber-700"
-                  >
-                    {orderLoading ? (
-                      <span className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        {t("courseDetails:processing", "Processing...")}
+            <div className="space-y-6">
+              <Card className="border-[#e5e7eb] bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                <div className="bg-gradient-to-r from-[#b28a2f] to-[#d4af37] px-6 py-4">
+                  <h3 className="text-xl font-semibold text-white">{t("courseDetails:getThisCourse", "Get This Course")}</h3>
+                </div>
+
+                <CardContent className="pt-6">
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[#1f2937]">{t("courseDetails:price", "Price")}:</span>
+                      <span className="text-2xl font-bold text-[#b28a2f]">
+                        {course.price > 0 ? `$${course.price.toFixed(2)}` : t("courseDetails:free", "Free")}
                       </span>
-                    ) : (
-                      course.price > 0 ? (
-                        <>{t("courseDetails:enrollFor", "Enroll for")} ${course.price?.toFixed(2) || "0.00"}</>
-                      ) : (
-                        <>{t("courseDetails:enrollFree", "Enroll Free")}</>
-                      )
+                    </div>
+
+                    {course.price > 0 && (
+                      <div className="text-sm text-[#b28a2f] flex items-center gap-1 justify-end mb-4">
+                        <Lock className="w-3 h-3" />
+                        {t("courseDetails:securePayment", "Secure payment")}
+                      </div>
                     )}
-                  </Button>
-                </CardFooter>
+                  </div>
+
+                  {buttonProps.show && (
+                    <Button
+                      onClick={buttonProps.onClick}
+                      disabled={buttonProps.disabled}
+                      className="w-full bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] text-white font-medium disabled:bg-[#e5e7eb] disabled:cursor-not-allowed"
+                      size="lg"
+                    >
+                      {buttonProps.disabled ? (
+                        <span className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          {t("courseDetails:processing", "Processing...")}
+                        </span>
+                      ) : (
+                        buttonProps.text
+                      )}
+                    </Button>
+                  )}
+
+                  {course.price > 0 && (
+                    <div className="mt-4 flex flex-col gap-3">
+                      <div className="flex items-center gap-2 text-[#1f2937]">
+                        <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
+                          <CheckIcon className="w-3 h-3 text-[#b28a2f]" />
+                        </div>
+                        {t("courseDetails:instantAccess", "Instant digital access")}
+                      </div>
+                      <div className="flex items-center gap-2 text-[#1f2937]">
+                        <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
+                          <CheckIcon className="w-3 h-3 text-[#b28a2f]" />
+                        </div>
+                        {course.materials?.length > 0 || course.accessLink ? t("courseDetails:onlineMaterials", "Online course materials") : t("courseDetails:courseAccess", "Course access")}
+                      </div>
+                      <div className="flex items-center gap-2 text-[#1f2937]">
+                        <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
+                          <CheckIcon className="w-3 h-3 text-[#b28a2f]" />
+                        </div>
+                        {t("courseDetails:securePayment", "Secure payment")}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
               </Card>
 
               {relatedCourses.length > 0 && (
-                <Card className="bg-white">
+                <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle>{t("courseDetails:relatedCourses", "Related Courses")}</CardTitle>
+                    <CardTitle className="text-lg text-[#1f2937]">{t("courseDetails:relatedCourses", "Related Courses")}</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {relatedCourses.map((relatedCourse) => (
-                        <div
-                          key={relatedCourse._id}
-                          className="flex items-center gap-4 cursor-pointer hover:bg-amber-50 p-2 rounded"
-                          onClick={() => navigateToCourse(relatedCourse._id)}
-                        >
+                  <CardContent className="space-y-4">
+                    {relatedCourses.map((relatedCourse) => (
+                      <div
+                        key={relatedCourse._id}
+                        className="flex gap-3 cursor-pointer hover:bg-[#fef3c7] p-2 rounded-md transition-colors"
+                        onClick={() => navigateToCourse(relatedCourse._id)}
+                      >
+                        <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
                           <img
                             src={relatedCourse.image || "/placeholder.svg"}
-                            alt={relatedCourse.title || "Course"}
-                            className="w-12 h-12 rounded-md object-cover"
+                            alt={relatedCourse.title}
+                            className="w-full h-full object-cover"
                           />
-                          <div>
-                            <h4 className="font-semibold">{relatedCourse.title || "Untitled"}</h4>
-                            <div className="flex items-center gap-1">
-                              {renderStars(relatedCourse.averageRating)}
-                              <span className="text-sm text-gray-500">({relatedCourse.averageRating?.toFixed(1) || "0.0"})</span>
-                            </div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-[#1f2937] line-clamp-1">{relatedCourse.title}</h4>
+                          <div className="flex items-center gap-1 mt-1">
+                            {renderStars(relatedCourse.averageRating || 0)}
+                            <span className="text-xs text-[#1f2937]/70">
+                              {relatedCourse.averageRating?.toFixed(1) || t("courseDetails:noRatings", "No ratings")}
+                            </span>
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </CardContent>
+                  <CardFooter>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-[#b28a2f] hover:text-[#d4af37] hover:bg-[#fef3c7]"
+                      onClick={() => router.push(`/courses?category=${course.category}`)}
+                    >
+                      {t("courseDetails:viewAllRelated", "View All Related Courses")}
+                    </Button>
+                  </CardFooter>
                 </Card>
               )}
             </div>

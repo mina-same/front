@@ -67,9 +67,18 @@
         "invalidLink": "يجب أن يكون رابط الوصول عنوان URL صالحًا",
         "userNotAuthenticated": "فشل مصادقة المستخدم. يرجى تسجيل الدخول مرة أخرى.",
         "submissionFailed": "فشل إنشاء الكتاب. يرجى المحاولة مرة أخرى.",
-        "formInvalid": "يرجى إصلاح الأخطاء في النموذج قبل الإرسال."
+        "formInvalid": "يرجى إصلاح الأخطاء في النموذج قبل الإرسال.",
+        "fileTooLarge": "الملف كبير جدًا (الحد الأقصى 50 ميغابايت)",
+        "onlyPDFAndEPUBAllowed": "يُسمح فقط بملفات PDF وEPUB",
+        "onlyImagesAllowed": "يُسمح فقط بالصور",
+        "imageTooLarge": "الصورة كبيرة جدًا (الحد الأقصى 10 ميغابايت)"
     },
     "fileTooLarge": "حجم الملف يتجاوز حد 50 ميغابايت",
     "imageTooLarge": "حجم الصورة يتجاوز حد 10 ميغابايت",
-    "onlyPDFAndEPUBAllowed": "يُسمح فقط بملفات PDF وEPUB"
+    "onlyPDFAndEPUBAllowed": "يُسمح فقط بملفات PDF وEPUB",
+    "editBook": "تعديل الكتاب",
+    "updateBook": "تحديث الكتاب",
+    "loading": "جار التحميل...",
+    "authError": "خطأ في التوثيق",
+    "bookUpdatedSuccess": "تم تحديث الكتاب بنجاح"
 }

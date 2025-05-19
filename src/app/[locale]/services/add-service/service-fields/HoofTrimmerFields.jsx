@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 const HoofTrimmerFields = ({
   formData,
@@ -10,16 +10,16 @@ const HoofTrimmerFields = ({
   addNestedArrayItem,
   removeNestedArrayItem,
   errors,
-  isRTL
+  isRTL,
+  serviceDetailKey = 'hoofTrimmerDetails'
 }) => {
-  // Make sure we're working with a properly initialized hoof trimmer object
   React.useEffect(() => {
-    if (!formData.service_details.hoofTrimmerDetails) {
-      handleNestedChange('hoofTrimmerDetails', '', {});
+    if (!formData.service_details[serviceDetailKey]) {
+      handleNestedChange(serviceDetailKey, '', {});
     }
-  }, []);
+  }, [serviceDetailKey, formData, handleNestedChange]);
 
-  const hoofDetails = formData.service_details.hoofTrimmerDetails || {};
+  const hoofDetails = formData.service_details[serviceDetailKey] || {};
   const additionalServices = hoofDetails.additionalServices || [];
 
   const inputClass = (errorField) => `
@@ -37,34 +37,40 @@ const HoofTrimmerFields = ({
   return (
     <div className="space-y-6">
       <div className="relative">
-        <Label className={labelClass} htmlFor="hoofTrimmerDetails.specialization">
+        <Label className={labelClass} htmlFor={`${serviceDetailKey}.specialization`}>
           Specialization*
         </Label>
         <select
-          id="hoofTrimmerDetails.specialization"
+          id={`${serviceDetailKey}.specialization`}
           value={hoofDetails.specialization || ""}
-          onChange={(e) => handleNestedChange('hoofTrimmerDetails', 'specialization', e.target.value)}
-          className={inputClass('hoofTrimmerDetails.specialization')}
+          onChange={(e) => handleNestedChange(serviceDetailKey, 'specialization', e.target.value)}
+          className={inputClass(`${serviceDetailKey}.specialization`)}
         >
           <option value="" disabled>Select your specialization</option>
           <option value="hoof_trimmer">Hoof Trimmer</option>
           <option value="farrier">Farrier</option>
           <option value="horseshoe_fitting">Horseshoe Fitting</option>
         </select>
+        {errors[`${serviceDetailKey}.specialization`] && (
+          <p className={errorClass}>{errors[`${serviceDetailKey}.specialization`]}</p>
+        )}
       </div>
 
       <div className="relative">
-        <Label className={labelClass} htmlFor="hoofTrimmerDetails.methodsAndTools">
+        <Label className={labelClass} htmlFor={`${serviceDetailKey}.methodsAndTools`}>
           Methods and Tools*
         </Label>
         <Textarea
-          id="hoofTrimmerDetails.methodsAndTools"
+          id={`${serviceDetailKey}.methodsAndTools`}
           value={hoofDetails.methodsAndTools || ""}
-          onChange={(e) => handleNestedChange('hoofTrimmerDetails', 'methodsAndTools', e.target.value)}
-          className={inputClass('hoofTrimmerDetails.methodsAndTools')}
+          onChange={(e) => handleNestedChange(serviceDetailKey, 'methodsAndTools', e.target.value)}
+          className={inputClass(`${serviceDetailKey}.methodsAndTools`)}
           placeholder="Describe your methods and tools"
           rows={4}
         />
+        {errors[`${serviceDetailKey}.methodsAndTools`] && (
+          <p className={errorClass}>{errors[`${serviceDetailKey}.methodsAndTools`]}</p>
+        )}
       </div>
 
       <div className="relative">
@@ -76,15 +82,15 @@ const HoofTrimmerFields = ({
           id="certifications"
           onChange={(e) => {
             if (e.target.files) {
-              handleNestedChange('hoofTrimmerDetails', 'certifications', e.target.files);
+              handleNestedChange(serviceDetailKey, 'certifications', Array.from(e.target.files));
             }
           }}
-          className={`${inputClass('certifications')} py-2`}
+          className={`${inputClass(`${serviceDetailKey}.certifications`)} py-2`}
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
           multiple
         />
         <p className="text-xs text-gray-500 mt-1">
-          Accepted formats, DOC, DOCX, JPG, JPEG, PNG, GIF
+          Accepted formats: DOC, DOCX, JPG, JPEG, PNG, GIF
         </p>
       </div>
 
@@ -95,7 +101,7 @@ const HoofTrimmerFields = ({
           </Label>
           <button
             type="button"
-            onClick={() => addNestedArrayItem('hoofTrimmerDetails.additionalServices')}
+            onClick={() => addNestedArrayItem(`${serviceDetailKey}.additionalServices`)}
             className="px-3 py-1 bg-gold/10 hover:bg-gold/20 text-gold/90 text-sm rounded-md transition-colors"
           >
             + Add Service
@@ -108,7 +114,7 @@ const HoofTrimmerFields = ({
               <div key={index} className="p-4 border border-gray-200 rounded-lg relative">
                 <button
                   type="button"
-                  onClick={() => removeNestedArrayItem('hoofTrimmerDetails.additionalServices', index)}
+                  onClick={() => removeNestedArrayItem(`${serviceDetailKey}.additionalServices`, index)}
                   className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -125,7 +131,7 @@ const HoofTrimmerFields = ({
                       id={`additionalServices-${index}-name_ar`}
                       type="text"
                       value={service.name_ar || ""}
-                      onChange={(e) => handleNestedArrayChange('hoofTrimmerDetails.additionalServices', index, 'name_ar', e.target.value)}
+                      onChange={(e) => handleNestedArrayChange(`${serviceDetailKey}.additionalServices`, index, 'name_ar', e.target.value)}
                       className={inputClass('')}
                       dir="rtl"
                     />
@@ -138,7 +144,7 @@ const HoofTrimmerFields = ({
                       id={`additionalServices-${index}-name_en`}
                       type="text"
                       value={service.name_en || ""}
-                      onChange={(e) => handleNestedArrayChange('hoofTrimmerDetails.additionalServices', index, 'name_en', e.target.value)}
+                      onChange={(e) => handleNestedArrayChange(`${serviceDetailKey}.additionalServices`, index, 'name_en', e.target.value)}
                       className={inputClass('')}
                     />
                   </div>
@@ -154,7 +160,7 @@ const HoofTrimmerFields = ({
                         id={`additionalServices-${index}-price`}
                         type="number"
                         value={service.price || ""}
-                        onChange={(e) => handleNestedArrayChange('hoofTrimmerDetails.additionalServices', index, 'price', e.target.value)}
+                        onChange={(e) => handleNestedArrayChange(`${serviceDetailKey}.additionalServices`, index, 'price', e.target.value)}
                         className={`${inputClass('')} pl-10`}
                         placeholder="0.00"
                       />
