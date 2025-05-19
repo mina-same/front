@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Book, Grid, List, Search } from "lucide-react";
-import { Button } from "../../../../../../components/ui/button";
-import { Input } from "../../../../../../components/ui/input";
-import BooksList from "../../../../BooksList";
-import Layout from "../../../../../../../../components/layout/Layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+// import BooksList from "../../../../BooksList";
+import Layout from "../../../../../../components/layout/Layout";
 
 const CATEGORY_TITLES = {
   equine_anatomy_physiology: "Equine Anatomy and Physiology",
@@ -116,7 +116,7 @@ export default function BooksCategoryPage() {
               </div>
 
               {/* Books List */}
-              <BooksList viewMode={viewMode} searchQuery={searchQuery} category={category} />
+              {/* <BooksList viewMode={viewMode} searchQuery={searchQuery} category={category} /> */}
             </div>
           </div>
         </main>
