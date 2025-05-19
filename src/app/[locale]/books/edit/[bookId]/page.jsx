@@ -7,7 +7,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { client } from '@/lib/sanity';
 import { Book, Image, DollarSign, FileText, Upload, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui new/sonner';
+import { toast } from 'sonner';
 
 const VALID_USER_TYPE = 'educational_services';
 
