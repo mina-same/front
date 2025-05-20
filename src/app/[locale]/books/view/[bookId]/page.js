@@ -31,7 +31,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import ResourceNotFound from "../../../../../../components/shared/ResourceNotFound";
 import { client } from "../../../../../lib/sanity";
 import Layout from "components/layout/Layout";
-import Image from 'next/image';
 
 
 const AlertNotification = ({ message, isVisible, onClose, type }) => (
@@ -1058,13 +1057,13 @@ export default function BookDetails() {
                                                                 onClick={() => router.push(`/books/${otherBook._id}`)}
                                                             >
                                                                 <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
-                                    <Image
-                                        src={otherBook.image || "/placeholder.svg"}
-                                        alt={otherBook.title}
-                                        className="w-full h-full object-cover"
-                                        width={48}
-                                        height={64}
-                                    />
+                                                                    <Image
+                                                                        src={otherBook.image || "/placeholder.svg"}
+                                                                        alt={otherBook.title}
+                                                                        className="w-full h-full object-cover"
+                                                                        width={48}
+                                                                        height={64}
+                                                                    />
                                                                 </div>
                                                                 <div>
                                                                     <h4 className="font-medium text-[#1f2937] line-clamp-1">{otherBook.title}</h4>

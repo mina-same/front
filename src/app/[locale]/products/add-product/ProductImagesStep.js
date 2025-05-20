@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Image, Upload, X } from "lucide-react";
+import { Image as LucideImage, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import Image from 'next/image';
@@ -126,7 +126,7 @@ export default function ProductImagesStep({ formData, setFormData, setErrors }) 
   return (
     <div className={isRTL ? "rtl" : "ltr"}>
       <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-4">
-        <Image className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} />
+        <LucideImage className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} />
         {t("addProduct:imagesCategory")}
       </h2>
       <div className="p-4 bg-blue-50 rounded-xl border border-gold/20 mb-6">

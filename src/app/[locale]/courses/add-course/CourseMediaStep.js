@@ -1,6 +1,6 @@
 "use client";
 
-import { Upload, Image } from "lucide-react";
+import { Upload, Image as LucideImage } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -115,7 +115,7 @@ export default function CourseMediaStep({ formData, setFormData, setErrors }) {
   return (
     <div className={i18n.language === "ar" ? "rtl" : "ltr"}>
       <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-4">
-        <Image className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} />
+        <LucideImage className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} />
         {t("addCourse:mediaMaterials")}
       </h2>
       <div className="p-4 bg-blue-50 rounded-xl border border-gold/20 mb-6">

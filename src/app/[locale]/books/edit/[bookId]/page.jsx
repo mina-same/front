@@ -520,7 +520,13 @@ const EditBook = () => {
             {/* Media Upload */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-4">
-                <Image className={`text-gold ${isRTL ? 'ml-2' : 'mr-2'}`} size={28} />
+                <Image 
+                  className={`text-gold ${isRTL ? 'ml-2' : 'mr-2'}`} 
+                  size={28}
+                  alt={t('addBook:mediaIcon')}
+                  width={28}
+                  height={28}
+                />
                 {t('addBook:mediaFileUpload')}
               </h2>
               <div className="mb-6">

@@ -163,6 +163,26 @@ const HorseProfilePage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoading(true);
+                const [horseData, ratingsData] = await Promise.all([
+                    horseQuery,
+                    ratingsQuery
+                ]);
+                setHorseData(horseData);
+                setRatings(ratingsData);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching data:', error.message);
+                setLoading(false);
+            }
+        };
+
+        if (horseId) fetchData();
+    }, [horseId, horseQuery, ratingsQuery]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
                 const horse = await client.fetch(horseQuery, { horseId });
                 console.log('Fetched horse data:', horse);
                 setHorseData(horse);
@@ -1970,7 +1990,8 @@ const HorseProfilePage = () => {
 
                 <div className="relative h-[500px] overflow-hidden"> {/* Changed height from h-96 to h-[500px] */}
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50"></div>
-                    <img
+                    <Image
+                        fill
                         src={images[0] || '/api/placeholder/800/500'}
                         alt={horseData.fullName}
                         className="w-full h-full object-cover object-center" /* Added object-center */
@@ -2014,7 +2035,7 @@ const HorseProfilePage = () => {
                 <div className="bg-white p-4 flex justify-center gap-4 shadow-md">
                     {images.map((image, index) => (
                         <div key={index} className="w-20 h-20 rounded-md overflow-hidden cursor-pointer" onClick={() => handleImageClick(index)}>
-                            <img src={image} alt={`${horseData.fullName} - ${index + 1}`} className="w-full h-full object-cover" />
+                            <Image fill src={image} alt={`${horseData.fullName} - ${index + 1}`} className="w-full h-full object-cover" />
                         </div>
                     ))}
                 </div>
@@ -2033,7 +2054,8 @@ const HorseProfilePage = () => {
                             </div>
 
                             {/* Image */}
-                            <img
+                            <Image
+                                fill
                                 src={images[selectedImageIndex]}
                                 alt={`${horseData.fullName} - Image ${selectedImageIndex + 1} of ${images.length}`}
                                 className="w-full h-auto max-h-[80vh] object-contain"
@@ -2559,7 +2581,7 @@ const HorseProfilePage = () => {
                                                                             {/* User Image or Icon */}
                                                                             <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
                                                                                 {rating.user?.image ? (
-                                                                                    <img
+                                                                                    <Image
                                                                                         src={
                                                                                             rating.user.image.asset
                                                                                                 ? urlFor(rating.user.image).url()
@@ -2569,6 +2591,7 @@ const HorseProfilePage = () => {
                                                                                         }
                                                                                         alt={rating.user?.userName || 'User'}
                                                                                         className="w-full h-full object-cover"
+                                                                                        fill
                                                                                         onError={(e) => (e.target.src = "/api/placeholder/100/100")}
                                                                                     />
                                                                                 ) : (
@@ -2704,10 +2727,11 @@ const HorseProfilePage = () => {
                                 <h3 className="font-bold mb-4">{t('horseDetails:contactOwner')}</h3>
                                 <div className="flex items-center mb-4">
                                     <div className={`w-12 h-12 rounded-full bg-gray-200 ${isRTL ? 'ml-3' : 'mr-3'} overflow-hidden`}>
-                                        <img
+                                        <Image
+                                            fill
                                             src={
                                                 ownerData?.image
-                                                    ? ownerData.image.asset
+                                                    ? urlFor(ownerData.image).url()
                                                         ? urlFor(ownerData.image).url() // Sanity asset
                                                         : ownerData.image._upload?.previewImage // Base64 preview from upload
                                                             ? ownerData.image._upload.previewImage
@@ -2762,7 +2786,7 @@ const HorseProfilePage = () => {
                                         similarHorses.slice(0, 3).map((horse) => (
                                             <div key={horse._id} className="flex items-center cursor-pointer" onClick={() => router.replace(`/horses/${horse._id}`)}>
                                                 <div className={`w-16 h-16 rounded-md bg-gray-200 ${isRTL ? 'ml-3' : 'mr-3'} overflow-hidden`}>
-                                                    <img src={horse.images?.[0] ? urlFor(horse.images[0]).url() : "/api/placeholder/100/100"} alt={horse.fullName} className="w-full h-full object-cover" />
+                                                    <Image fill src={horse.images?.[0] ? urlFor(horse.images[0]).url() : "/api/placeholder/100/100"} alt={horse.fullName} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">{horse.fullName}</p>

@@ -15,7 +15,6 @@ import Link from 'next/link';
 import ReservationPopup from 'components/elements/ReservationPopup';
 import Preloader from 'components/elements/Preloader';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 
 // Alert component
 const Alert = ({ message, isVisible, onClose, type }) => (

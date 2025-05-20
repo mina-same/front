@@ -6,9 +6,8 @@ import { useTranslation } from 'react-i18next';
 import Layout from '../../../../../../components/layout/Layout';
 import { client } from '@/lib/sanity';
 import { toast } from '@/components/ui/sonner';
-import { Book, FileText, Image, Save, Upload, Plus, X } from 'lucide-react';
+import { Book, FileText, Image as LucideImage, Save, Upload, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 
 // Category and other options
 const categoryOptions = [
@@ -785,7 +784,7 @@ export default function EditCourseForm() {
           {/* Media Materials Section */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-4">
-              <Image className={`text-gold ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} size={28} />
+              <LucideImage className={`text-gold ${i18n.language === 'ar' ? 'ml-2' : 'mr-2'}`} size={28} />
               {t('addCourse:mediaMaterials')}
             </h2>
 
@@ -846,7 +845,7 @@ export default function EditCourseForm() {
                     key={`existing-${index}`}
                     className="relative border rounded-xl overflow-hidden group"
                   >
-                    <Image
+                    <LucideImage
                       width={200}
                       height={200}
                       src={image.asset.url}
@@ -870,7 +869,7 @@ export default function EditCourseForm() {
                     key={`new-${index}`}
                     className="relative border rounded-xl overflow-hidden group"
                   >
-                    <Image
+                    <LucideImage
                       width={200}
                       height={200}
                       src={URL.createObjectURL(image)}

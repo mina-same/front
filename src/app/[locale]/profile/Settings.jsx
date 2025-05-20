@@ -14,6 +14,7 @@ import {
 import { client } from "@/lib/sanity";
 import { urlFor } from "@/lib/sanity";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "react-toastify";
 
 export default function SettingsPage({ userData }) {

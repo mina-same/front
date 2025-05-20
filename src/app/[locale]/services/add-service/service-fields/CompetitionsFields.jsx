@@ -13,7 +13,7 @@ const CompetitionsFields = ({
     if (!formData.service_details.competitions) {
       handleNestedChange('competitions', '', {});
     }
-  }, []);
+  }, [formData.service_details.competitions, handleNestedChange]);
 
   const competitionsDetails = formData.service_details.competitions || {};
   

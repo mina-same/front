@@ -280,8 +280,8 @@ export default function BookMediaStep({ formData, setFormData, setErrors }) {
                   src={URL.createObjectURL(image)}
                   alt={`${t("addBook:cover")} ${index + 1}`}
                   className="w-full h-32 object-cover"
-									width={200}
-									height={128}
+                  width={200}
+                  height={128}
                 />
                 <button
                   type="button"

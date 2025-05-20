@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useRouter, useParams } from "next/navigation";
 import { client, urlFor } from "../../../../../lib/sanity";
 import { toast } from "@/components/ui new/sonner";
-import { Package, Image, DollarSign, Tag, Upload, X } from "lucide-react";
+import { Package, Image as LucideImage, DollarSign, Tag, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from 'next/image';
 
@@ -401,7 +401,7 @@ export default function EditProduct() {
 
             {/* Images and Category */}
             <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-4 mt-12">
-              <Image className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} />
+              <LucideImage className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} />
               {t("addProduct:imagesCategory")}
             </h2>
             <div className="mb-6">
@@ -485,7 +485,7 @@ export default function EditProduct() {
                           key={`existing-${index}`}
                           className="relative group rounded-xl overflow-hidden border border-gray-200"
                         >
-                          <Image
+                          <LucideImage
                             width={200}
                             height={200}
                             src={urlFor(image.asset).width(200).height(200).url()}
@@ -514,7 +514,7 @@ export default function EditProduct() {
                       key={`new-${index}`}
                       className="relative group rounded-xl overflow-hidden border border-gray-200"
                     >
-                      <Image
+                      <LucideImage
                         width={200} 
                         height={200}
                         src={URL.createObjectURL(image)}

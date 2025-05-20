@@ -65,7 +65,7 @@ const Profile = () => {
     } else {
       setActiveTab("overview");
     }
-  }, [searchParams]);
+  }, [searchParams, validTabs]);
 
   // Fetch user data from Sanity and check isProfileCompleted
   useEffect(() => {
