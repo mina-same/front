@@ -4,6 +4,8 @@ import { Upload, Image } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import { useTranslation } from "react-i18next";
+import Image from 'next/image';
+
 
 export default function CourseMediaStep({ formData, setFormData, setErrors }) {
   const { t, i18n } = useTranslation();
@@ -176,10 +178,12 @@ export default function CourseMediaStep({ formData, setFormData, setErrors }) {
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {formData.images.map((image, index) => (
             <div key={index} className="relative border rounded-xl overflow-hidden group">
-              <img
+              <Image
                 src={URL.createObjectURL(image)}
                 alt={`${t("addCourse:image")} ${index + 1}`}
                 className="w-full h-32 object-cover"
+                height={128}
+                width={128}
               />
               <button
                 type="button"

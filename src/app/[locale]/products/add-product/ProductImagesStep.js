@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Image, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import Image from 'next/image';
 
 const categories = [
   { value: "feed_nutrition", label: { en: "Feed and Nutrition", ar: "الأعلاف والتغذية" } },
@@ -215,7 +216,8 @@ export default function ProductImagesStep({ formData, setFormData, setErrors }) 
                 key={index}
                 className="relative group rounded-xl overflow-hidden border border-gray-200"
               >
-                <img
+                <Image
+                  fill
                   src={URL.createObjectURL(image)}
                   alt={`${t("addProduct:image")} ${index + 1}`}
                   className="w-full h-32 object-cover"

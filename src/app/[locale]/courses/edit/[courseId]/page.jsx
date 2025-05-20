@@ -8,6 +8,7 @@ import { client } from '@/lib/sanity';
 import { toast } from '@/components/ui/sonner';
 import { Book, FileText, Image, Save, Upload, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 // Category and other options
 const categoryOptions = [
@@ -845,7 +846,9 @@ export default function EditCourseForm() {
                     key={`existing-${index}`}
                     className="relative border rounded-xl overflow-hidden group"
                   >
-                    <img
+                    <Image
+                      width={200}
+                      height={200}
                       src={image.asset.url}
                       alt={`${t('addCourse:image')} ${index + 1}`}
                       className="w-full h-32 object-cover"
@@ -867,7 +870,9 @@ export default function EditCourseForm() {
                     key={`new-${index}`}
                     className="relative border rounded-xl overflow-hidden group"
                   >
-                    <img
+                    <Image
+                      width={200}
+                      height={200}
                       src={URL.createObjectURL(image)}
                       alt={`${t('addCourse:image')} ${index + 1}`}
                       className="w-full h-32 object-cover"

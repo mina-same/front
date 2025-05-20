@@ -15,6 +15,7 @@ import Link from 'next/link';
 import ReservationPopup from 'components/elements/ReservationPopup';
 import Preloader from 'components/elements/Preloader';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 // Alert component
 const Alert = ({ message, isVisible, onClose, type }) => (
@@ -426,7 +427,7 @@ export default function ServiceDetailsPage() {
                 {/* Hero Section */}
                 <div className="relative h-96 md:h-[500px] overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70"></div>
-                    <img
+                    <Image
                         src={images[0] || '/placeholder.jpg'}
                         alt={isRTL ? service.name_ar : service.name_en}
                         className="w-full h-full object-cover"
@@ -500,7 +501,7 @@ export default function ServiceDetailsPage() {
                             className="w-20 h-20 rounded-md overflow-hidden cursor-pointer flex-shrink-0 hover:opacity-80 transition-opacity"
                             onClick={() => setSelectedImageIndex(index)}
                         >
-                            <img src={image} alt={`${service.name_en || 'Service'} - ${index + 1}`} className="w-full h-full object-cover" />
+                            <Image fill src={image} alt={`${service.name_en || 'Service'} - ${index + 1}`} className="w-full h-full object-cover" />
                         </div>
                     ))}
                 </motion.div>
@@ -724,7 +725,8 @@ export default function ServiceDetailsPage() {
                                 <h3 className="font-bold text-lg mb-4">{t('serviceDetails:contactProvider')}</h3>
                                 <div className="flex items-center mb-4">
                                     <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 overflow-hidden">
-                                        <img
+                                        <Image
+                                            fill
                                             src={provider?.image ? urlFor(provider.image).url() : "/placeholder.jpg"}
                                             alt={isRTL ? provider?.name_ar : provider?.name_en}
                                             className="w-full h-full object-cover"

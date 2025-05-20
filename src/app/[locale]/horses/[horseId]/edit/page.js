@@ -8,6 +8,7 @@ import { client, urlFor } from "@/lib/sanity"; // Adjust path
 import { useParams, useRouter } from "next/navigation";
 import SearchableBreedDropdown from "../../../../../../components/elements/SearchableBreedDropdown"; // Adjust path
 import Layout from "components/layout/Layout";
+import Image from 'next/image';
 
 // Custom Alert Component
 const Alert = ({ message, isVisible, onClose, type }) => (
@@ -470,7 +471,9 @@ export default function EditHorsePage() {
                                     >
                                         {image instanceof File ? (
                                             <div className="text-center w-full">
-                                                <img
+                                                <Image
+                                                    width={200}
+                                                    height={160}
                                                     src={URL.createObjectURL(image)}
                                                     alt={`Horse image ${index + 1}`}
                                                     className="w-full h-32 sm:h-36 md:h-40 object-contain rounded-md mb-2"
@@ -479,7 +482,9 @@ export default function EditHorsePage() {
                                             </div>
                                         ) : image?.asset?._ref ? (
                                             <div className="text-center w-full">
-                                                <img
+                                                <Image
+                                                    width={200}
+                                                    height={160}
                                                     src={urlFor(image).width(200).height(160).url()} // Adjusted height for better visibility
                                                     alt={`Horse image ${index + 1}`}
                                                     className="w-full h-32 sm:h-36 md:h-40 object-contain rounded-md mb-2"

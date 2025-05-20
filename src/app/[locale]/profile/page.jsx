@@ -28,6 +28,8 @@ import Reservations from "./Reservations";
 import { client } from "@/lib/sanity";
 import { LiaHorseHeadSolid } from "react-icons/lia";
 import Layout from "components/layout/Layout";
+import Image from 'next/image';
+
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -294,7 +296,8 @@ const Profile = () => {
                   {/* User profile section */}
                   <div className="pb-8 lg:pb-8 mb-4 lg:mb-5">
                     <div className="w-24 h-24 rounded-full bg-gray-100 bg-cover bg-center shadow-lg ring-4 ring-[#8c6b23]/10 pb-5 transition-transform duration-300 group-hover:scale-105">
-                      <img
+                      <Image 
+                        fill
                         className="w-24 h-24 block rounded-full mb-3 border-2 border-gray-100 shadow-sm"
                         src={userImage || "/placeholder.svg"}
                         alt={userData.fullName || "User"}

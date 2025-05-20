@@ -25,6 +25,7 @@ import {
   PinIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const FormStepContent = ({
   formData,
@@ -166,7 +167,8 @@ const FormStepContent = ({
 
             {imagePreview ? (
               <div className="relative w-40 h-40 rounded-lg overflow-hidden border-4 border-primary/10">
-                <img
+                <Image
+                  fill
                   src={imagePreview}
                   alt="Profile Preview"
                   className="object-cover w-full h-full"
@@ -227,7 +229,8 @@ const FormStepContent = ({
                     key={`img-${index}`}
                     className="relative w-24 h-24 rounded-md overflow-hidden border border-gray-200"
                   >
-                    <img
+                    <Image
+                      fill
                       src={preview}
                       alt={`Additional image ${index + 1}`}
                       className="w-full h-full object-cover"

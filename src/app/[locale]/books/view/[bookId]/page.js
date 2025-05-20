@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from 'next/image';
 import { useParams, useRouter } from "next/navigation";
 import {
     Book,
@@ -30,6 +31,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import ResourceNotFound from "../../../../../../components/shared/ResourceNotFound";
 import { client } from "../../../../../lib/sanity";
 import Layout from "components/layout/Layout";
+import Image from 'next/image';
+
 
 const AlertNotification = ({ message, isVisible, onClose, type }) => (
     <AnimatePresence>
@@ -583,10 +586,12 @@ export default function BookDetails() {
                                     onClick={() => setActiveImage(index)}
                                     className={`flex-shrink-0 w-16 h-24 rounded-md overflow-hidden border-2 transition-all ${activeImage === index ? "border-[#b28a2f] shadow-md" : "border-transparent opacity-70 hover:opacity-100"}`}
                                 >
-                                    <img
-                                        src={image.asset?.url || defaultImage}
+                                    <Image
+                                        src={book.images?.[activeImage]?.asset?.url || defaultImage}
                                         alt={`${book.title} - Image ${index + 1}`}
                                         className="w-full h-full object-cover"
+                                        width={256}
+                                        height={384}
                                     />
                                 </button>
                             ))}
@@ -980,10 +985,12 @@ export default function BookDetails() {
                                                 {book.author?.image && (
                                                     <div className="flex justify-center">
                                                         <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-[#d4af37] shadow-md">
-                                                            <img
+                                                            <Image
                                                                 src={book.author.image}
                                                                 alt={book.author?.fullName || book.author?.name}
                                                                 className="w-full h-full object-cover"
+                                                                width={128}
+                                                                height={128}
                                                             />
                                                         </div>
                                                     </div>
@@ -1051,11 +1058,13 @@ export default function BookDetails() {
                                                                 onClick={() => router.push(`/books/${otherBook._id}`)}
                                                             >
                                                                 <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
-                                                                    <img
-                                                                        src={otherBook.image || "/placeholder.svg"}
-                                                                        alt={otherBook.title}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
+                                    <Image
+                                        src={otherBook.image || "/placeholder.svg"}
+                                        alt={otherBook.title}
+                                        className="w-full h-full object-cover"
+                                        width={48}
+                                        height={64}
+                                    />
                                                                 </div>
                                                                 <div>
                                                                     <h4 className="font-medium text-[#1f2937] line-clamp-1">{otherBook.title}</h4>
@@ -1168,7 +1177,9 @@ export default function BookDetails() {
                                                 onClick={() => router.push(`/books/${relatedBook._id}`)}
                                             >
                                                 <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
-                                                    <img
+                                                    <Image
+                                                        width={48}
+                                                        height={64}
                                                         src={relatedBook.image || "/placeholder.svg"}
                                                         alt={relatedBook.title}
                                                         className="w-full h-full object-cover"

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Trash2, ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
+import Image from 'next/image';
 
 export default function FavoritesPage() {
   // State for color selections for each product
@@ -57,7 +58,8 @@ export default function FavoritesPage() {
                     <div className="relative">
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
-                          <img
+                          <Image
+                            fill
                             className="mx-auto"
                             src="/placeholder.svg"
                             width="226"
@@ -120,7 +122,8 @@ export default function FavoritesPage() {
                     <div className="relative">
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
-                          <img
+                          <Image
+                            fill
                             className="mx-auto"
                             src="/placeholder.svg"
                             width="226"
@@ -210,7 +213,8 @@ export default function FavoritesPage() {
                     <div className="relative">
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
-                          <img
+                          <Image
+                            fill  
                             className="mx-auto"
                             src="/placeholder.svg"
                             width="226"
@@ -302,7 +306,8 @@ export default function FavoritesPage() {
                     <div className="relative">
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
-                          <img
+                          <Image
+                            fill  
                             className="mx-auto"
                             src="/placeholder.svg"
                             width="226"
@@ -351,7 +356,8 @@ export default function FavoritesPage() {
                     <div className="relative">
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
-                          <img
+                          <Image
+                            fill
                             className="mx-auto"
                             src="/placeholder.svg"
                             width="226"
@@ -452,7 +458,8 @@ export default function FavoritesPage() {
                     <div className="relative">
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
-                          <img
+                          <Image
+                            fill  
                             className="mx-auto"
                             src="/placeholder.svg"
                             width="226"

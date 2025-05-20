@@ -1,5 +1,6 @@
 import React from 'react';
 import { Separator } from "@/components/ui/separator";
+import Image from 'next/image';
 
 export const ReviewStep = ({ 
   formData, 
@@ -46,7 +47,8 @@ export const ReviewStep = ({
             <h3 className="text-sm font-medium mb-2">Profile Image</h3>
             {imagePreview ? (
               <div className="w-32 h-32 rounded border overflow-hidden mb-4">
-                <img 
+                <Image
+                  fill
                   src={imagePreview} 
                   alt="Profile image" 
                   className="w-full h-full object-cover"
@@ -66,7 +68,8 @@ export const ReviewStep = ({
                   key={index}
                   className="aspect-square rounded border overflow-hidden"
                 >
-                  <img 
+                  <Image
+                    fill
                     src={url} 
                     alt={`Service image ${index + 1}`} 
                     className="w-full h-full object-cover"

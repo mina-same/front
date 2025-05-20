@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Clock, Star } from "lucide-react";
+import Image from 'next/image';
 
 export default function OrdersPage() {
   const [expandedOrder, setExpandedOrder] = useState("orderThree");
@@ -194,7 +195,8 @@ export default function OrdersPage() {
                             key={idx}
                             className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden"
                           >
-                            <img
+                            <Image
+                              fill
                               src={item.image}
                               alt={item.name}
                               className="w-full h-full object-cover"
@@ -226,7 +228,8 @@ export default function OrdersPage() {
                               <td className="py-4 pr-4">
                                 <div className="flex items-center">
                                   <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden">
-                                    <img
+                                    <Image
+                                      fill
                                       src={item.image}
                                       alt={item.name}
                                       className="w-full h-full object-cover"

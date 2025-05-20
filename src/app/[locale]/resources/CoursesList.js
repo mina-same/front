@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "../../../components/u
 import { Button } from "../../../components/ui/button";
 import { client } from "../../../lib/sanity";
 import Link from "next/link";
+import Image from 'next/image';
 
 const mockCourses = [
 ];
@@ -115,7 +116,8 @@ export default function CoursesList({ viewMode, searchQuery }) {
           <div
             className={`${viewMode === "list" ? "w-full md:w-1/3 h-48 md:h-auto relative" : "aspect-video overflow-hidden relative"}`}
           >
-            <img
+            <Image
+              fill
               src={course.images?.[0]?.asset?.url || "/placeholder.svg"}
               alt={course.title}
               className="w-full h-full object-cover"

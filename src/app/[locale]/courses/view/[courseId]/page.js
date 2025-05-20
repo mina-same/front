@@ -31,6 +31,7 @@ import ResourceNotFound from "../../../../../../components/shared/ResourceNotFou
 import { client } from "@/lib/sanity";
 import Layout from "components/layout/Layout";
 import { useTranslation } from "react-i18next";
+import Image from 'next/image';
 
 const AlertNotification = ({ message, isVisible, onClose, type }) => (
   <AnimatePresence>
@@ -600,7 +601,8 @@ export default function CourseDetails() {
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-[#d4af37] to-[#b28a2f] rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
                   <div className="relative aspect-[2/3] w-64 overflow-hidden rounded-lg shadow-xl border border-[#fef3c7]">
-                    <img
+                    <Image
+                      fill
                       src={course.images?.[activeImage]?.url || defaultImage}
                       alt={course.title || "Course Image"}
                       className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
@@ -675,7 +677,8 @@ export default function CourseDetails() {
                   onClick={() => setActiveImage(index)}
                   className={`flex-shrink-0 w-16 h-24 rounded-md overflow-hidden border-2 transition-all ${activeImage === index ? "border-[#b28a2f] shadow-md" : "border-transparent opacity-70 hover:opacity-100"}`}
                 >
-                  <img
+                  <Image
+                    fill
                     src={image.url || defaultImage}
                     alt={`${course.title || "Course"} - Image ${index + 1}`}
                     className="w-full h-full object-cover"
@@ -1088,7 +1091,8 @@ export default function CourseDetails() {
                           {course.instructor?.image && (
                             <div className="flex justify-center">
                               <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-[#d4af37] shadow-md">
-                                <img
+                                <Image
+                                  fill
                                   src={course.instructor.image}
                                   alt={course.instructor?.fullName || course.instructor?.userName}
                                   className="w-full h-full object-cover"
@@ -1177,7 +1181,8 @@ export default function CourseDetails() {
                                   onClick={() => navigateToCourse(otherCourse._id)}
                                 >
                                   <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
-                                    <img
+                                    <Image
+                                      fill
                                       src={otherCourse.image || "/placeholder.svg"}
                                       alt={otherCourse.title}
                                       className="w-full h-full object-cover"
@@ -1297,7 +1302,8 @@ export default function CourseDetails() {
                         onClick={() => navigateToCourse(relatedCourse._id)}
                       >
                         <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
-                          <img
+                          <Image
+                            fill
                             src={relatedCourse.image || "/placeholder.svg"}
                             alt={relatedCourse.title}
                             className="w-full h-full object-cover"

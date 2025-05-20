@@ -11,6 +11,8 @@ import {
 import { Button } from "../../../../../components/ui/button";
 import { client } from "../../../../../lib/sanity";
 import Link from "next/link";
+import Image from 'next/image';
+
 
 const mockBooks = [
 ];
@@ -174,7 +176,8 @@ export default function BooksList({ viewMode, searchQuery, category, router }) {
                 : "aspect-[3/4] overflow-hidden relative"
             }`}
           >
-            <img
+            <Image
+              fill
               src={book.images?.[0]?.asset?.url || "/placeholder.svg"}
               alt={book.title}
               className="w-full h-full object-cover"

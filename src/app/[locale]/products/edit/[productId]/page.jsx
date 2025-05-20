@@ -8,6 +8,7 @@ import { client, urlFor } from "../../../../../lib/sanity";
 import { toast } from "@/components/ui new/sonner";
 import { Package, Image, DollarSign, Tag, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from 'next/image';
 
 const categories = [
   { value: "feed_nutrition", label: { en: "Feed and Nutrition", ar: "الأعلاف والتغذية" } },
@@ -484,7 +485,9 @@ export default function EditProduct() {
                           key={`existing-${index}`}
                           className="relative group rounded-xl overflow-hidden border border-gray-200"
                         >
-                          <img
+                          <Image
+                            width={200}
+                            height={200}
                             src={urlFor(image.asset).width(200).height(200).url()}
                             alt={`${t("addProduct:image")} ${index + 1}`}
                             className="w-full h-32 object-cover"
@@ -511,7 +514,9 @@ export default function EditProduct() {
                       key={`new-${index}`}
                       className="relative group rounded-xl overflow-hidden border border-gray-200"
                     >
-                      <img
+                      <Image
+                        width={200} 
+                        height={200}
                         src={URL.createObjectURL(image)}
                         alt={`${t("addProduct:image")} ${index + 1}`}
                         className="w-full h-32 object-cover"
