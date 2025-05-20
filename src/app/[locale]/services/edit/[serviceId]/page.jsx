@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,13 +22,16 @@ const EditServiceForm = ({
     }
   );
   const [errors, setErrors] = useState({});
+  const initializedServiceTypes = useRef(new Set());
 
-  // Initialize service_details for the given serviceType
   useEffect(() => {
-    if (serviceType && !formData.service_details[serviceType]) {
-      handleNestedChange(serviceType, "", {});
+    if (serviceType && !initializedServiceTypes.current.has(serviceType)) {
+      if (!formData.service_details[serviceType]) {
+        handleNestedChange(serviceType, "", {});
+        initializedServiceTypes.current.add(serviceType);
+      }
     }
-  }, [serviceType]);
+  }, [serviceType, handleNestedChange]); // Include handleNestedChange as a dependency
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -36,7 +39,6 @@ const EditServiceForm = ({
       ...prev,
       [name]: files ? Array.from(files) : value,
     }));
-    // Clear error for the field
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
@@ -51,7 +53,6 @@ const EditServiceForm = ({
         },
       },
     }));
-    // Clear error for the nested field
     setErrors((prev) => ({ ...prev, [`${section}.${field}`]: "" }));
   };
 
@@ -110,7 +111,6 @@ const EditServiceForm = ({
 
   const validateForm = () => {
     const newErrors = {};
-    // Basic validation for top-level fields
     if (!formData.name_ar) newErrors.name_ar = "Arabic name is required";
     if (!formData.name_en) newErrors.name_en = "English name is required";
     if (!formData.description_ar)
@@ -118,7 +118,6 @@ const EditServiceForm = ({
     if (!formData.description_en)
       newErrors.description_en = "English description is required";
 
-    // Service-specific validations (example, can be expanded)
     if (serviceType === "suppliers") {
       const products = formData.service_details.suppliers?.products || [];
       products.forEach((product, index) => {
@@ -142,7 +141,6 @@ const EditServiceForm = ({
     e.preventDefault();
     if (validateForm()) {
       onSubmit(formData);
-      // Example: await axios.put('/api/services', formData);
     }
   };
 
@@ -165,7 +163,6 @@ const EditServiceForm = ({
       <h1 className="text-2xl font-bold mb-6 text-center">Edit Service</h1>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Service Type (Read-only) */}
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-lg font-medium mb-4">Service Type</h3>
           <div className="relative">
@@ -179,7 +176,6 @@ const EditServiceForm = ({
           </div>
         </div>
 
-        {/* General Service Information */}
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-lg font-medium mb-4">General Information</h3>
           <div className="space-y-4">
@@ -242,7 +238,6 @@ const EditServiceForm = ({
           </div>
         </div>
 
-        {/* Service-Specific Fields */}
         <ServiceFieldsFactory
           serviceType={serviceType}
           formData={formData}
@@ -255,7 +250,6 @@ const EditServiceForm = ({
           isRTL={isRTL}
         />
 
-        {/* Submit Button */}
         <div className="flex justify-end">
           <Button
             type="submit"

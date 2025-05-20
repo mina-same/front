@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Trash2, ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
-import Image from 'next/image';
+import Image from "next/image";
 
 export default function FavoritesPage() {
   // State for color selections for each product
@@ -59,10 +59,10 @@ export default function FavoritesPage() {
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
                           <Image
-                            fill
                             className="mx-auto"
                             src="/placeholder.svg"
-                            width="226"
+                            width={226}
+                            height={226}
                             alt="Product"
                           />
                         </div>
@@ -123,10 +123,10 @@ export default function FavoritesPage() {
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
                           <Image
-                            fill
                             className="mx-auto"
                             src="/placeholder.svg"
-                            width="226"
+                            width={226}
+                            height={226}
                             alt="Product"
                           />
                         </div>
@@ -214,10 +214,10 @@ export default function FavoritesPage() {
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
                           <Image
-                            fill  
                             className="mx-auto"
                             src="/placeholder.svg"
-                            width="226"
+                            width={226}
+                            height={226}
                             alt="Product"
                           />
                         </div>
@@ -307,10 +307,10 @@ export default function FavoritesPage() {
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
                           <Image
-                            fill  
                             className="mx-auto"
                             src="/placeholder.svg"
-                            width="226"
+                            width={226}
+                            height={226}
                             alt="Product"
                           />
                         </div>
@@ -357,10 +357,10 @@ export default function FavoritesPage() {
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
                           <Image
-                            fill
                             className="mx-auto"
                             src="/placeholder.svg"
-                            width="226"
+                            width={226}
+                            height={226}
                             alt="Product"
                           />
                         </div>
@@ -459,10 +459,10 @@ export default function FavoritesPage() {
                       <a className="block" href="#">
                         <div className="p-2 xl:p-4 flex justify-center">
                           <Image
-                            fill  
                             className="mx-auto"
                             src="/placeholder.svg"
-                            width="226"
+                            width={226}
+                            height={226}
                             alt="Product"
                           />
                         </div>
@@ -525,8 +525,8 @@ export default function FavoritesPage() {
                                   color.pattern === "wood"
                                     ? "linear-gradient(45deg, #a87c5b, #8b5e3c)"
                                     : color.pattern === "marble"
-                                    ? "linear-gradient(45deg, #c0c0c0, #e0e0e0)"
-                                    : "none",
+                                      ? "linear-gradient(45deg, #c0c0c0, #e0e0e0)"
+                                      : "none",
                               }}
                             ></span>
                           </label>

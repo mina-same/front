@@ -196,7 +196,8 @@ export default function OrdersPage() {
                             className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden"
                           >
                             <Image
-                              fill
+                              width={48}
+                              height={48}
                               src={item.image}
                               alt={item.name}
                               className="w-full h-full object-cover"
@@ -229,7 +230,8 @@ export default function OrdersPage() {
                                 <div className="flex items-center">
                                   <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden">
                                     <Image
-                                      fill
+                                      width={64}
+                                      height={64}
                                       src={item.image}
                                       alt={item.name}
                                       className="w-full h-full object-cover"
