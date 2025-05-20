@@ -1,8 +1,9 @@
 "use client";
 
-import { Upload, FileText, Image } from "lucide-react";
+import { Upload, FileText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../../../../components/ui/button";
+import Image from 'next/image';
 import { useTranslation } from "react-i18next";
 
 export default function BookMediaStep({ formData, setFormData, setErrors }) {
@@ -275,10 +276,12 @@ export default function BookMediaStep({ formData, setFormData, setErrors }) {
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {formData.images.map((image, index) => (
               <div key={index} className="relative border rounded-xl overflow-hidden group">
-                <img
+                <Image
                   src={URL.createObjectURL(image)}
                   alt={`${t("addBook:cover")} ${index + 1}`}
                   className="w-full h-32 object-cover"
+									width={200}
+									height={128}
                 />
                 <button
                   type="button"

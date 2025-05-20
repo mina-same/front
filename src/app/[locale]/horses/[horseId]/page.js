@@ -183,7 +183,7 @@ const HorseProfilePage = () => {
         };
 
         if (horseId) fetchData();
-    }, [horseId, t]);
+    }, [horseId, t, horseQuery, similarHorsesQuery, ratingsQuery]);
 
     useEffect(() => {
         const fetchData = async () => {

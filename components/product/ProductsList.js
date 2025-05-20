@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "../../src/components/ui/card";
 import { Button } from "../../src/components/ui/button";
 import { Badge } from "../../src/components/ui/badge";
@@ -12,16 +13,18 @@ const ProductCard = ({ product, viewMode }) => {
     <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg ${isGridView ? '' : 'flex'}`}>
       <Link href={`/products/view/${product.id}`} className={`${isGridView ? 'block' : 'flex-shrink-0 w-1/3'}`}>
         <div className={`${isGridView ? 'aspect-square' : 'h-full'} overflow-hidden relative`}>
-          <img 
-            src={product.images[0]} 
-            alt={product.name_en} 
+          <Image
+            src={product.images[0]}
+            alt={product.name_en}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            width={500}
+            height={500}
           />
-          
-          <Badge 
+
+          <Badge
             className={`absolute top-3 right-3 ${
-              product.listingType === 'rent' 
-                ? 'bg-blue-500 hover:bg-blue-600' 
+              product.listingType === 'rent'
+                ? 'bg-blue-500 hover:bg-blue-600'
                 : 'bg-emerald-500 hover:bg-emerald-600'
             }`}
           >

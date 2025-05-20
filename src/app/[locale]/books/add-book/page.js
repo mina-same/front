@@ -60,7 +60,7 @@ const ContactClient = () => {
     };
 
     verifyAuth();
-  }, [router, client]);
+  }, [router]);
 
   if (isLoading) {
     return (

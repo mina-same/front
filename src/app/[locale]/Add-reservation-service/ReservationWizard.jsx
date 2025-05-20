@@ -83,7 +83,7 @@ const ReservationWizard = ({ service }) => {
     };
     
     loadData();
-  }, [service?.service_type]);
+  }, [service, service?.service_type]);
 
   // Update price calculation when relevant form fields change
   useEffect(() => {

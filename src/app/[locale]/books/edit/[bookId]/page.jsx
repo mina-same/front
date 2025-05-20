@@ -5,9 +5,10 @@ import Layout from '../../../../../../components/layout/Layout';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useParams } from 'next/navigation';
 import { client } from '@/lib/sanity';
-import { Book, Image, DollarSign, FileText, Upload, Tag } from 'lucide-react';
+import { Book, DollarSign, FileText, Upload, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 const VALID_USER_TYPE = 'educational_services';
 
@@ -36,7 +37,7 @@ const categories = [
   { value: 'equine_environmental_stewardship', label: { en: 'Equine Environmental Stewardship', ar: 'الإشراف البيئي للخيول' } },
   { value: 'equine_technology_innovation', label: { en: 'Equine Technology and Innovation', ar: 'تكنولوجيا وابتكار الخيول' } },
   { value: 'equine_entrepreneurship', label: { en: 'Equine Entrepreneurship', ar: 'ريادة الأعمال في مجال الخيول' } },
-  { value: 'equine_dentistry', label: { en: 'Equine Dentistry', ar: 'طب الأسنان للخيول' } },
+  { value: 'equine_dentistry', label: { en: 'Equine Podiatry', ar: 'العناية بالحوافر' } },
   { value: 'equine_podiatry', label: { en: 'Equine Podiatry', ar: 'العناية بالحوافر' } },
   { value: 'english_riding', label: { en: 'English Riding', ar: 'الركوب الإنجليزي' } },
   { value: 'western_riding', label: { en: 'Western Riding', ar: 'الركوب الغربي' } },
@@ -331,11 +332,6 @@ const EditBook = () => {
       newErrors.accessLink = t('addBook:errors.fileOrLinkRequired');
       isValid = false;
     }
-    if (formData.file && formData.accessLink) {
-      newErrors.file = t('addBook:errors.fileOrLinkExclusive');
-      newErrors.accessLink = t('addBook:errors.fileOrLinkExclusive');
-      isValid = false;
-    }
     if (formData.accessLink && !validateURL(formData.accessLink)) {
       newErrors.accessLink = t('addBook:errors.invalidLink');
       isValid = false;
@@ -606,10 +602,12 @@ const EditBook = () => {
                   <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {formData.images.map((image, index) => (
                       <div key={index} className="relative border rounded-xl overflow-hidden group">
-                        <img
+                        <Image
                           src={image.url || URL.createObjectURL(image.file)}
                           alt={`${t('addBook:cover')} ${index + 1}`}
                           className="w-full h-32 object-cover"
+													width={200}
+													height={128}
                         />
                         <button
                           type="button"
@@ -641,7 +639,7 @@ const EditBook = () => {
                   disabled={!!formData.file}
                 />
                 {localErrors.accessLink && (
-                  <p className="text-red-500 text-sm mt-1">{localErrors.accessLink}</p>
+                  <p className="text-red-500 text-sm mt-2">{localErrors.accessLink}</p>
                 )}
               </div>
             </div>
@@ -673,7 +671,7 @@ const EditBook = () => {
                   ))}
                 </select>
                 {localErrors.category && (
-                  <p className="text-red-500 text-sm mt-1">{localErrors.category}</p>
+                  <p className="text-red-500 text-sm mt-2">{localErrors.category}</p>
                 )}
               </div>
               <div className="mb-6">

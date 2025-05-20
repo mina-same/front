@@ -36,7 +36,7 @@ const Header = ({ handleHidden }) => {
         setScroll(scrollCheck);
       }
     });
-  }, []);
+  }, [scroll]);
 
   useEffect(() => {
     const verifyUser = async () => {

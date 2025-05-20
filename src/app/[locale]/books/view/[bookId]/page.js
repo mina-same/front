@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
     Book,
     Download,
@@ -20,6 +19,7 @@ import {
     Phone,
     MessageSquareOff
 } from "lucide-react";
+import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "../../../../../components/ui/card";
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
@@ -510,10 +510,12 @@ export default function BookDetails() {
                                 <div className="relative group">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-[#d4af37] to-[#b28a2f] rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
                                     <div className="relative aspect-[2/3] w-64 overflow-hidden rounded-lg shadow-xl border border-[#fef3c7]">
-                                        <img
+                                        <Image
                                             src={book.images?.[activeImage]?.asset?.url || defaultImage}
                                             alt={book.title}
                                             className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                                            width={256}
+                                            height={384}
                                         />
                                     </div>
                                 </div>

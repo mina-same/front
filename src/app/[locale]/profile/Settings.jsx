@@ -946,7 +946,7 @@ export default function SettingsPage({ userData }) {
               href="/support"
               className="font-semibold text-yellow-700 underline"
             >
-              Learn more
+wwwwwwww              Learn more
             </Link>
           </p>
         </div>

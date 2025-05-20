@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,7 @@ const SearchableBreedDropdown = ({ formData, handleChange, t, isRTL, formGroupCl
     const currentLang = i18n.language === 'ar' ? 'ar' : 'en'; // Determine current language
 
     // Breed options with separate Arabic and English names
-    const breedOptions = [
+    const breedOptions = React.useMemo(() => [
         { ar: 'الخيل العربي الأصيل', en: 'Purebred Arabian', value: 'purebredArabian' },
         { ar: 'الخيل التبتي', en: 'Tibetan Pony', value: 'tibetanPony' },
         { ar: 'الخيل المنغولي', en: 'Mongolian Horse', value: 'mongolianHorse' },
@@ -107,7 +107,7 @@ const SearchableBreedDropdown = ({ formData, handleChange, t, isRTL, formGroupCl
         { ar: 'الخيل الروسي الكوباني', en: 'Kuban Horse', value: 'kubanHorse2' },
         { ar: 'الخيل الأوكراني', en: 'Ukrainian Horse', value: 'ukrainianHorse2' },
         { ar: 'الخيل البيلاروسي', en: 'Belarusian Horse', value: 'belarusianHorse2' },
-    ];
+    ], []);
 
     // Filter breeds based on search term
     const filteredBreeds = breedOptions.filter(breed =>

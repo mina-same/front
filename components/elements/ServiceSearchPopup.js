@@ -147,10 +147,10 @@ const ServiceSearchPopup = ({ onClose }) => {
   }, [selectedTypes, filters, t]);
 
   // Debounced search handler
-  const debouncedFetch = useCallback(
-    debounce((searchQuery) => fetchServices(searchQuery), 300),
-    [fetchServices]
-  );
+  const debouncedFetch = useCallback((searchQuery) => {
+    const debouncedFunction = debounce((query) => fetchServices(query), 300);
+    debouncedFunction(searchQuery);
+  }, [fetchServices]);
 
   // Effect for search term changes
   useEffect(() => {
