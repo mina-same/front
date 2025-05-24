@@ -68,7 +68,7 @@ export const ReviewStep = ({
                   key={index}
                   className="aspect-square rounded border overflow-hidden"
                 >
-                  <Image
+                  <Image 
                     fill
                     src={url} 
                     alt={`Service image ${index + 1}`} 

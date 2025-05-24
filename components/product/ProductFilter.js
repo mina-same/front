@@ -3,18 +3,18 @@ import { Input } from "../../src/components/ui/input";
 import { Label } from "../../src/components/ui/label";
 import { Button } from "../../src/components/ui/button";
 import { Badge } from "../../src/components/ui/badge";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "../../src/components/ui/select";
 import {
   Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from "../../src/components/ui/accordion";
 import {
   Filter,
@@ -24,7 +24,6 @@ import {
   LayoutGrid,
   Star,
   Package,
-  ChevronDown
 } from "lucide-react";
 import { Slider } from "../../src/components/ui/slider";
 import { Checkbox } from "../../src/components/ui/checkbox";
@@ -59,76 +58,99 @@ const AVAILABILITY_OPTIONS = [
   { id: "out-of-stock", label: "Out of Stock" },
 ];
 
-function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchTerm }) {
-  const [category, setCategory] = useState("all");
+function ProductFilter({
+  onFilterChange,
+  initialProducts,
+  searchTerm,
+  setSearchTerm,
+  initialCategory = "all", // Default to "all"
+}) {
+  const [category, setCategory] = useState(initialCategory);
   const [listingType, setListingType] = useState("all");
-  const [priceRange, setPriceRange] = useState([0, 1500]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
   const [rating, setRating] = useState("any");
   const [selectedAvailability, setSelectedAvailability] = useState([]);
   const [activeFilters, setActiveFilters] = useState([]);
-  
+
   // Get min and max prices from the products
-  const maxPrice = Math.max(...initialProducts.map(p => p.price), 1500);
-  
+  const maxPrice = Math.max(...initialProducts.map((p) => p.price), 10000);
+
   // Apply filters whenever they change
   useEffect(() => {
     let result = [...initialProducts];
     const newActiveFilters = [];
-    
+
     // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       result = result.filter(
-        p => p.name_en.toLowerCase().includes(term) || 
-             p.name_ar?.toLowerCase().includes(term) || 
-             p.description_en?.toLowerCase().includes(term) || 
-             p.description_ar?.toLowerCase().includes(term)
+        (p) =>
+          p.name_en.toLowerCase().includes(term) ||
+          p.name_ar?.toLowerCase().includes(term) ||
+          p.description_en?.toLowerCase().includes(term) ||
+          p.description_ar?.toLowerCase().includes(term)
       );
       newActiveFilters.push(`Search: "${searchTerm}"`);
     }
-    
+
     // Filter by category
     if (category && category !== "all") {
-      result = result.filter(p => p.category === category);
-      const categoryOption = CATEGORY_OPTIONS.find(c => c.value === category);
+      result = result.filter((p) => p.category === category);
+      const categoryOption = CATEGORY_OPTIONS.find((c) => c.value === category);
       if (categoryOption) newActiveFilters.push(`Category: ${categoryOption.label}`);
     }
-    
+
     // Filter by listing type
     if (listingType && listingType !== "all") {
-      result = result.filter(p => p.listingType === listingType);
-      const listingOption = LISTING_TYPE_OPTIONS.find(l => l.value === listingType);
+      result = result.filter((p) => p.listingType === listingType);
+      const listingOption = LISTING_TYPE_OPTIONS.find((l) => l.value === listingType);
       if (listingOption) newActiveFilters.push(`Type: ${listingOption.label}`);
     }
-    
+
     // Filter by price range
     if (priceRange[0] > 0 || priceRange[1] < maxPrice) {
-      result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+      result = result.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
       newActiveFilters.push(`Price: SAR ${priceRange[0]} - ${priceRange[1]}`);
     }
-    
+
     // Filter by rating
     if (rating !== "any") {
       const ratingValue = parseInt(rating);
-      result = result.filter(p => p.averageRating >= ratingValue);
+      result = result.filter((p) => p.averageRating >= ratingValue);
       newActiveFilters.push(`Rating: ${rating}+ stars`);
     }
-    
+
     // Filter by availability
     if (selectedAvailability.length > 0) {
-      if (selectedAvailability.includes("in-stock") && !selectedAvailability.includes("out-of-stock")) {
-        result = result.filter(p => p.stock > 0);
+      if (
+        selectedAvailability.includes("in-stock") &&
+        !selectedAvailability.includes("out-of-stock")
+      ) {
+        result = result.filter((p) => p.stock > 0);
         newActiveFilters.push("Availability: In Stock");
-      } else if (!selectedAvailability.includes("in-stock") && selectedAvailability.includes("out-of-stock")) {
-        result = result.filter(p => p.stock === 0);
+      } else if (
+        !selectedAvailability.includes("in-stock") &&
+        selectedAvailability.includes("out-of-stock")
+      ) {
+        result = result.filter((p) => p.stock === 0);
         newActiveFilters.push("Availability: Out of Stock");
       }
     }
-    
+
     setActiveFilters(newActiveFilters);
     onFilterChange(result);
-  }, [searchTerm, category, listingType, priceRange, rating, selectedAvailability, initialProducts, onFilterChange, maxPrice]);
-  
+  }, [
+    searchTerm,
+    category,
+    listingType,
+    priceRange,
+    rating,
+    selectedAvailability,
+    initialProducts,
+    onFilterChange,
+    maxPrice,
+  ]);
+
   const resetFilters = () => {
     setCategory("all");
     setListingType("all");
@@ -140,10 +162,8 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
   };
 
   const toggleAvailability = (value) => {
-    setSelectedAvailability(prev => 
-      prev.includes(value) 
-        ? prev.filter(item => item !== value) 
-        : [...prev, value]
+    setSelectedAvailability((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
     );
   };
 
@@ -170,25 +190,40 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
           <Filter className="mr-2 text-[#d4af37]" size={20} />
           <h3 className="text-lg font-semibold">Filters</h3>
         </div>
-        <Button variant="ghost" size="sm" onClick={resetFilters} className="text-[#d4af37] hover:text-[#b8972e]">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={resetFilters}
+          className="text-[#d4af37] hover:text-[#b8972e]"
+        >
           Clear All
         </Button>
       </div>
-      
+
       {activeFilters.length > 0 && (
         <div className="mb-4 flex flex-wrap gap-2">
-          {activeFilters.map(filter => (
-            <Badge 
-              key={filter} 
-              variant="secondary" 
+          {activeFilters.map((filter) => (
+            <Badge
+              key={filter}
+              variant="secondary"
               className="px-3 py-1 flex items-center gap-1 bg-[#d4af37]/10 text-[#d4af37] hover:bg-[#d4af37]/20"
             >
               {filter}
-              <button 
+              <button
                 onClick={() => removeFilter(filter)}
                 className="ml-1 rounded-full hover:bg-[#d4af37]/30 p-0.5"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M18 6 6 18"></path>
                   <path d="m6 6 12 12"></path>
                 </svg>
@@ -197,10 +232,14 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
           ))}
         </div>
       )}
-      
+
       <div className="mb-6">
         <div className="relative">
-          <Search className="absolute text-gray-400" size={16} style={{top: "50%", left: "10px", transform: "translateY(-50%)"}} />
+          <Search
+            className="absolute text-gray-400"
+            size={16}
+            style={{ top: "50%", left: "10px", transform: "translateY(-50%)" }}
+          />
           <Input
             type="text"
             placeholder="      Search products..."
@@ -210,7 +249,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
           />
         </div>
       </div>
-      
+
       <Accordion type="multiple" defaultValue={["category", "price"]} className="w-full">
         <AccordionItem value="category">
           <AccordionTrigger className="text-sm font-medium">
@@ -226,7 +265,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORY_OPTIONS.map(option => (
+                  {CATEGORY_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -236,7 +275,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
             </div>
           </AccordionContent>
         </AccordionItem>
-        
+
         <AccordionItem value="listingType">
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
@@ -251,7 +290,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
                   <SelectValue placeholder="All Listings" />
                 </SelectTrigger>
                 <SelectContent>
-                  {LISTING_TYPE_OPTIONS.map(option => (
+                  {LISTING_TYPE_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -261,7 +300,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
             </div>
           </AccordionContent>
         </AccordionItem>
-        
+
         <AccordionItem value="price">
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
@@ -293,7 +332,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
             </div>
           </AccordionContent>
         </AccordionItem>
-        
+
         <AccordionItem value="rating">
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
@@ -308,7 +347,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
                   <SelectValue placeholder="Any Rating" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RATING_OPTIONS.map(option => (
+                  {RATING_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -318,7 +357,7 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
             </div>
           </AccordionContent>
         </AccordionItem>
-        
+
         <AccordionItem value="availability">
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
@@ -330,8 +369,8 @@ function ProductFilter({ onFilterChange, initialProducts, searchTerm, setSearchT
             <div className="space-y-2">
               {AVAILABILITY_OPTIONS.map((option) => (
                 <div key={option.id} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={option.id} 
+                  <Checkbox
+                    id={option.id}
                     checked={selectedAvailability.includes(option.id)}
                     onCheckedChange={() => toggleAvailability(option.id)}
                   />
