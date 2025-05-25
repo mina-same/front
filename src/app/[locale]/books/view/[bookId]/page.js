@@ -31,6 +31,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import ResourceNotFound from "../../../../../../components/shared/ResourceNotFound";
 import { client } from "../../../../../lib/sanity";
 import Layout from "components/layout/Layout";
+import { Heart, Loader2 } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 
 
 const AlertNotification = ({ message, isVisible, onClose, type }) => (
@@ -86,6 +89,9 @@ export default function BookDetails() {
     const [showAuthorContact, setShowAuthorContact] = useState(false);
     const [hasPurchased, setHasPurchased] = useState(false);
     const [userOrder, setUserOrder] = useState(null);
+    const { t } = useTranslation();
+    const [wishlist, setWishlist] = useState({});
+    const [wishlistLoading, setWishlistLoading] = useState(false);
 
     useEffect(() => {
         const verifyAuth = async () => {
@@ -179,6 +185,8 @@ export default function BookDetails() {
                     price
                 }`;
 
+                const wishlistQuery = `*[_type == "user" && _id == $userId][0]{wishlistBooks[]->{_id}}`;
+
                 const sanityBook = await client.fetch(bookQuery, { bookId });
                 console.log("Fetched book data:", sanityBook);
 
@@ -198,6 +206,14 @@ export default function BookDetails() {
 
                         setUserOrder(userOrderData);
                         setHasPurchased(userOrderData?.status === "completed" && userOrderData?.paymentStatus === "paid");
+
+                        const userData = await client.fetch(wishlistQuery, { userId: currentUserId });
+                        const wishlistBooks = userData?.wishlistBooks || [];
+                        const wishlistMap = wishlistBooks.reduce((acc, book) => {
+                            acc[book._id] = true;
+                            return acc;
+                        }, {});
+                        setWishlist(wishlistMap);
                     }
                 }
             } catch (error) {
@@ -355,6 +371,75 @@ export default function BookDetails() {
             showAlert(`Failed to submit rating: ${error.message}`, "error");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleWishlistToggle = async (e) => {
+        e.preventDefault();
+        if (!currentUserId) {
+            showAlert(
+                <>
+                    {t("bookDetails:errors.userNotAuthenticatedWishlist", "You must be logged in to manage your wishlist.")} {" "}
+                    <Link href="/login" className="text-red-700 hover:underline">
+                        {t("bookDetails:login", "Log in here")}
+                    </Link>
+                </>,
+                "error"
+            );
+            router.push("/login");
+            return;
+        }
+
+        if (!bookId) {
+            showAlert(t("bookDetails:errors.invalidBook", "Invalid book. Please try again."), "error");
+            return;
+        }
+
+        setWishlistLoading(true);
+
+        try {
+            const userQuery = `*[_type == "user" && _id == $userId][0]{wishlistBooks}`;
+            const userData = await client.fetch(userQuery, { userId: currentUserId });
+            const wishlistBooks = userData?.wishlistBooks || [];
+
+            if (wishlist[bookId]) {
+                const index = wishlistBooks.findIndex((item) => item._ref === bookId);
+                if (index === -1) {
+                    showAlert(t("bookDetails:errors.bookNotInWishlist", "Book not found in wishlist."), "error");
+                    return;
+                }
+                await client
+                    .patch(currentUserId)
+                    .unset([`wishlistBooks[${index}]`])
+                    .commit();
+                setWishlist((prev) => {
+                    const newWishlist = { ...prev };
+                    delete newWishlist[bookId];
+                    showAlert(t("bookDetails:removedFromWishlist", "Removed from wishlist"), "success");
+                    return newWishlist;
+                });
+            } else {
+                const wishlistItem = {
+                    _key: uuidv4(),
+                    _type: "reference",
+                    _ref: bookId,
+                };
+                await client
+                    .patch(currentUserId)
+                    .setIfMissing({ wishlistBooks: [] })
+                    .append("wishlistBooks", [wishlistItem])
+                    .commit();
+                setWishlist((prev) => {
+                    const newWishlist = { ...prev, [bookId]: true };
+                    showAlert(t("bookDetails:addedToWishlist", "Added to wishlist"), "success");
+                    return newWishlist;
+                });
+            }
+        } catch (error) {
+            console.error("Error updating wishlist:", error);
+            showAlert(t("bookDetails:errors.wishlistFailed", "Failed to update wishlist. Please try again."), "error");
+        } finally {
+            setWishlistLoading(false);
         }
     };
 
@@ -563,6 +648,27 @@ export default function BookDetails() {
                                             )}
                                         </Button>
                                     )}
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={handleWishlistToggle}
+                                        className={`p-2.5 bg-white text-[#b28a2f] border border-[#d4af37] transition-all duration-300 hover:scale-110 hover:bg-[#fef3c7] hover:text-[#1f2937] ${wishlist[bookId]
+                                            ? "bg-[#fef3c7] text-[#b28a2f] border-[#d4af37]"
+                                            : "bg-white text-[#b28a2f] border-[#d4af37]"
+                                            } ${wishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                        title={
+                                            wishlist[bookId]
+                                                ? t("bookDetails:removeFromWishlist", "Remove from Wishlist")
+                                                : t("bookDetails:addToWishlist", "Add to Wishlist")
+                                        }
+                                        disabled={wishlistLoading}
+                                    >
+                                        {wishlistLoading ? (
+                                            <Loader2 className="w-6 h-6 animate-spin" />
+                                        ) : (
+                                            <Heart className={`w-6 h-6 ${wishlist[bookId] ? "fill-current" : ""}`} />
+                                        )}
+                                    </Button>
                                     <Button
                                         onClick={handleShare}
                                         variant="outline"

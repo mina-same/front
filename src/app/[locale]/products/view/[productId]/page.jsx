@@ -22,11 +22,14 @@ import {
   Instagram,
   MessageCircle,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { client } from "../../../../../lib/sanity";
 import { toast } from "sonner";
 import Layout from "components/layout/Layout";
 import ProductsList from "../../../../../../components/product/ProductsList";
+import RentalDatePopup from "../../../../../../components/product/RentalDatePopup";
+import { v4 as uuidv4 } from "uuid"; // Import uuid for generating unique keys
 
 // Category and rental unit mappings
 const categoryNames = {
@@ -47,11 +50,60 @@ const rentalUnitNames = {
   year: "Year",
 };
 
+// Default supplier ID (replace with a valid ID from your Sanity dataset)
+const DEFAULT_SUPPLIER_ID = "your-default-supplier-id"; // TODO: Replace with actual supplier ID
+
 // ProductCard Component
 const ProductCard = React.memo(({ product, index }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false); // Added for wishlist loading
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const router = useRouter();
+
+  // Verify user authentication and check wishlist status
+  useEffect(() => {
+    const verifyAuthAndWishlist = async () => {
+      try {
+        const response = await fetch("/api/auth/verify", {
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!response.ok) {
+          if (response.status === 401) {
+            setCurrentUserId(null);
+            return;
+          }
+          throw new Error(`Verify API failed with status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.authenticated) {
+          const userId = data.userId || data.user?.id || data.user?.userId;
+          setCurrentUserId(userId);
+
+          // Fetch user's wishlist to check if the product is already wishlisted
+          if (userId && product?.id) {
+            const query = `*[_type == "user" && _id == $userId][0]{wishlistProducts}`;
+            const params = { userId };
+            const userData = await client.fetch(query, params);
+            const isProductWishlisted = userData?.wishlistProducts?.some(
+              (item) => item._ref === product.id
+            );
+            setIsWishlisted(isProductWishlisted || false);
+          }
+        } else {
+          setCurrentUserId(null);
+        }
+      } catch (error) {
+        console.error("Auth or wishlist verification failed:", error.message);
+        setCurrentUserId(null);
+      }
+    };
+
+    verifyAuthAndWishlist();
+  }, [product?.id]);
 
   const getProductImage = useCallback(() => {
     return product.images?.length > 0
@@ -84,16 +136,68 @@ const ProductCard = React.memo(({ product, index }) => {
     return stars;
   }, []);
 
-  const handleWishlistToggle = useCallback(() => {
+  const handleWishlistToggle = useCallback(async () => {
+    if (!currentUserId) {
+      toast.error(
+        <div>
+          You must be logged in to manage your wishlist.{" "}
+          <a href="/login" className="text-blue-600 hover:underline">
+            Log in here
+          </a>
+        </div>
+      );
+      router.push("/login");
+      return;
+    }
+
     if (!product) return;
-    setIsWishlisted((prev) => !prev);
-    toast.success(
-      isWishlisted ? "Removed from wishlist" : "Added to wishlist",
-      {
-        description: `Item has been ${isWishlisted ? "removed from" : "added to"} your wishlist`,
+
+    setIsWishlistLoading(true);
+
+    try {
+      if (isWishlisted) {
+        // Remove from wishlist
+        const query = `*[_type == "user" && _id == $userId][0]{wishlistProducts}`;
+        const userData = await client.fetch(query, { userId: currentUserId });
+        const updatedWishlist = userData.wishlistProducts.filter(
+          (item) => item._ref !== product.id
+        );
+
+        await client
+          .patch(currentUserId)
+          .set({ wishlistProducts: updatedWishlist })
+          .commit();
+
+        setIsWishlisted(false);
+        toast.success("Removed from wishlist", {
+          description: "Item has been removed from your wishlist",
+        });
+      } else {
+        // Add to wishlist
+        const wishlistItem = {
+          _key: uuidv4(),
+          _type: "reference",
+          _ref: product.id,
+        };
+
+        await client
+          .patch(currentUserId)
+          .setIfMissing({ wishlistProducts: [] })
+          .append("wishlistProducts", [wishlistItem])
+          .commit();
+
+        setIsWishlisted(true);
+        toast.success("Added to wishlist", {
+          description: "Item has been added to your wishlist",
+        });
       }
-    );
-  }, [isWishlisted, product]);
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      toast.error("Failed to update wishlist. Please try again.");
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  }, [currentUserId, isWishlisted, product, router]);
 
   return (
     <div
@@ -138,14 +242,19 @@ const ProductCard = React.memo(({ product, index }) => {
             onClick={handleWishlistToggle}
             className={`p-2.5 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 ${
               isWishlisted
-                ? "bg-[#d4af37] text-white"
-                : "bg-white/90 text-gray-700 hover:bg-white hover:text-[#d4af37]"
-            }`}
+                ? "bg-red-50 text-red-500 border-red-500 hover:bg-red-100 hover:text-red-600"
+                : "bg-white/90 text-gray-700 border-gray-300 hover:bg-red-50 hover:text-red-500 hover:border-red-500"
+            } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             title="Add to Wishlist"
+            disabled={isWishlistLoading}
           >
-            <Heart
-              className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`}
-            />
+            {isWishlistLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Heart
+                className={`w-4 h-4 ${isWishlisted ? "fill-current" : ""}`}
+              />
+            )}
           </button>
           <button
             className="p-2.5 bg-white/90 text-gray-700 rounded-full shadow-lg backdrop-blur-sm hover:bg-white hover:text-[#d4af37] transition-all duration-300 hover:scale-110"
@@ -218,7 +327,7 @@ const ProductCard = React.memo(({ product, index }) => {
                 href={`tel:${product.supplier.phone}`}
                 className="text-[#d4af37] hover:underline"
               >
-                {product.supplier.name}
+                {product.supplier.userName}
               </a>
             </p>
           )}
@@ -262,19 +371,23 @@ const CombinedProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("details");
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false); // For wishlist actions
+  const [isLoading, setIsLoading] = useState(false); // For cart actions
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const productsPerSlide = 4;
   const totalSlides = Math.ceil(relatedProducts.length / productsPerSlide);
 
-  // Verify user authentication
+  // Verify user authentication and check wishlist status
   useEffect(() => {
-    const verifyAuth = async () => {
+    const verifyAuthAndWishlist = async () => {
       try {
         const response = await fetch("/api/auth/verify", {
           method: "GET",
@@ -290,18 +403,52 @@ const CombinedProductPage = () => {
         }
         const data = await response.json();
         if (data.authenticated) {
-          setCurrentUserId(data.userId || data.user?.id || data.user?.userId);
+          const userId = data.userId || data.user?.id || data.user?.userId;
+          setCurrentUserId(userId);
+
+          // Fetch user's wishlist to check if the product is already wishlisted
+          if (userId && productId) {
+            const query = `*[_type == "user" && _id == $userId][0]{wishlistProducts}`;
+            const params = { userId };
+            const userData = await client.fetch(query, params);
+            const isProductWishlisted = userData?.wishlistProducts?.some(
+              (item) => item._ref === productId
+            );
+            setIsWishlisted(isProductWishlisted || false);
+          }
         } else {
           setCurrentUserId(null);
         }
       } catch (error) {
-        console.error("Auth verification failed:", error.message);
+        console.error("Auth or wishlist verification failed:", error.message);
         setCurrentUserId(null);
       }
     };
 
-    verifyAuth();
-  }, []);
+    verifyAuthAndWishlist();
+  }, [productId]);
+
+  // Check if the product is already in the user's orders
+  useEffect(() => {
+    const checkOrderStatus = async () => {
+      if (!currentUserId || !productId) return;
+
+      try {
+        const query = `*[_type == "orderProduct" && user._ref == $userId && product._ref == $productId && status == "pending"]`;
+        const params = { userId: currentUserId, productId };
+        const orders = await client.fetch(query, params);
+
+        if (orders.length > 0) {
+          setIsAdded(true);
+        }
+      } catch (error) {
+        console.error("Error checking order status:", error);
+        toast.error("Failed to check order status. Please try again.");
+      }
+    };
+
+    checkOrderStatus();
+  }, [currentUserId, productId]);
 
   // Fetch product data
   useEffect(() => {
@@ -328,7 +475,8 @@ const CombinedProductPage = () => {
             }
           },
           supplier-> {
-            name,
+            _id,
+            userName,
             email,
             phone
           },
@@ -396,7 +544,7 @@ const CombinedProductPage = () => {
             }
           },
           supplier-> {
-            name,
+            userName,
             phone
           }
         }`;
@@ -480,32 +628,146 @@ const CombinedProductPage = () => {
     setIsAutoPlay(false);
   }, [totalSlides]);
 
-  const handleAddToCart = useCallback(() => {
-    if (!product) return;
-    toast.success(`${quantity} ${product.name_en} added to cart`, {
-      description:
-        product.listingType === "rent"
-          ? "Item has been added to your rental cart"
-          : "Item has been added to your shopping cart",
-    });
-  }, [quantity, product]);
+  const handleWishlistToggle = useCallback(async () => {
+    if (!currentUserId) {
+      toast.error(
+        <div>
+          You must be logged in to manage your wishlist.{" "}
+          <a href="/login" className="text-blue-600 hover:underline">
+            Log in here
+          </a>
+        </div>
+      );
+      router.push("/login");
+      return;
+    }
 
-  const handleBuyNow = useCallback(() => {
     if (!product) return;
-    toast.success("Proceeding to checkout...", {
-      description: "You are being redirected to complete your purchase.",
-    });
-  }, [product]);
 
-  const handleWishlistToggle = useCallback(() => {
-    setIsWishlisted((prev) => !prev);
-    toast.success(
-      isWishlisted ? "Removed from wishlist" : "Added to wishlist",
-      {
-        description: `Item has been ${isWishlisted ? "removed from" : "added to"} your wishlist`,
+    setIsWishlistLoading(true);
+
+    try {
+      if (isWishlisted) {
+        // Remove from wishlist
+        const query = `*[_type == "user" && _id == $userId][0]{wishlistProducts}`;
+        const userData = await client.fetch(query, { userId: currentUserId });
+        const updatedWishlist = userData.wishlistProducts.filter(
+          (item) => item._ref !== product.id
+        );
+
+        await client
+          .patch(currentUserId)
+          .set({ wishlistProducts: updatedWishlist })
+          .commit();
+
+        setIsWishlisted(false);
+        toast.success("Removed from wishlist", {
+          description: "Item has been removed from your wishlist",
+        });
+      } else {
+        // Add to wishlist
+        const wishlistItem = {
+          _key: uuidv4(),
+          _type: "reference",
+          _ref: product.id,
+        };
+
+        await client
+          .patch(currentUserId)
+          .setIfMissing({ wishlistProducts: [] })
+          .append("wishlistProducts", [wishlistItem])
+          .commit();
+
+        setIsWishlisted(true);
+        toast.success("Added to wishlist", {
+          description: "Item has been added to your wishlist",
+        });
       }
-    );
-  }, [isWishlisted]);
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      toast.error("Failed to update wishlist. Please try again.");
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  }, [currentUserId, isWishlisted, product, router]);
+
+  const handleCartAction = useCallback(
+    async (rentalDates = null) => {
+      if (!currentUserId) {
+        toast.error(
+          <div>
+            You must be logged in to add items to your cart.{" "}
+            <a href="/login" className="text-blue-600 hover:underline">
+              Log in here
+            </a>
+          </div>
+        );
+        router.push("/login");
+        return;
+      }
+
+      if (!product || product.stock <= 0) {
+        toast.error("This product is out of stock.");
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const orderData = {
+          _type: "orderProduct",
+          user: { _type: "reference", _ref: currentUserId },
+          product: { _type: "reference", _ref: product.id },
+          supplier: {
+            _type: "reference",
+            _ref: product.supplier && product.supplier._id ? product.supplier._id : DEFAULT_SUPPLIER_ID,
+          },
+          orderDate: new Date().toISOString(),
+          price: product.price,
+          quantity, // Include quantity in order
+          status: "pending",
+          paymentStatus: "pending",
+        };
+
+        if (product.listingType === "rent" && rentalDates) {
+          orderData.startDate = rentalDates.startDate;
+          orderData.endDate = rentalDates.endDate;
+        }
+
+        await client.create(orderData);
+        setIsAdded(true);
+        toast.success(`${quantity} ${product.name_en} added to cart`, {
+          description:
+            product.listingType === "rent"
+              ? "Item has been added to your rental cart"
+              : "Item has been added to your shopping cart",
+        });
+      } catch (error) {
+        console.error("Error creating order:", error);
+        toast.error("Failed to add product to cart. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentUserId, product, quantity, router]
+  );
+
+  const handleButtonClick = useCallback(() => {
+    if (isAdded) {
+      router.push("/profile?tab=orders");
+    } else if (product?.listingType === "rent") {
+      setIsPopupOpen(true);
+    } else {
+      handleCartAction();
+    }
+  }, [isAdded, product?.listingType, handleCartAction, router]);
+
+  const handleRentalSubmit = useCallback(
+    (rentalDates) => {
+      handleCartAction(rentalDates);
+    },
+    [handleCartAction]
+  );
 
   const handleShare = useCallback(() => {
     if (navigator.share) {
@@ -849,7 +1111,7 @@ const CombinedProductPage = () => {
                     href={`tel:${product.supplier.phone}`}
                     className="text-[#d4af37] hover:underline"
                   >
-                    {product.supplier.name}
+                    {product.supplier.userName}
                   </a>
                 </p>
               </div>
@@ -882,12 +1144,18 @@ const CombinedProductPage = () => {
 
                 <div className="flex gap-3">
                   <button
-                    onClick={handleAddToCart}
+                    onClick={handleButtonClick}
                     className="flex-1 bg-gradient-to-r from-[#d4af37] to-yellow-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-yellow-600 hover:to-[#d4af37] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                    disabled={product.stock <= 0}
+                    disabled={product.stock <= 0 || isLoading}
                   >
-                    <ShoppingCart className="w-5 h-5" />
-                    {product.listingType === "rent"
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <ShoppingCart className="w-5 h-5" />
+                    )}
+                    {isAdded
+                      ? "Product Added"
+                      : product.listingType === "rent"
                       ? "Add to Rental Cart"
                       : "Add to Cart"}
                   </button>
@@ -895,13 +1163,18 @@ const CombinedProductPage = () => {
                     onClick={handleWishlistToggle}
                     className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                       isWishlisted
-                        ? "border-[#d4af37] bg-[#d4af37]/10 text-[#d4af37]"
-                        : "border-gray-300 text-gray-600 hover:border-[#d4af37] hover:bg-[#d4af37]/10 hover:text-[#d4af37]"
-                    }`}
+                        ? "border-red-500 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600"
+                        : "border-gray-300 text-gray-600 hover:border-red-500 hover:bg-red-50 hover:text-red-500"
+                    } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={isWishlistLoading}
                   >
-                    <Heart
-                      className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`}
-                    />
+                    {isWishlistLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Heart
+                        className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`}
+                      />
+                    )}
                   </button>
                   <button
                     onClick={handleShare}
@@ -910,16 +1183,6 @@ const CombinedProductPage = () => {
                     <Share2 className="w-5 h-5" />
                   </button>
                 </div>
-
-                <button
-                  onClick={handleBuyNow}
-                  className="w-full bg-gradient-to-r from-yellow-600 to-[#d4af37] text-white px-6 py-4 rounded-xl font-semibold hover:from-[#d4af37] hover:to-yellow-600 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  disabled={product.stock <= 0}
-                >
-                  {product.listingType === "rent"
-                    ? "Request to Rent"
-                    : "Buy Now"}
-                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -1041,16 +1304,6 @@ const CombinedProductPage = () => {
                     <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6">
                       {product.description_en}
                     </p>
-                    {product.description_ar && (
-                      <div dir="rtl">
-                        <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900">
-                          العربية
-                        </h3>
-                        <p className="text-gray-700 text-base sm:text-lg leading-relaxed">
-                          {product.description_ar}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -1340,6 +1593,15 @@ const CombinedProductPage = () => {
                 <ProductsList products={currentProducts} viewMode="grid" />
               </div>
             </section>
+          )}
+
+          {product.listingType === "rent" && (
+            <RentalDatePopup
+              isOpen={isPopupOpen}
+              onClose={() => setIsPopupOpen(false)}
+              onSubmit={handleRentalSubmit}
+              rentalDurationUnit={product.rentalDurationUnit}
+            />
           )}
         </div>
 

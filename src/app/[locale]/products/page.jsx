@@ -101,6 +101,12 @@ const ProductsPage = () => {
           averageRating,
           ratingCount,
           rentalDurationUnit,
+          supplier-> {
+            _id,
+            userName,
+            email,
+            phone
+          },
           images[] {
             asset-> {
               url
@@ -126,6 +132,7 @@ const ProductsPage = () => {
           averageRating: product.averageRating || 0,
           ratingCount: product.ratingCount || 0,
           rentalDurationUnit: product.rentalDurationUnit || null,
+          supplier: product.supplier || { _id: DEFAULT_SUPPLIER_ID, userName: "Unknown", email: "", phone: "" },
         }));
 
         setAllProducts(formattedProducts);

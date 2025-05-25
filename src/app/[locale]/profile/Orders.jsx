@@ -1,129 +1,185 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, Clock, Star } from "lucide-react";
-import Image from 'next/image';
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { client } from "@/lib/sanity"; // Adjust path to your Sanity client
+import imageUrlBuilder from "@sanity/image-url"; // Added for image URL handling
 
-export default function OrdersPage() {
-  const [expandedOrder, setExpandedOrder] = useState("orderThree");
+// Initialize Sanity image URL builder
+const builder = imageUrlBuilder(client);
+
+export default function OrdersPage({ userId }) { // Fixed props destructuring
+  const [expandedOrder, setExpandedOrder] = useState(null);
   const [timeFilter, setTimeFilter] = useState("All time");
   const [currentPage, setCurrentPage] = useState(1);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Added error state
+  const router = useRouter();
+  const ordersPerPage = 4;
 
-  // Order status badges with appropriate styling
+  // Status badges with appropriate styling
   const StatusBadge = ({ status }) => {
     const statusStyles = {
-      "In progress": "bg-blue-100 text-blue-600",
-      Canceled: "bg-red-100 text-red-600",
-      Delivered: "bg-green-100 text-green-600",
+      pending: "bg-yellow-100 text-yellow-600",
+      approved: "bg-blue-100 text-blue-600",
+      disapproved: "bg-red-100 text-red-600",
+      completed: "bg-green-100 text-green-600",
+      cancelled: "bg-red-100 text-red-600",
+      failed: "bg-gray-100 text-gray-600",
+      "pending approval": "bg-yellow-100 text-yellow-600", // Added for rental pending
     };
 
     return (
       <span
-        className={`text-xs font-medium px-2 py-1 rounded-full ${statusStyles[status]}`}
+        className={`text-xs font-medium px-2 py-1 rounded-full ${statusStyles[status] || "bg-gray-100 text-gray-600"}`}
       >
-        {status}
+        {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
   };
+
+  // Fetch orders from Sanity
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError(null); // Reset error state
+      console.log("Fetching orders for userId:", userId); // Debugging
+      try {
+        const query = `
+          *[_type in ["orderProduct", "orderBook", "orderCourse"] && user._ref == $userId] {
+            _id,
+            _type,
+            orderDate,
+            status,
+            paymentStatus,
+            price,
+            transactionId,
+            _type == "orderProduct" => {
+              "item": *[_type == "product" && _id == ^.product._ref][0] {
+                _id,
+                name_en,
+                name_ar,
+                images,
+                listingType,
+                price,
+                supplier-> {
+                  _id,
+                  username
+                }
+              },
+              startDate,
+              endDate
+            },
+            _type == "orderBook" => {
+              "item": *[_type == "book" && _id == ^.book._ref][0] {
+                _id,
+                title_en,
+                title_ar,
+                coverImage
+              }
+            },
+            _type == "orderCourse" => {
+              "item": *[_type == "course" && _id == ^.course._ref][0] {
+                _id,
+                title_en,
+                title_ar,
+                image
+              }
+            }
+          }
+        `;
+        const ordersData = await client.fetch(query, { userId });
+        
+        // Map orders to unified structure
+        const mappedOrders = ordersData.map((order) => ({
+          id: order._id,
+          orderNumber: `#${order._id.slice(0, 10).toUpperCase()}`,
+          status: order._type === "orderProduct" && order.item?.listingType === "rent" && order.status === "pending" ? "pending approval" : order.status,
+          date: new Date(order.orderDate).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+          orderDate: order.orderDate, // Added for filtering
+          total: `$${order.price.toFixed(2)}`,
+          items: [
+            {
+              image: order.item?.images?.[0]?.asset?._ref
+                ? builder.image(order.item.images[0]).url()
+                : order.item?.coverImage?.asset?._ref
+                ? builder.image(order.item.coverImage).url()
+                : order.item?.image?.asset?._ref
+                ? builder.image(order.item.image).url()
+                : "/placeholder.svg",
+              name: order.item?.name_en || order.item?.title_en || "Item",
+              color: order._type === "orderProduct" ? order.item?.listingType || "N/A" : "N/A",
+              quantity: 1,
+              price: `$${order.price.toFixed(2)}`,
+              total: `$${order.price.toFixed(2)}`,
+              type: order._type,
+              startDate: order.startDate ? new Date(order.startDate).toLocaleDateString() : null,
+              endDate: order.endDate ? new Date(order.endDate).toLocaleDateString() : null,
+            },
+          ],
+        }));
+
+        setOrders(mappedOrders);
+        console.log("Mapped orders:", mappedOrders); // Debugging
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError("Failed to fetch orders. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchOrders();
+    } else {
+      setError("No user ID provided.");
+      setLoading(false);
+    }
+  }, [userId]);
+
+  // Reset currentPage when timeFilter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [timeFilter]);
+
+  // Filter orders based on timeFilter
+  const filteredOrders = orders.filter((order) => {
+    if (timeFilter === "All time") return true;
+    if (timeFilter === "Last week") {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return new Date(order.orderDate) >= oneWeekAgo;
+    }
+    if (timeFilter === "Last month") {
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      return new Date(order.orderDate) >= oneMonthAgo;
+    }
+    if (timeFilter === "In progress") return order.status === "pending" || order.status === "approved" || order.status === "pending approval";
+    if (timeFilter === "Canceled") return order.status === "cancelled";
+    if (timeFilter === "Delivered") return order.status === "completed";
+    return true;
+  });
+
+  console.log("Filtered orders:", filteredOrders); // Debugging
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * ordersPerPage,
+    currentPage * ordersPerPage
+  );
 
   // Toggle accordion expansion
   const toggleOrder = (orderId) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
   };
-
-  // Sample order data
-  const orders = [
-    {
-      id: "orderOne",
-      orderNumber: "#78A6431D409",
-      status: "In progress",
-      date: "Jan 27, 2023",
-      total: "$16.00",
-      items: [
-        {
-          image: "/placeholder.svg",
-          name: "Candle in concrete bowl",
-          color: "Gray night",
-          quantity: 1,
-          price: "$16",
-          total: "$16",
-        },
-      ],
-    },
-    {
-      id: "orderTwo",
-      orderNumber: "#47H76G09F33",
-      status: "Canceled",
-      date: "Sep 14, 2023",
-      total: "$59.00",
-      items: [
-        {
-          image: "/placeholder.svg",
-          name: "Analogue wall clock",
-          color: "Turquoise",
-          quantity: 1,
-          price: "$25",
-          total: "$25",
-        },
-        {
-          image: "/placeholder.svg",
-          name: "Glossy round vase",
-          color: "White",
-          quantity: 1,
-          price: "$15",
-          total: "$15",
-        },
-        {
-          image: "/placeholder.svg",
-          name: "Ceramic flower pot",
-          color: "Gray concrete",
-          quantity: 1,
-          price: "$19",
-          total: "$19",
-        },
-      ],
-    },
-    {
-      id: "orderThree",
-      orderNumber: "#34VB5540K83",
-      status: "Delivered",
-      date: "Jul 10, 2023",
-      total: "$38.00",
-      items: [
-        {
-          image: "/placeholder.svg",
-          name: "Candle in concrete bowl",
-          color: "Gray night",
-          quantity: 1,
-          price: "$16",
-          total: "$16",
-        },
-        {
-          image: "/placeholder.svg",
-          name: "Exquisite glass vase",
-          color: "Rose",
-          quantity: 2,
-          price: "$11",
-          total: "$22",
-        },
-      ],
-    },
-    {
-      id: "orderFour",
-      orderNumber: "#502TR872W2",
-      status: "Delivered",
-      date: "May 11, 2023",
-      total: "$17.00",
-      items: [
-        {
-          image: "/placeholder.svg",
-          name: "Dispenser for soap",
-          color: "White marble",
-          quantity: 1,
-          price: "$17",
-          total: "$17",
-        },
-      ],
-    },
-  ];
 
   // Time filter options
   const timeFilterOptions = [
@@ -134,6 +190,14 @@ export default function OrdersPage() {
     "Canceled",
     "Delivered",
   ];
+
+  if (error) {
+    return <div className="container mx-auto px-4 py-8 text-red-600">{error}</div>;
+  }
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -162,170 +226,186 @@ export default function OrdersPage() {
         {/* Orders List */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="divide-y divide-gray-200">
-            {orders.map((order) => (
-              <div key={order.id} className="border-gray-200">
-                {/* Order Header */}
-                <div
-                  className="cursor-pointer"
-                  onClick={() => toggleOrder(order.id)}
-                >
-                  <div className="flex items-center justify-between p-6">
-                    <div className="flex space-x-8 items-center">
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          {order.orderNumber}
-                        </div>
-                        <StatusBadge status={order.status} />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">
-                          Order date
-                        </div>
-                        <div className="text-sm font-medium">{order.date}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">Total</div>
-                        <div className="text-sm font-medium">{order.total}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="hidden sm:flex space-x-2">
-                        {order.items.slice(0, 3).map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden"
-                          >
-                            <Image
-                              width={48}
-                              height={48}
-                              src={item.image}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
+            {paginatedOrders.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">No orders found.</div>
+            ) : (
+              paginatedOrders.map((order) => (
+                <div key={order.id} className="border-gray-200">
+                  {/* Order Header */}
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => toggleOrder(order.id)}
+                  >
+                    <div className="flex items-center justify-between p-6">
+                      <div className="flex space-x-8 items-center">
+                        <div>
+                          <div className="text-sm text-gray-500">
+                            {order.orderNumber}
                           </div>
-                        ))}
+                          <StatusBadge status={order.status} />
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">
+                            Order date
+                          </div>
+                          <div className="text-sm font-medium">{order.date}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-500 mb-1">Total</div>
+                          {order.total}
+                        </div>
                       </div>
-                      {expandedOrder === order.id ? (
-                        <ChevronUp size={20} />
-                      ) : (
-                        <ChevronDown size={20} />
-                      )}
+                      <div className="flex items-center space-x-4">
+                        <div className="hidden sm:flex space-x-2">
+                          {order.items.slice(0, 3).map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden"
+                            >
+                              <Image
+                                width={48}
+                                height={48}
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        {expandedOrder === order.id ? (
+                          <ChevronUp size={20} />
+                        ) : (
+                          <ChevronDown size={20} />
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Order Details (Expanded) */}
-                {expandedOrder === order.id && (
-                  <div className="px-6 pb-6">
-                    {/* Items Table */}
-                    <div className="overflow-x-auto">
-                      <table className="w-full mb-4">
-                        <tbody>
-                          {order.items.map((item, idx) => (
-                            <tr
-                              key={idx}
-                              className="border-b last:border-b-0 border-gray-100"
-                            >
-                              <td className="py-4 pr-4">
-                                <div className="flex items-center">
-                                  <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden">
-                                    <Image
-                                      width={64}
-                                      height={64}
-                                      src={item.image}
-                                      alt={item.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
-                                  <div className="ml-4">
-                                    <h4 className="font-medium text-gray-800">
-                                      {item.name}
-                                    </h4>
-                                    <div className="text-sm text-gray-500">
-                                      Color:{" "}
-                                      <span className="text-gray-800">
-                                        {item.color}
-                                      </span>
+                  {/* Order Details (Expanded) */}
+                  {expandedOrder === order.id && (
+                    <div className="px-6 pb-6">
+                      {/* Items Table */}
+                      <div className="overflow-x-auto">
+                        <table className="w-full mb-4">
+                          <tbody>
+                            {order.items.map((item, idx) => (
+                              <tr
+                                key={idx}
+                                className="border-b last:border-b-0 border-gray-100"
+                              >
+                                <td className="py-4 pr-4">
+                                  <div className="flex items-center">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden">
+                                      <Image
+                                        width={64}
+                                        height={64}
+                                        src={item.image}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="ml-4">
+                                      <h4 className="font-medium text-gray-800">
+                                        {item.name}
+                                      </h4>
+                                      <div className="text-sm text-gray-500">
+                                        Type:{" "}
+                                        <span className="text-gray-800">
+                                          {item.type.replace("order", "")}
+                                        </span>
+                                      </div>
+                                      {item.startDate && item.endDate && (
+                                        <div className="text-sm text-gray-500">
+                                          Rental Period:{" "}
+                                          <span className="text-gray-800">
+                                            {item.startDate} - {item.endDate}
+                                          </span>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
-                                </div>
-                              </td>
-                              <td className="py-4 px-4">
-                                <div className="text-sm text-gray-500 mb-1">
-                                  Quantity
-                                </div>
-                                <div className="text-sm font-medium">
-                                  {item.quantity}
-                                </div>
-                              </td>
-                              <td className="py-4 px-4">
-                                <div className="text-sm text-gray-500 mb-1">
-                                  Price
-                                </div>
-                                <div className="text-sm font-medium">
-                                  {item.price}
-                                </div>
-                              </td>
-                              <td className="py-4 pl-4">
-                                <div className="text-sm text-gray-500 mb-1">
-                                  Total
-                                </div>
-                                <div className="text-sm font-medium">
-                                  {item.total}
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <div className="text-sm text-gray-500 mb-1">
+                                    Quantity
+                                  </div>
+                                  <div className="text-sm font-medium">
+                                    {item.quantity}
+                                  </div>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <div className="text-sm text-gray-500 mb-1">
+                                    Price
+                                  </div>
+                                  <div className="text-sm font-medium">
+                                    {item.price}
+                                  </div>
+                                </td>
+                                <td className="py-4 pl-4">
+                                  <div className="text-sm text-gray-500 mb-1">
+                                    Total
+                                  </div>
+                                  <div className="text-sm font-medium">
+                                    {item.total}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
 
-                    {/* Order Info */}
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <div className="md:flex md:justify-between">
-                        <div className="mb-4 md:mb-0">
-                          <div className="text-sm font-medium text-gray-800 mb-1">
-                            Payment:
+                      {/* Order Info */}
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <div className="md:flex md:justify-between">
+                          <div className="mb-4 md:mb-0">
+                            <div className="text-sm font-medium text-gray-800 mb-1">
+                              Payment:
+                            </div>
+                            <div className="text-sm">{order.paymentStatus}</div>
+                            <button className="flex items-center text-blue-600 mt-2 text-sm">
+                              <Clock size={14} className="mr-1" />
+                              Order history
+                            </button>
                           </div>
-                          <div className="text-sm">Upon the delivery</div>
-                          <button className="flex items-center text-blue-600 mt-2 text-sm">
-                            <Clock size={14} className="mr-1" />
-                            Order history
-                          </button>
-                        </div>
-                        <div className="mb-4 md:mb-0">
-                          <div className="text-sm font-medium text-gray-800 mb-1">
-                            Delivery address:
+                          <div className="mb-4 md:mb-0">
+                            <div className="text-sm font-medium text-gray-800 mb-1">
+                              Delivery address:
+                            </div>
+                            <div className="text-sm">
+                              401 Magnetic Drive Unit 2,
+                              <br />
+                              Toronto, Ontario, M3J 3H9, Canada
+                            </div>
                           </div>
-                          <div className="text-sm">
-                            401 Magnetic Drive Unit 2,
-                            <br />
-                            Toronto, Ontario, M3J 3H9, Canada
+                          <div className="flex justify-start md:justify-end">
+                            <button className="flex items-center justify-center border border-blue-600 text-blue-600 hover:bg-blue-50 transition px-4 py-2 max-h-[35px] rounded-xl text-sm">
+                              <Star size={14} className="mr-1" />
+                              Leave a review
+                            </button>
                           </div>
-                        </div>
-                        <div className="flex justify-start md:justify-end">
-                          <button className="flex items-center justify-center border border-blue-600 text-blue-600 hover:bg-blue-50 transition px-4 py-2 max-h-[35px] rounded-xl text-sm">
-                            <Star size={14} className="mr-1" />
-                            Leave a review
-                          </button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))
+            )}
           </div>
 
           {/* Pagination */}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-between items-center p-6 border-t border-gray-200">
-            <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-xl transition w-100 w-sm-auto 1 ms-sm-auto me-sm-n5 sm:w-auto mb-4 sm:mb-0">
+            <button
+              className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-xl transition w-100 w-sm-auto sm:w-auto mb-4 sm:mb-0"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
               Load more orders
             </button>
             <div className="flex items-center justify-center">
               <nav className="flex items-center">
                 <ul className="flex space-x-1">
-                  {[1, 2, 3, 4].map((page) => (
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <li key={page}>
                       <button
                         className={`w-8 h-8 flex items-center justify-center rounded-full text-sm ${

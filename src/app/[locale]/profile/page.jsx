@@ -171,7 +171,7 @@ const Profile = () => {
       case "reservations":
         return <Reservations />;
       case "favorites":
-        return <Favorites />;
+        return <Favorites userId={userId}/>;
       case "horses":
         return <Horses userId={userId} />;
       case "services":

@@ -7,7 +7,8 @@ import { client, urlFor } from '../../../../lib/sanity';
 import { useParams } from 'next/navigation';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import html2pdf from 'html2pdf.js';
+// Dynamic import for html2pdf will be used instead of static import
+// import html2pdf from 'html2pdf.js';
 import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
@@ -51,7 +52,7 @@ const HorseProfilePage = () => {
     const isRTL = i18n.language === 'ar';
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('overview');
-    const [isFavorite, setIsFavorite] = useState(false);
+    const [isInWishlist, setIsInWishlist] = useState(false);
     const [horseData, setHorseData] = useState(null);
     const [ownerData, setOwnerData] = useState(null);
     const [similarHorses, setSimilarHorses] = useState([]);
@@ -67,6 +68,7 @@ const HorseProfilePage = () => {
     const { horseId } = useParams();
     const [alert, setAlert] = useState({ isVisible: false, message: '', type: 'error' });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [wishlistLoading, setWishlistLoading] = useState(false);
 
     const horseQuery = `*[_type == "horse" && _id == $horseId][0] {
         fullName, breed, birthDate, gender, images, mainColor, additionalColors,
@@ -206,22 +208,72 @@ const HorseProfilePage = () => {
     }, [horseId, t, horseQuery, similarHorsesQuery, ratingsQuery]);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const verifyAuth = async () => {
             try {
-                const horse = await client.fetch(horseQuery, { horseId });
-                setHorseData(horse);
-                // ...
-                const ratingsData = await client.fetch(ratingsQuery, { horseId });
-                setRatings(ratingsData);
-                setLoading(false);
+                const response = await fetch('/api/auth/verify', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                if (!response.ok) throw new Error(`Verify API failed with status: ${response.status}`);
+                const data = await response.json();
+                if (data.authenticated) {
+                    const userId = data.userId || data.user?.id || data.user?.userId;
+                    setCurrentUserId(userId);
+                    // Fetch user's wishlist
+                    const userQuery = `*[_type == "user" && _id == $userId][0]{wishlistHorses[]->{_id}}`;
+                    const userData = await client.fetch(userQuery, { userId });
+                    const isHorseInWishlist = userData?.wishlistHorses?.some(horse => horse._id === horseId) || false;
+                    setIsInWishlist(isHorseInWishlist);
+                }
             } catch (error) {
-                console.error('Error fetching data:', error.message);
-                setLoading(false);
+                console.error('Auth verification failed:', error.message);
             }
         };
-
-        if (horseId) fetchData();
+        verifyAuth();
     }, [horseId]);
+
+    const toggleWishlist = async () => {
+        if (!currentUserId) {
+            showAlert(t('horseDetails:loginToWishlist'));
+            return;
+        }
+        try {
+            setWishlistLoading(true); // Start loading
+            const userQuery = `*[_type == "user" && _id == $userId][0]{wishlistHorses[]->{_id}}`;
+            const userData = await client.fetch(userQuery, { userId: currentUserId });
+            const isHorseInWishlist = userData?.wishlistHorses?.some(horse => horse._id === horseId);
+
+            if (isHorseInWishlist) {
+                // Remove horse from wishlist
+                await client
+                    .patch(currentUserId)
+                    .unset([`wishlistHorses[_ref == "${horseId}"]`])
+                    .commit();
+                setIsInWishlist(false);
+                showAlert(t('horseDetails:removedFromWishlist'), 'success');
+            } else {
+                // Add horse to wishlist with a unique _key
+                const newWishlistEntry = {
+                    _type: 'reference',
+                    _ref: horseId,
+                    _key: `horse-${horseId}-${Date.now()}` // Unique key to avoid errors
+                };
+                await client
+                    .patch(currentUserId)
+                    .setIfMissing({ wishlistHorses: [] })
+                    .append('wishlistHorses', [newWishlistEntry])
+                    .commit();
+                setIsInWishlist(true);
+                showAlert(t('horseDetails:addedToWishlist'), 'success');
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+            showAlert(t('horseDetails:wishlistUpdateFailed'));
+        } finally {
+            setWishlistLoading(false); // Stop loading
+        }
+    };
 
     const images = horseData?.images ? horseData.images.map(image => urlFor(image).url()) : [];
 
@@ -1378,6 +1430,9 @@ const HorseProfilePage = () => {
             element.innerHTML = htmlContent;
             document.body.appendChild(element);
 
+            // Dynamically import html2pdf.js only on client side
+            const html2pdf = (await import('html2pdf.js')).default;
+
             await html2pdf()
                 .set(options)
                 .from(element)
@@ -1908,6 +1963,9 @@ const HorseProfilePage = () => {
             // Wait a small amount of time to ensure fonts are loaded
             await new Promise(resolve => setTimeout(resolve, 300));
 
+            // Dynamically import html2pdf.js only on client side
+            const html2pdf = (await import('html2pdf.js')).default;
+
             await html2pdf()
                 .set(options)
                 .from(element)
@@ -1988,14 +2046,16 @@ const HorseProfilePage = () => {
                     type={alert.type}
                 />
 
-                <div className="relative h-[500px] overflow-hidden"> {/* Changed height from h-96 to h-[500px] */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50"></div>
+                <div className="z-1 relative h-[500px] overflow-hidden"> {/* Changed height from h-96 to h-[500px] */}
                     <Image
-                        fill
+                        width={800}
+                        height={500}
                         src={images[0] || '/api/placeholder/800/500'}
-                        alt={horseData.fullName}
+                        alt={horseData.fullName || "horse image"}
                         className="w-full h-full object-cover object-center" /* Added object-center */
                     />
+                    <div className="z-2 absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-50"></div>
+
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                         <div className="flex justify-between items-end">
                             <div>
@@ -2017,8 +2077,16 @@ const HorseProfilePage = () => {
                                 </div>
                             </div>
                             <div className="flex gap-3">
-                                <button onClick={() => setIsFavorite(!isFavorite)} className="bg-blue-50 bg-opacity-20 hover:bg-opacity-30 p-2 rounded-full">
-                                    <Heart size={24} className={isFavorite ? "text-red-500 fill-red-500" : "text-white"} />
+                                <button
+                                    onClick={toggleWishlist}
+                                    className="bg-blue-50 bg-opacity-20 hover:bg-opacity-30 p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={wishlistLoading}
+                                >
+                                    {wishlistLoading ? (
+                                        <div className="w-6 h-6 border-2 border-t-blue-500 border-blue-200 rounded-full animate-spin" />
+                                    ) : (
+                                        <Heart size={24} className={isInWishlist ? "text-red-500 fill-red-500" : "text-white"} />
+                                    )}
                                 </button>
                                 <button onClick={handleShare} className="bg-blue-50 bg-opacity-20 hover:bg-opacity-30 p-2 rounded-full">
                                     <Share2 size={24} className="text-white" />
@@ -2035,7 +2103,7 @@ const HorseProfilePage = () => {
                 <div className="bg-white p-4 flex justify-center gap-4 shadow-md">
                     {images.map((image, index) => (
                         <div key={index} className="w-20 h-20 rounded-md overflow-hidden cursor-pointer" onClick={() => handleImageClick(index)}>
-                            <Image fill src={image} alt={`${horseData.fullName} - ${index + 1}`} className="w-full h-full object-cover" />
+                            <Image width={32} height={32} src={image} alt={`${horseData.fullName} - ${index + 1}`} className="w-full h-full object-cover" />
                         </div>
                     ))}
                 </div>
@@ -2591,7 +2659,8 @@ const HorseProfilePage = () => {
                                                                                         }
                                                                                         alt={rating.user?.userName || 'User'}
                                                                                         className="w-full h-full object-cover"
-                                                                                        fill
+                                                                                        width={32}
+                                                                                        height={32}
                                                                                         onError={(e) => (e.target.src = "/api/placeholder/100/100")}
                                                                                     />
                                                                                 ) : (
@@ -2728,7 +2797,8 @@ const HorseProfilePage = () => {
                                 <div className="flex items-center mb-4">
                                     <div className={`w-12 h-12 rounded-full bg-gray-200 ${isRTL ? 'ml-3' : 'mr-3'} overflow-hidden`}>
                                         <Image
-                                            fill
+                                            width={32}
+                                            height={32}
                                             src={
                                                 ownerData?.image
                                                     ? urlFor(ownerData.image).url()
@@ -2786,7 +2856,7 @@ const HorseProfilePage = () => {
                                         similarHorses.slice(0, 3).map((horse) => (
                                             <div key={horse._id} className="flex items-center cursor-pointer" onClick={() => router.replace(`/horses/${horse._id}`)}>
                                                 <div className={`w-16 h-16 rounded-md bg-gray-200 ${isRTL ? 'ml-3' : 'mr-3'} overflow-hidden`}>
-                                                    <Image fill src={horse.images?.[0] ? urlFor(horse.images[0]).url() : "/api/placeholder/100/100"} alt={horse.fullName} className="w-full h-full object-cover" />
+                                                    <Image fill src={horse.images?.[0] ? urlFor(horse.images[0]).url() : "/api/placeholder/100/100"} alt={horse.fullName || "image hourse"} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">{horse.fullName}</p>

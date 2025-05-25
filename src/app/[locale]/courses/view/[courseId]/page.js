@@ -18,7 +18,9 @@ import {
   MessageSquare,
   Mail,
   Phone,
-  MessageSquareOff
+  MessageSquareOff,
+  Heart,
+  Loader2,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +34,9 @@ import ResourceNotFound from "../../../../../../components/shared/ResourceNotFou
 import { client } from "@/lib/sanity";
 import Layout from "components/layout/Layout";
 import { useTranslation } from "react-i18next";
-import Image from 'next/image';
+import Image from "next/image";
+import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 const AlertNotification = ({ message, isVisible, onClose, type }) => (
   <AnimatePresence>
@@ -44,15 +48,26 @@ const AlertNotification = ({ message, isVisible, onClose, type }) => (
         className="fixed bottom-4 left-2 transform z-50 max-w-md w-full mx-auto"
       >
         <div
-          className={`bg-white shadow-lg rounded-lg p-4 flex items-start border-l-4 ${type === "success" ? "border-[#b28a2f]" : "border-red-500"}`}
+          className={`bg-white shadow-lg rounded-xl p-4 flex items-start border-l-4 ${type === "success" ? "border-[#b28a2f]" : "border-red-500"
+            }`}
         >
           {type === "success" ? (
             <svg className="w-6 h-6 text-[#b28a2f] mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
             </svg>
           ) : (
-            <svg className="w-6 h-6 text-red-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="w-6 h-6 text-red-500 mr-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
           )}
           <div className="flex-1">
@@ -105,6 +120,8 @@ export default function CourseDetails() {
   const [showInstructorContact, setShowInstructorContact] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
   const [userOrder, setUserOrder] = useState(null);
+  const [wishlist, setWishlist] = useState({}); // Added wishlist state
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -207,26 +224,38 @@ export default function CourseDetails() {
           price
         }`;
 
+        const wishlistQuery = `*[_type == "user" && _id == $userId][0]{wishlistCourses[]->{_id}}`;
+
         const sanityCourse = await client.fetch(courseQuery, { courseId });
         console.log("Fetched course data:", JSON.stringify(sanityCourse, null, 2));
 
-
         if (sanityCourse) {
           setCourse(sanityCourse);
-          const related = await client.fetch(relatedCoursesQuery, { category: sanityCourse.category || "other", courseId });
-          setRelatedCourses(related.filter(course => course._id && course.image));
+          const related = await client.fetch(relatedCoursesQuery, {
+            category: sanityCourse.category || "other",
+            courseId,
+          });
+          setRelatedCourses(related.filter((course) => course._id && course.image));
 
           if (currentUserId) {
             const userOrderData = await client.fetch(orderQuery, {
               userId: currentUserId,
-              courseId
+              courseId,
             });
             setUserOrder(userOrderData);
             setHasPurchased(userOrderData?.status === "completed" && userOrderData?.paymentStatus === "paid");
+
+            const userData = await client.fetch(wishlistQuery, { userId: currentUserId });
+            const wishlistCourses = userData?.wishlistCourses || [];
+            const wishlistMap = wishlistCourses.reduce((acc, course) => {
+              acc[course._id] = true;
+              return acc;
+            }, {});
+            setWishlist(wishlistMap);
           }
         }
       } catch (error) {
-        console.error("Error fetching course or order:", error);
+        console.error("Error fetching course, order, or wishlist:", error);
       } finally {
         setLoading(false);
       }
@@ -286,7 +315,6 @@ export default function CourseDetails() {
         console.log("Order linked to course:", courseId);
       } catch (patchError) {
         console.warn("Failed to link order to course, proceeding anyway:", patchError.message);
-        // Continue even if linking fails, as the order is still created
       }
 
       if (course.price === 0) {
@@ -296,17 +324,102 @@ export default function CourseDetails() {
           .commit();
         setHasPurchased(true);
         setUserOrder({ ...order, status: "completed", paymentStatus: "paid" });
-        showAlert(t("courseDetails:enrollSuccess", "Enrolled successfully! You can now access the course materials."), "success");
+        showAlert(
+          t("courseDetails:enrollSuccess", "Enrolled successfully! You can now access the course materials."),
+          "success"
+        );
       } else {
-        showAlert(t("courseDetails:orderCreated", "Order created! Please complete payment on the orders page."), "success");
+        showAlert(
+          t("courseDetails:orderCreated", "Order created! Please complete payment on the orders page."),
+          "success"
+        );
         setUserOrder({ ...order, status: "pending", paymentStatus: "pending" });
         router.push("/profile?tab=orders");
       }
     } catch (error) {
       console.error("Error enrolling in course:", error.message, error.stack);
-      showAlert(`${t("courseDetails:errors.enrollFailed", "Failed to enroll in course")}: ${error.message}`, "error");
+      showAlert(
+        `${t("courseDetails:errors.enrollFailed", "Failed to enroll in course")}: ${error.message}`,
+        "error"
+      );
     } finally {
       setOrderLoading(false);
+    }
+  };
+
+  const handleWishlistToggle = async (e) => {
+    e.preventDefault();
+    console.log("Wishlist toggle for course:", courseId, "Current wishlist state:", wishlist[courseId]);
+
+    if (!currentUserId) {
+      console.log("No user ID, redirecting to login");
+      showAlert(
+        <>
+          {t("courseDetails:errors.userNotAuthenticatedWishlist", "You must be logged in to manage your wishlist.")} {" "}
+          <Link href="/login" className="text-red-700 hover:underline">
+            {t("courseDetails:login", "Log in here")}
+          </Link>
+        </>,
+        "error"
+      );
+      router.push("/login");
+      return;
+    }
+
+    if (!courseId) {
+      console.error("Invalid courseId:", courseId);
+      showAlert(t("courseDetails:errors.invalidCourse", "Invalid course. Please try again."), "error");
+      return;
+    }
+
+    setWishlistLoading(true);
+
+    try {
+      const userQuery = `*[_type == "user" && _id == $userId][0]{wishlistCourses}`;
+      const userData = await client.fetch(userQuery, { userId: currentUserId });
+      const wishlistCourses = userData?.wishlistCourses || [];
+
+      if (wishlist[courseId]) {
+        const index = wishlistCourses.findIndex((item) => item._ref === courseId);
+        if (index === -1) {
+          console.warn("Course not found in wishlist:", courseId);
+          showAlert(t("courseDetails:errors.courseNotInWishlist", "Course not found in wishlist."), "error");
+          return;
+        }
+        await client
+          .patch(currentUserId)
+          .unset([`wishlistCourses[${index}]`])
+          .commit();
+        setWishlist((prev) => {
+          const newWishlist = { ...prev };
+          delete newWishlist[courseId];
+          showAlert(t("courseDetails:removedFromWishlist", "Removed from wishlist"), "success");
+          console.log("Updated wishlist after removal:", newWishlist);
+          return newWishlist;
+        });
+      } else {
+        const wishlistItem = {
+          _key: uuidv4(),
+          _type: "reference",
+          _ref: courseId,
+        };
+        await client
+          .patch(currentUserId)
+          .setIfMissing({ wishlistCourses: [] })
+          .append("wishlistCourses", [wishlistItem])
+          .commit();
+        setWishlist((prev) => {
+          const newWishlist = { ...prev, [courseId]: true };
+          showAlert(t("courseDetails:addedToWishlist", "Added to wishlist"), "success");
+          console.log("Updated wishlist after addition:", newWishlist);
+          return newWishlist;
+        });
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      showAlert(t("courseDetails:errors.wishlistFailed", "Failed to update wishlist. Please try again."), "error");
+    } finally {
+      setWishlistLoading(false);
     }
   };
 
@@ -315,7 +428,8 @@ export default function CourseDetails() {
       navigator
         .share({
           title: `Course: ${course?.title || "Course"}`,
-          text: `Check out this course: ${course?.title || "Course"} by ${course?.instructor?.fullName || course?.instructor?.userName || "Unknown Instructor"}`,
+          text: `Check out this course: ${course?.title || "Course"} by ${course?.instructor?.fullName || course?.instructor?.userName || "Unknown Instructor"
+            }`,
           url: window.location.href,
         })
         .catch((error) => console.log("Error sharing", error));
@@ -409,7 +523,10 @@ export default function CourseDetails() {
       showAlert(t("courseDetails:ratingSubmitted", "Rating submitted successfully!"), "success");
     } catch (error) {
       console.error("Error submitting rating:", error);
-      showAlert(`${t("courseDetails:errors.ratingFailed", "Failed to submit rating")}: ${error.message}`, "error");
+      showAlert(
+        `${t("courseDetails:errors.ratingFailed", "Failed to submit rating")}: ${error.message}`,
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -417,7 +534,7 @@ export default function CourseDetails() {
 
   const showAlert = (message, type = "error") => {
     setAlert({ isVisible: true, message, type });
-    setTimeout(() => setAlert({ isVisible: false, message: "", type: "error" }), 5000); // Increased to 5s for visibility
+    setTimeout(() => setAlert({ isVisible: false, message: "", type: "error" }), 5000);
   };
 
   const renderStars = (rating, interactive = false) => {
@@ -515,7 +632,9 @@ export default function CourseDetails() {
   const getButtonProps = () => {
     if (!userOrder) {
       return {
-        text: course?.price > 0 ? `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}` : (
+        text: course?.price > 0 ? (
+          `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}`
+        ) : (
           <span className="flex items-center gap-2">
             <Download className="w-4 h-4" />
             {t("courseDetails:enrollFree", "Enroll Free")}
@@ -523,7 +642,7 @@ export default function CourseDetails() {
         ),
         onClick: handlePurchase,
         disabled: orderLoading,
-        show: true
+        show: true,
       };
     }
 
@@ -532,7 +651,7 @@ export default function CourseDetails() {
         text: t("courseDetails:continuePayment", "Continue Payment"),
         onClick: () => router.push("/profile?tab=orders"),
         disabled: false,
-        show: true
+        show: true,
       };
     }
 
@@ -541,12 +660,14 @@ export default function CourseDetails() {
         text: t("courseDetails:accessMaterials", "Access Materials"),
         onClick: () => router.push("/profile?tab=orders"),
         disabled: false,
-        show: true
+        show: true,
       };
     }
 
     return {
-      text: course?.price > 0 ? `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}` : (
+      text: course?.price > 0 ? (
+        `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}`
+      ) : (
         <span className="flex items-center gap-2">
           <Download className="w-4 h-4" />
           {t("courseDetails:enrollFree", "Enroll Free")}
@@ -554,7 +675,7 @@ export default function CourseDetails() {
       ),
       onClick: handlePurchase,
       disabled: orderLoading,
-      show: true
+      show: true,
     };
   };
 
@@ -562,7 +683,9 @@ export default function CourseDetails() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#b28a2f]"></div>
-        <p className="mt-4 text-[#1f2937] font-medium">{t("courseDetails:loading", "Loading course details...")}</p>
+        <p className="mt-4 text-[#1f2937] font-medium">
+          {t("courseDetails:loading", "Loading course details...")}
+        </p>
       </div>
     );
   }
@@ -600,8 +723,8 @@ export default function CourseDetails() {
             <div className="flex flex-row md:flex-row gap-8 items-center">
               <div className="w-full md:w-1/3 flex justify-center">
                 <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#d4af37] to-[#b28a2f] rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
-                  <div className="relative aspect-[2/3] w-64 overflow-hidden rounded-lg shadow-xl border border-[#fef3c7]">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#d4af37] to-[#b28a2f] rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
+                  <div className="relative aspect-[2/3] w-64 overflow-hidden rounded-xl shadow-xl border border-[#fef3c7]">
                     <Image
                       fill
                       src={course.images?.[activeImage]?.url || defaultImage}
@@ -620,23 +743,35 @@ export default function CourseDetails() {
                   >
                     {course.category || t("courseDetails:uncategorized", "Uncategorized")}
                   </Badge>
-                  <h1 className="text-4xl font-bold tracking-tight">{course.title || t("courseDetails:untitled", "Untitled Course")}</h1>
+                  <h1 className="text-4xl font-bold tracking-tight">
+                    {course.title || t("courseDetails:untitled", "Untitled Course")}
+                  </h1>
                   <p className="text-xl text-[#fef3c7] mt-2">
-                    {t("courseDetails:byInstructor", "By")} {course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown Instructor")}
+                    {t("courseDetails:byInstructor", "By")}{" "}
+                    {course.instructor?.fullName ||
+                      course.instructor?.userName ||
+                      t("courseDetails:unknown", "Unknown Instructor")}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
                     {renderStars(course.averageRating)}
-                    <span className="ml-2 text-[#fef3c7]">{course.averageRating?.toFixed(1) || t("courseDetails:noRatings", "No ratings")}</span>
+                    <span className="ml-2 text-[#fef3c7]">
+                      {course.averageRating?.toFixed(1) || t("courseDetails:noRatings", "No ratings")}
+                    </span>
                   </div>
                   <div className="text-[#fef3c7]">
-                    {totalRatings} {totalRatings === 1 ? t("courseDetails:review", "review") : t("courseDetails:reviews", "reviews")}
+                    {totalRatings}{" "}
+                    {totalRatings === 1
+                      ? t("courseDetails:review", "review")
+                      : t("courseDetails:reviews", "reviews")}
                   </div>
                 </div>
 
-                <p className="text-[#fef3c7] line-clamp-3">{course.description || t("courseDetails:noDescription", "No description available.")}</p>
+                <p className="text-[#fef3c7] line-clamp-3">
+                  {course.description || t("courseDetails:noDescription", "No description available.")}
+                </p>
 
                 <div className="flex flex-wrap gap-4">
                   {buttonProps.show && (
@@ -655,6 +790,27 @@ export default function CourseDetails() {
                       )}
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleWishlistToggle}
+                    className={`p-2.5 bg-white text-[#b28a2f] border border-[#d4af37] transition-all duration-300 hover:scale-110 hover:bg-[#fef3c7] hover:text-[#1f2937] ${wishlist[courseId]
+                        ? "bg-[#fef3c7] text-[#b28a2f] border-[#d4af37]"
+                        : "bg-white text-[#b28a2f] border-[#d4af37]"
+                      } ${wishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    title={
+                      wishlist[courseId]
+                        ? t("courseDetails:removeFromWishlist", "Remove from Wishlist")
+                        : t("courseDetails:addToWishlist", "Add to Wishlist")
+                    }
+                    disabled={wishlistLoading}
+                  >
+                    {wishlistLoading ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <Heart className={`w-6 h-6 ${wishlist[courseId] ? "fill-current" : ""}`} />
+                    )}
+                  </Button>
                   <Button
                     onClick={handleShare}
                     variant="outline"
@@ -676,7 +832,8 @@ export default function CourseDetails() {
                 <button
                   key={image._key || `image-${index}`}
                   onClick={() => setActiveImage(index)}
-                  className={`flex-shrink-0 w-16 h-24 rounded-md overflow-hidden border-2 transition-all ${activeImage === index ? "border-[#b28a2f] shadow-md" : "border-transparent opacity-70 hover:opacity-100"}`}
+                  className={`flex-shrink-0 w-16 h-24 rounded-xl overflow-hidden border-2 transition-all ${activeImage === index ? "border-[#b28a2f] shadow-md" : "border-transparent opacity-70 hover:opacity-100"
+                    }`}
                 >
                   <Image
                     fill
@@ -696,11 +853,31 @@ export default function CourseDetails() {
             {/* Main content area */}
             <div className="lg:col-span-2 space-y-6">
               <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-4 mb-6 bg-[#f5f5f5] rounded-lg p-1">
-                  <TabsTrigger value="overview" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:overview", "Overview")}</TabsTrigger>
-                  <TabsTrigger value="details" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:details", "Details")}</TabsTrigger>
-                  <TabsTrigger value="reviews" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:reviews", "Reviews")}</TabsTrigger>
-                  <TabsTrigger value="instructor" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("courseDetails:instructor", "Instructor")}</TabsTrigger>
+                <TabsList className="grid grid-cols-4 mb-6 bg-[#f5f5f5] rounded-xl p-1">
+                  <TabsTrigger
+                    value="overview"
+                    className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-xl transition-colors"
+                  >
+                    {t("courseDetails:overview", "Overview")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="details"
+                    className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-xl transition-colors"
+                  >
+                    {t("courseDetails:details", "Details")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="reviews"
+                    className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-xl transition-colors"
+                  >
+                    {t("courseDetails:reviews", "Reviews")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="instructor"
+                    className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-xl transition-colors"
+                  >
+                    {t("courseDetails:instructor", "Instructor")}
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-6">
@@ -712,7 +889,9 @@ export default function CourseDetails() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-[#1f2937] leading-relaxed whitespace-pre-line">{course.description || t("courseDetails:noDescription", "No description available.")}</p>
+                      <p className="text-[#1f2937] leading-relaxed whitespace-pre-line">
+                        {course.description || t("courseDetails:noDescription", "No description available.")}
+                      </p>
                     </CardContent>
                   </Card>
 
@@ -731,7 +910,11 @@ export default function CourseDetails() {
                           </div>
                           <div>
                             <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:format", "Format")}</h4>
-                            <p className="text-[#1f2937]">{course.accessLink || course.materials ? t("courseDetails:onlineCourse", "Online Course") : t("courseDetails:notSpecified", "Not specified")}</p>
+                            <p className="text-[#1f2937]">
+                              {course.accessLink || course.materials
+                                ? t("courseDetails:onlineCourse", "Online Course")
+                                : t("courseDetails:notSpecified", "Not specified")}
+                            </p>
                           </div>
                         </div>
 
@@ -741,7 +924,9 @@ export default function CourseDetails() {
                           </div>
                           <div>
                             <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:language", "Language")}</h4>
-                            <p className="text-[#1f2937]">{course.language || t("courseDetails:english", "English")}</p>
+                            <p className="text-[#1f2937]">
+                              {course.language || t("courseDetails:english", "English")}
+                            </p>
                           </div>
                         </div>
 
@@ -751,7 +936,11 @@ export default function CourseDetails() {
                           </div>
                           <div>
                             <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:instructor", "Instructor")}</h4>
-                            <p className="text-[#1f2937]">{course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown")}</p>
+                            <p className="text-[#1f2937]">
+                              {course.instructor?.fullName ||
+                                course.instructor?.userName ||
+                                t("courseDetails:unknown", "Unknown")}
+                            </p>
                           </div>
                         </div>
 
@@ -761,7 +950,9 @@ export default function CourseDetails() {
                           </div>
                           <div>
                             <h4 className="font-semibold text-[#1f2937]">{t("courseDetails:startDate", "Start Date")}</h4>
-                            <p className="text-[#1f2937]">{course.startDate || t("courseDetails:flexible", "Flexible")}</p>
+                            <p className="text-[#1f2937]">
+                              {course.startDate || t("courseDetails:flexible", "Flexible")}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -787,11 +978,17 @@ export default function CourseDetails() {
                                     href={material}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-center bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] text-white font-medium py-2 px-4 rounded-md transition-colors disabled:bg-[#e5e7eb] disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] text-white font-medium py-2 px-4 rounded-xl transition-colors disabled:bg-[#e5e7eb] disabled:cursor-not-allowed"
                                     onClick={(e) => {
                                       if (!material || !isValidUrl(material)) {
                                         e.preventDefault();
-                                        showAlert(t("courseDetails:errors.invalidMaterialLink", "Material link is invalid or unavailable. Please try again later."), "error");
+                                        showAlert(
+                                          t(
+                                            "courseDetails:errors.invalidMaterialLink",
+                                            "Material link is invalid or unavailable. Please try again later."
+                                          ),
+                                          "error"
+                                        );
                                       } else {
                                         console.log("Attempting to open material link:", material);
                                         window.open(material, "_blank", "noopener,noreferrer");
@@ -808,7 +1005,10 @@ export default function CourseDetails() {
                               <Alert className="bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
                                 <AlertDescription className="flex items-center gap-2">
                                   <Lock className="w-4 h-4 text-[#b28a2f]" />
-                                  {t("courseDetails:noMaterials", "No downloadable materials available for this course.")}
+                                  {t(
+                                    "courseDetails:noMaterials",
+                                    "No downloadable materials available for this course."
+                                  )}
                                 </AlertDescription>
                               </Alert>
                             )}
@@ -817,11 +1017,17 @@ export default function CourseDetails() {
                                 href={course.accessLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full flex items-center justify-center bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] text-white font-medium py-2 px-4 rounded-md transition-colors disabled:bg-[#e5e7eb] disabled:cursor-not-allowed"
+                                className="w-full flex items-center justify-center bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] text-white font-medium py-2 px-4 rounded-xl transition-colors disabled:bg-[#e5e7eb] disabled:cursor-not-allowed"
                                 onClick={(e) => {
                                   if (!course.accessLink || !isValidUrl(course.accessLink)) {
                                     e.preventDefault();
-                                    showAlert(t("courseDetails:errors.invalidAccessLink", "Online access link is invalid or unavailable. Please try again later."), "error");
+                                    showAlert(
+                                      t(
+                                        "courseDetails:errors.invalidAccessLink",
+                                        "Online access link is invalid or unavailable. Please try again later."
+                                      ),
+                                      "error"
+                                    );
                                   } else {
                                     console.log("Attempting to open access link:", course.accessLink);
                                     window.open(course.accessLink, "_blank", "noopener,noreferrer");
@@ -839,11 +1045,18 @@ export default function CourseDetails() {
                             <AlertDescription className="flex items-center gap-2">
                               <Lock className="w-4 h-4 text-[#b28a2f]" />
                               {course.price > 0 ? (
-                                t("courseDetails:enrollToAccess", "Enroll in this course to access its full content and materials.")
+                                t(
+                                  "courseDetails:enrollToAccess",
+                                  "Enroll in this course to access its full content and materials."
+                                )
                               ) : (
                                 <>
-                                  {t("courseDetails:clickToEnroll", "Click")} {" "}
-                                  <a href="#" onClick={handlePurchase} className="text-[#b28a2f] hover:underline">
+                                  {t("courseDetails:clickToEnroll", "Click")}{" "}
+                                  <a
+                                    href="#"
+                                    onClick={handlePurchase}
+                                    className="text-[#b28a2f] hover:underline"
+                                  >
                                     {t("courseDetails:enrollFree", "Enroll Free")}
                                   </a>{" "}
                                   {t("courseDetails:toAccessCourse", "to access this course.")}
@@ -868,44 +1081,81 @@ export default function CourseDetails() {
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6">
                         <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:title", "Title")}</h4>
-                          <p className="text-[#1f2937] font-medium">{course.title || t("courseDetails:untitled", "Untitled")}</p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:instructor", "Instructor")}</h4>
-                          <p className="text-[#1f2937] font-medium">{course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknown", "Unknown")}</p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:category", "Category")}</h4>
-                          <Badge variant="outline" className="mt-1 bg-[#fef3c7] text-[#1f2937] border-[#d4af37] hover:bg-[#d4af37] hover:text-white">{course.category || t("courseDetails:uncategorized", "Uncategorized")}</Badge>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:language", "Language")}</h4>
-                          <p className="text-[#1f2937] font-medium">{course.language || t("courseDetails:english", "English")}</p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:duration", "Duration")}</h4>
-                          <p className="text-[#1f2937] font-medium">{course.duration || t("courseDetails:notSpecified", "Not specified")}</p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:startDate", "Start Date")}</h4>
-                          <p className="text-[#1f2937] font-medium">{course.startDate || t("courseDetails:flexible", "Flexible")}</p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:level", "Level")}</h4>
-                          <p className="text-[#1f2937] font-medium">{course.level || t("courseDetails:notSpecified", "Not specified")}</p>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-[#1f2937]/70">{t("courseDetails:price", "Price")}</h4>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:title", "Title")}
+                          </h4>
                           <p className="text-[#1f2937] font-medium">
-                            {course.price > 0 ? `$${course.price?.toFixed(2) || "0.00"}` : t("courseDetails:free", "Free")}
+                            {course.title || t("courseDetails:untitled", "Untitled")}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:instructor", "Instructor")}
+                          </h4>
+                          <p className="text-[#1f2937] font-medium">
+                            {course.instructor?.fullName ||
+                              course.instructor?.userName ||
+                              t("courseDetails:unknown", "Unknown")}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:category", "Category")}
+                          </h4>
+                          <Badge
+                            variant="outline"
+                            className="mt-1 bg-[#fef3c7] text-[#1f2937] border-[#d4af37] hover:bg-[#d4af37] hover:text-white"
+                          >
+                            {course.category || t("courseDetails:uncategorized", "Uncategorized")}
+                          </Badge>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:language", "Language")}
+                          </h4>
+                          <p className="text-[#1f2937] font-medium">
+                            {course.language || t("courseDetails:english", "English")}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:duration", "Duration")}
+                          </h4>
+                          <p className="text-[#1f2937] font-medium">
+                            {course.duration || t("courseDetails:notSpecified", "Not specified")}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:startDate", "Start Date")}
+                          </h4>
+                          <p className="text-[#1f2937] font-medium">
+                            {course.startDate || t("courseDetails:flexible", "Flexible")}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:level", "Level")}
+                          </h4>
+                          <p className="text-[#1f2937] font-medium">
+                            {course.level || t("courseDetails:notSpecified", "Not specified")}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-sm font-medium text-[#1f2937]/70">
+                            {t("courseDetails:price", "Price")}
+                          </h4>
+                          <p className="text-[#1f2937] font-medium">
+                            {course.price > 0
+                              ? `$${course.price?.toFixed(2) || "0.00"}`
+                              : t("courseDetails:free", "Free")}
                           </p>
                         </div>
                       </div>
@@ -914,7 +1164,10 @@ export default function CourseDetails() {
                         <Alert className="mt-8 bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
                           <AlertDescription className="flex items-center gap-2">
                             <Lock className="w-4 h-4 text-[#b28a2f]" />
-                            {t("courseDetails:enrollToAccess", "Enroll in this course to access its full content and materials.")}
+                            {t(
+                              "courseDetails:enrollToAccess",
+                              "Enroll in this course to access its full content and materials."
+                            )}
                           </AlertDescription>
                         </Alert>
                       )}
@@ -940,7 +1193,10 @@ export default function CourseDetails() {
                               </div>
                               <div className="mt-2">{renderStars(course.averageRating || 0)}</div>
                               <div className="mt-1 text-[#1f2937]/70">
-                                {totalRatings} {totalRatings === 1 ? t("courseDetails:review", "review") : t("courseDetails:reviews", "reviews")}
+                                {totalRatings}{" "}
+                                {totalRatings === 1
+                                  ? t("courseDetails:review", "review")
+                                  : t("courseDetails:reviews", "reviews")}
                               </div>
                             </div>
 
@@ -966,20 +1222,24 @@ export default function CourseDetails() {
                             </div>
                           </div>
 
-                          <div className="bg-[#fef3c7] p-5 rounded-lg shadow-sm border border-[#d4af37] mb-6">
+                          <div className="bg-[#fef3c7] p-5 rounded-xl shadow-sm border border-[#d4af37] mb-6">
                             <h4 className="text-lg font-semibold text-[#1f2937] mb-3 flex items-center gap-2">
                               <MessageSquare size={20} className="text-[#b28a2f]" />
                               {t("courseDetails:rateCourse", "Rate This Course")}
                             </h4>
                             <form onSubmit={handleRatingSubmit}>
                               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-                                <div className="flex items-center bg-white py-2 px-3 rounded-md border border-[#e5e7eb] shadow-sm">
+                                <div className="flex items-center bg-white py-2 px-3 rounded-xl border border-[#e5e7eb] shadow-sm">
                                   {renderStars(userRating, true)}
                                   <span className="ml-2 text-sm text-[#1f2937] min-w-20">
-                                    {userRating ? `${userRating}/5` : t("courseDetails:selectRating", "Select a rating")}
+                                    {userRating
+                                      ? `${userRating}/5`
+                                      : t("courseDetails:selectRating", "Select a rating")}
                                   </span>
                                 </div>
-                                <span className="text-xs text-[#1f2937]/70">{t("courseDetails:clickToRate", "Click to rate")}</span>
+                                <span className="text-xs text-[#1f2937]/70">
+                                  {t("courseDetails:clickToRate", "Click to rate")}
+                                </span>
                               </div>
                               <div className="relative mb-4">
                                 <Textarea
@@ -987,7 +1247,7 @@ export default function CourseDetails() {
                                   onChange={(e) => setUserComment(e.target.value)}
                                   placeholder={t("courseDetails:leaveComment", "Leave a comment")}
                                   maxLength={200}
-                                  className="w-full p-3 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#d4af37] bg-white text-[#1f2937]"
+                                  className="w-full p-3 border border-[#e5e7eb] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#d4af37] bg-white text-[#1f2937]"
                                   rows={3}
                                 />
                                 <div className="absolute bottom-2 right-2 text-xs text-[#1f2937]/70">
@@ -1000,7 +1260,9 @@ export default function CourseDetails() {
                                 className="w-full bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] disabled:bg-[#e5e7eb] disabled:cursor-not-allowed text-white font-medium"
                               >
                                 <Star size={18} className="mr-2" />
-                                {isSubmitting ? t("courseDetails:submitting", "Submitting...") : t("courseDetails:submitRating", "Submit Rating")}
+                                {isSubmitting
+                                  ? t("courseDetails:submitting", "Submitting...")
+                                  : t("courseDetails:submitRating", "Submit Rating")}
                               </Button>
                             </form>
                           </div>
@@ -1009,23 +1271,29 @@ export default function CourseDetails() {
                             {course.ratings.map((rating, index) => (
                               <div
                                 key={rating._key || index}
-                                className="border-b border-[#e5e7eb] last:border-0 pb-6 last:pb-0 bg-[#fef3c7]/50 p-4 rounded-md"
+                                className="border-b border-[#e5e7eb] last:border-0 pb-6 last:pb-0 bg-[#fef3c7]/50 p-4 rounded-xl"
                               >
                                 <div className="flex justify-between items-start mb-2">
                                   <div>
                                     <div className="font-medium text-[#1f2937]">
-                                      {rating.user?.userName || rating.user?.fullName || t("courseDetails:anonymousLearner", "Anonymous Learner")}
+                                      {rating.user?.userName ||
+                                        rating.user?.fullName ||
+                                        t("courseDetails:anonymousLearner", "Anonymous Learner")}
                                     </div>
                                     <div className="flex items-center gap-2 mt-1">
                                       {renderStars(rating.value)}
                                       <span className="text-sm text-[#1f2937]/70">
-                                        {rating.date ? new Date(rating.date).toLocaleDateString() : t("courseDetails:noDate", "No date")}
+                                        {rating.date
+                                          ? new Date(rating.date).toLocaleDateString()
+                                          : t("courseDetails:noDate", "No date")}
                                       </span>
                                     </div>
                                   </div>
                                 </div>
                                 {rating.message && (
-                                  <p className="text-[#1f2937] mt-2 whitespace-pre-line">{rating.message}</p>
+                                  <p className="text-[#1f2937] mt-2 whitespace-pre-line">
+                                    {rating.message}
+                                  </p>
                                 )}
                               </div>
                             ))}
@@ -1036,19 +1304,28 @@ export default function CourseDetails() {
                           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#fef3c7] text-[#b28a2f] mb-4">
                             <MessageSquareOff className="w-10 h-10" />
                           </div>
-                          <h3 className="text-lg font-medium text-[#1f2937] mb-2">{t("courseDetails:noReviews", "No Reviews Yet")}</h3>
+                          <h3 className="text-lg font-medium text-[#1f2937] mb-2">
+                            {t("courseDetails:noReviews", "No Reviews Yet")}
+                          </h3>
                           <p className="text-[#1f2937]/70 max-w-md mx-auto">
-                            {t("courseDetails:firstToReview", "Be the first to review this course and share your thoughts with other learners.")}
+                            {t(
+                              "courseDetails:firstToReview",
+                              "Be the first to review this course and share your thoughts with other learners."
+                            )}
                           </p>
                           <form onSubmit={handleRatingSubmit} className="mt-6">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-                              <div className="flex items-center bg-white py-2 px-3 rounded-md border border-[#e5e7eb] shadow-sm">
+                              <div className="flex items-center bg-white py-2 px-3 rounded-xl border border-[#e5e7eb] shadow-sm">
                                 {renderStars(userRating, true)}
                                 <span className="ml-2 text-sm text-[#1f2937] min-w-20">
-                                  {userRating ? `${userRating}/5` : t("courseDetails:selectRating", "Select a rating")}
+                                  {userRating
+                                    ? `${userRating}/5`
+                                    : t("courseDetails:selectRating", "Select a rating")}
                                 </span>
                               </div>
-                              <span className="text-xs text-[#1f2937]/70">{t("courseDetails:clickToRate", "Click to rate")}</span>
+                              <span className="text-xs text-[#1f2937]/70">
+                                {t("courseDetails:clickToRate", "Click to rate")}
+                              </span>
                             </div>
                             <div className="relative mb-4">
                               <Textarea
@@ -1056,7 +1333,7 @@ export default function CourseDetails() {
                                 onChange={(e) => setUserComment(e.target.value)}
                                 placeholder={t("courseDetails:leaveComment", "Leave a comment")}
                                 maxLength={200}
-                                className="w-full p-3 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#d4af37] bg-white text-[#1f2937]"
+                                className="w-full p-3 border border-[#e5e7eb] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#d4af37] bg-white text-[#1f2937]"
                                 rows={3}
                               />
                               <div className="absolute bottom-2 right-2 text-xs text-[#1f2937]/70">
@@ -1069,7 +1346,9 @@ export default function CourseDetails() {
                               className="w-full bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] disabled:bg-[#e5e7eb] disabled:cursor-not-allowed text-white font-medium"
                             >
                               <Star size={18} className="mr-2" />
-                              {isSubmitting ? t("courseDetails:submitting", "Submitting...") : t("courseDetails:submitRating", "Submit Rating")}
+                              {isSubmitting
+                                ? t("courseDetails:submitting", "Submitting...")
+                                : t("courseDetails:submitRating", "Submit Rating")}
                             </Button>
                           </form>
                         </div>
@@ -1095,22 +1374,32 @@ export default function CourseDetails() {
                                 <Image
                                   fill
                                   src={course.instructor.image}
-                                  alt={course.instructor?.fullName || course.instructor?.userName}
+                                  alt={
+                                    course.instructor?.fullName || course.instructor?.userName
+                                  }
                                   className="w-full h-full object-cover"
                                 />
                               </div>
                             </div>
                           )}
 
-                          <div className={`flex flex-col justify-center w-full ${course.instructor?.image ? "md:w-3/4" : ""}`}>
+                          <div
+                            className={`flex flex-col justify-center w-full ${course.instructor?.image ? "md:w-3/4" : ""
+                              }`}
+                          >
                             <h3 className="text-xl font-semibold text-[#1f2937] mb-2">
-                              {course.instructor?.fullName || course.instructor?.userName || t("courseDetails:unknownInstructor", "Unknown Instructor")}
+                              {course.instructor?.fullName ||
+                                course.instructor?.userName ||
+                                t("courseDetails:unknownInstructor", "Unknown Instructor")}
                             </h3>
                             {course.instructor?.userName && (
                               <p className="text-[#1f2937]/70 mb-2">@{course.instructor.userName}</p>
                             )}
                             {course.instructor?.educationalDetails?.yearsOfExperience && (
-                              <p className="text-[#1f2937]">{course.instructor.educationalDetails.yearsOfExperience} {t("courseDetails:yearsExperience", "years of experience")}</p>
+                              <p className="text-[#1f2937]">
+                                {course.instructor.educationalDetails.yearsOfExperience}{" "}
+                                {t("courseDetails:yearsExperience", "years of experience")}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -1123,14 +1412,18 @@ export default function CourseDetails() {
                               variant="outline"
                             >
                               <MessageSquare size={18} className="mr-2" />
-                              {showInstructorContact ? t("courseDetails:hideContact", "Hide Contact") : t("courseDetails:seeContact", "See Contact Details")}
+                              {showInstructorContact
+                                ? t("courseDetails:hideContact", "Hide Contact")
+                                : t("courseDetails:seeContact", "See Contact Details")}
                             </Button>
                             {showInstructorContact && (
-                              <div className="mt-4 p-4 bg-[#fef3c7] rounded-lg border border-[#d4af37] shadow-sm">
+                              <div className="mt-4 p-4 bg-[#fef3c7] rounded-xl border border-[#d4af37] shadow-sm">
                                 {course.instructor?.email && (
                                   <p className="flex items-center text-sm text-[#1f2937] mb-2">
                                     <Mail className="w-4 h-4 mr-2 text-[#b28a2f]" />
-                                    <span className="font-medium">{t("courseDetails:email", "Email")}:</span>
+                                    <span className="font-medium">
+                                      {t("courseDetails:email", "Email")}:
+                                    </span>
                                     <a
                                       href={`mailto:${course.instructor.email}`}
                                       className="ml-1 text-[#b28a2f] hover:text-[#d4af37] hover:underline"
@@ -1142,7 +1435,9 @@ export default function CourseDetails() {
                                 {course.instructor?.phoneNumber && (
                                   <p className="flex items-center text-sm text-[#1f2937]">
                                     <Phone className="w-4 h-4 mr-2 text-[#b28a2f]" />
-                                    <span className="font-medium">{t("courseDetails:phone", "Phone")}:</span>
+                                    <span className="font-medium">
+                                      {t("courseDetails:phone", "Phone")}:
+                                    </span>
                                     <a
                                       href={`tel:${course.instructor.phoneNumber}`}
                                       className="ml-1 text-[#b28a2f] hover:text-[#d4af37] hover:underline"
@@ -1158,11 +1453,18 @@ export default function CourseDetails() {
 
                         {course.instructor?.educationalDetails?.certifications?.length > 0 && (
                           <div className="mt-6">
-                            <h4 className="text-lg font-semibold text-[#1f2937] mb-4">{t("courseDetails:certifications", "Certifications")}</h4>
+                            <h4 className="text-lg font-semibold text-[#1f2937] mb-4">
+                              {t("courseDetails:certifications", "Certifications")}
+                            </h4>
                             <ul className="list-disc pl-5">
                               {course.instructor.educationalDetails.certifications.map((cert, index) => (
                                 <li key={index}>
-                                  <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-[#b28a2f] hover:text-[#d4af37] hover:underline">
+                                  <a
+                                    href={cert.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[#b28a2f] hover:text-[#d4af37] hover:underline"
+                                  >
                                     {t("courseDetails:certification", "Certification")} {index + 1}
                                   </a>
                                 </li>
@@ -1173,12 +1475,14 @@ export default function CourseDetails() {
 
                         {course.instructor?.otherCourses && course.instructor.otherCourses.length > 0 && (
                           <div className="mt-6">
-                            <h4 className="text-lg font-semibold text-[#1f2937] mb-4">{t("courseDetails:otherCourses", "Other Courses by This Instructor")}</h4>
+                            <h4 className="text-lg font-semibold text-[#1f2937] mb-4">
+                              {t("courseDetails:otherCourses", "Other Courses by This Instructor")}
+                            </h4>
                             <div className="space-y-4">
                               {course.instructor.otherCourses.map((otherCourse) => (
                                 <div
                                   key={otherCourse._id}
-                                  className="flex gap-3 cursor-pointer hover:bg-[#fef3c7] p-2 rounded-md transition-colors"
+                                  className="flex gap-3 cursor-pointer hover:bg-[#fef3c7] p-2 rounded-xl transition-colors"
                                   onClick={() => navigateToCourse(otherCourse._id)}
                                 >
                                   <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
@@ -1190,11 +1494,14 @@ export default function CourseDetails() {
                                     />
                                   </div>
                                   <div>
-                                    <h4 className="font-medium text-[#1f2937] line-clamp-1">{otherCourse.title}</h4>
+                                    <h4 className="font-medium text-[#1f2937] line-clamp-1">
+                                      {otherCourse.title}
+                                    </h4>
                                     <div className="flex items-center gap-1 mt-1">
                                       {renderStars(otherCourse.averageRating || 0)}
                                       <span className="text-xs text-[#1f2937]/70">
-                                        {otherCourse.averageRating?.toFixed(1) || t("courseDetails:noRatings", "No ratings")}
+                                        {otherCourse.averageRating?.toFixed(1) ||
+                                          t("courseDetails:noRatings", "No ratings")}
                                       </span>
                                     </div>
                                   </div>
@@ -1227,7 +1534,9 @@ export default function CourseDetails() {
             <div className="space-y-6">
               <Card className="border-[#e5e7eb] bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                 <div className="bg-gradient-to-r from-[#b28a2f] to-[#d4af37] px-6 py-4">
-                  <h3 className="text-xl font-semibold text-white">{t("courseDetails:getThisCourse", "Get This Course")}</h3>
+                  <h3 className="text-xl font-semibold text-white">
+                    {t("courseDetails:getThisCourse", "Get This Course")}
+                  </h3>
                 </div>
 
                 <CardContent className="pt-6">
@@ -1235,7 +1544,9 @@ export default function CourseDetails() {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[#1f2937]">{t("courseDetails:price", "Price")}:</span>
                       <span className="text-2xl font-bold text-[#b28a2f]">
-                        {course.price > 0 ? `$${course.price.toFixed(2)}` : t("courseDetails:free", "Free")}
+                        {course.price > 0
+                          ? `$${course.price.toFixed(2)}`
+                          : t("courseDetails:free", "Free")}
                       </span>
                     </div>
 
@@ -1277,7 +1588,9 @@ export default function CourseDetails() {
                         <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
                           <CheckIcon className="w-3 h-3 text-[#b28a2f]" />
                         </div>
-                        {course.materials?.length > 0 || course.accessLink ? t("courseDetails:onlineMaterials", "Online course materials") : t("courseDetails:courseAccess", "Course access")}
+                        {course.materials?.length > 0 || course.accessLink
+                          ? t("courseDetails:onlineMaterials", "Online course materials")
+                          : t("courseDetails:courseAccess", "Course access")}
                       </div>
                       <div className="flex items-center gap-2 text-[#1f2937]">
                         <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
@@ -1293,13 +1606,15 @@ export default function CourseDetails() {
               {relatedCourses.length > 0 && (
                 <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-lg text-[#1f2937]">{t("courseDetails:relatedCourses", "Related Courses")}</CardTitle>
+                    <CardTitle className="text-lg text-[#1f2937]">
+                      {t("courseDetails:relatedCourses", "Related Courses")}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {relatedCourses.map((relatedCourse) => (
                       <div
                         key={relatedCourse._id}
-                        className="flex gap-3 cursor-pointer hover:bg-[#fef3c7] p-2 rounded-md transition-colors"
+                        className="flex gap-3 cursor-pointer hover:bg-[#fef3c7] p-2 rounded-xl transition-colors"
                         onClick={() => navigateToCourse(relatedCourse._id)}
                       >
                         <div className="w-12 h-16 bg-[#e5e7eb] rounded flex-shrink-0 overflow-hidden">
@@ -1311,11 +1626,14 @@ export default function CourseDetails() {
                           />
                         </div>
                         <div>
-                          <h4 className="font-medium text-[#1f2937] line-clamp-1">{relatedCourse.title}</h4>
+                          <h4 className="font-medium text-[#1f2937] line-clamp-1">
+                            {relatedCourse.title}
+                          </h4>
                           <div className="flex items-center gap-1 mt-1">
                             {renderStars(relatedCourse.averageRating || 0)}
                             <span className="text-xs text-[#1f2937]/70">
-                              {relatedCourse.averageRating?.toFixed(1) || t("courseDetails:noRatings", "No ratings")}
+                              {relatedCourse.averageRating?.toFixed(1) ||
+                                t("courseDetails:noRatings", "No ratings")}
                             </span>
                           </div>
                         </div>
