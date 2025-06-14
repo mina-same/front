@@ -2,103 +2,98 @@ import React from 'react';
 import { Separator } from "@/components/ui/separator";
 import Image from 'next/image';
 
-export const ReviewStep = ({ 
-  formData, 
-  getServiceTypeLabel, 
-  getPriceUnitLabel,
-  additionalImagePreviews,
-  imagePreview
-}) => {
+export const ReviewStep = ({ formData, getServiceTypeLabel, getPriceUnitLabel }) => {
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold">Review Your Service</h2>
-      <p className="text-muted-foreground">
-        Please review your service details before submitting
-      </p>
+      <h3 className="text-lg font-semibold">Review Your Service</h3>
       
-      <div className="space-y-8">
-        <Section title="Basic Information">
-          <InfoRow label="Name (English)" value={formData.name_en} />
-          <InfoRow label="Name (Arabic)" value={formData.name_ar} />
-          <InfoRow label="Years of Experience" value={formData.years_of_experience} />
-        </Section>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium">Service Management</h4>
+          <p>
+            <span className="font-semibold">Type:</span>{" "}
+            {formData.serviceManagementType === "fulltime" ? "Full-time (Stable-Managed)" : "Freelancer"}
+          </p>
+        </div>
 
-        <Section title="Description">
-          <InfoRow label="About (English)" value={formData.about_en} />
-          <InfoRow label="About (Arabic)" value={formData.about_ar} />
-          <InfoRow label="Past Experience (English)" value={formData.past_experience_en} />
-          <InfoRow label="Past Experience (Arabic)" value={formData.past_experience_ar} />
-        </Section>
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium">Basic Information</h4>
+          <p>
+            <span className="font-semibold">Name (English):</span>{" "}
+            {formData.name_en}
+          </p>
+          <p>
+            <span className="font-semibold">Name (Arabic):</span>{" "}
+            {formData.name_ar}
+          </p>
+          <p>
+            <span className="font-semibold">Years of Experience:</span>{" "}
+            {formData.years_of_experience}
+          </p>
+        </div>
 
-        <Section title="Contact & Location">
-          <InfoRow label="Phone" value={formData.servicePhone} />
-          <InfoRow label="Email" value={formData.serviceEmail} />
-          <InfoRow label="Address Details" value={formData.address_details} />
-        </Section>
-
-        <Section title="Service Details">
-          <InfoRow label="Service Type" value={getServiceTypeLabel(formData.service_type)} />
-          <InfoRow label="Price" value={`${formData.price} ${getPriceUnitLabel(formData.priceUnit)}`} />
-        </Section>
-
-        <Section title="Media">
-          {/* Profile Image */}
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium">Description</h4>
           <div>
-            <h3 className="text-sm font-medium mb-2">Profile Image</h3>
-            {imagePreview ? (
-              <div className="w-32 h-32 rounded border overflow-hidden mb-4">
-                <Image
-                  fill
-                  src={imagePreview} 
-                  alt="Profile image" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="text-sm text-muted-foreground mb-4">No profile image added</div>
-            )}
+            <span className="font-semibold">About (English):</span>
+            <p className="mt-1 text-sm">{formData.about_en}</p>
           </div>
-          
-          {/* Additional Images */}
           <div>
-            <h3 className="text-sm font-medium mb-2">Additional Images</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {additionalImagePreviews && additionalImagePreviews.map((url, index) => (
-                <div 
-                  key={index}
-                  className="aspect-square rounded border overflow-hidden"
-                >
-                  <Image 
-                    fill
-                    src={url} 
-                    alt={`Service image ${index + 1}`} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-              {(!additionalImagePreviews || additionalImagePreviews.length === 0) && (
-                <div className="text-sm text-muted-foreground">No additional images added</div>
-              )}
-            </div>
+            <span className="font-semibold">About (Arabic):</span>
+            <p className="mt-1 text-sm" dir="rtl">{formData.about_ar}</p>
           </div>
-          
-          <div className="mt-4">
-            <h3 className="text-sm font-medium mb-2">Links</h3>
-            <div className="space-y-1">
-              {formData.social_links.filter(link => link.url.trim() !== '').map((link, index) => (
-                <div key={index} className="text-sm flex items-center gap-2">
-                  <span className="capitalize font-medium">{link.linkType}:</span> 
-                  <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
-                    {link.url}
-                  </a>
-                </div>
+        </div>
+
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium">Contact & Location</h4>
+          <p>
+            <span className="font-semibold">Phone:</span> {formData.servicePhone}
+          </p>
+          <p>
+            <span className="font-semibold">Email:</span> {formData.serviceEmail}
+          </p>
+          <p>
+            <span className="font-semibold">Address:</span> {formData.address_details}
+          </p>
+        </div>
+
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium">Service Details</h4>
+          <p>
+            <span className="font-semibold">Service Type:</span>{" "}
+            {getServiceTypeLabel(formData.service_type)}
+          </p>
+          <p>
+            <span className="font-semibold">Price:</span>{" "}
+            {formData.price} {getPriceUnitLabel(formData.priceUnit)}
+          </p>
+        </div>
+
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium">Media</h4>
+          <p>
+            <span className="font-semibold">Images:</span>{" "}
+            {formData.images?.length || 0} uploaded
+          </p>
+          <div>
+            <span className="font-semibold">Social Links:</span>
+            <ul className="mt-1 text-sm space-y-1">
+              {formData.social_links.map((link, index) => (
+                link.url && (
+                  <li key={index}>
+                    {link.linkType}: {link.url}
+                  </li>
+                )
               ))}
-              {formData.social_links.filter(link => link.url.trim() !== '').length === 0 && (
-                <div className="text-sm text-muted-foreground">No links added</div>
-              )}
-            </div>
+            </ul>
           </div>
-        </Section>
+        </div>
+      </div>
+
+      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p className="text-sm text-yellow-800">
+          <span className="font-semibold">Note:</span> Please review all information carefully before submitting. Once submitted, your service will be reviewed by our team before being published.
+        </p>
       </div>
     </div>
   );

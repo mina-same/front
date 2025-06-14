@@ -1260,7 +1260,7 @@ export default function SignUpForm() {
                   {t('user:phoneNumber')}
                 </label>
                 <PhoneInput
-                  country={'eg'}
+                  country={'sa'}
                   value={pi.phone}
                   onChange={(phone) => handleChange('personalInfo', 'phone', phone)}
                   inputClass={`rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold text-black ${isRTL ? 'text-right font-arabic' : 'text-left'}`}

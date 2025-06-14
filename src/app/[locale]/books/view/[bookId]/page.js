@@ -29,7 +29,7 @@ import { Alert, AlertDescription } from "../../../../../components/ui/alert";
 import { Progress } from "../../../../../components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import ResourceNotFound from "../../../../../../components/shared/ResourceNotFound";
-import { client } from "../../../../../lib/sanity";
+import { client } from ".@/lib/sanity";
 import Layout from "components/layout/Layout";
 import { Heart, Loader2 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";

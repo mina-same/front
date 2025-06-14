@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Layout from '../../../../../components/layout/Layout';
+import Layout from "../../../../../components/layout/Layout";
 import { useTranslation } from 'react-i18next';
 import ServiceFormWizard from './ServiceFormWizard';
 import { useRouter } from 'next/navigation';
 import { client } from '../../../../lib/sanity';
 
-const VALID_USER_TYPE = 'provider';
+const VALID_USER_TYPES = ['provider', 'stable_owner'];
+
+// No longer hardcoding a single valid user type
+// const VALID_USER_TYPE = 'stable_owner';
 
 const ContactClient = () => {
   const { t } = useTranslation();
@@ -15,7 +18,9 @@ const ContactClient = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState(null); // Add state for userId
+  const [userId, setUserId] = useState(null);
+  const [userType, setUserType] = useState(null); // Add state for userType
+  const [userStable, setUserStable] = useState(null); // Add state for user's stable
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -35,7 +40,7 @@ const ContactClient = () => {
 
         if (data.authenticated) {
           // Fetch userType from Sanity
-          const query = `*[_type == "user" && _id == $userId]{ userType }[0]`;
+          const query = `*[_type == "user" && _id == $userId]{ userType, stable }[0]`;
           const params = { userId: data.user.id };
           const userData = await client.fetch(query, params);
 
@@ -43,11 +48,18 @@ const ContactClient = () => {
             throw new Error('User not found in database.');
           }
 
-          if (userData.userType !== VALID_USER_TYPE) {
-            throw new Error('Invalid user type. Only Educational Services users can access this page.');
+          if (!VALID_USER_TYPES.includes(userData.userType)) {
+            throw new Error(`Invalid user type. Only ${VALID_USER_TYPES.join(' or ')} users can access this page.`);
           }
 
-          setUserId(data.user.id); // Store userId
+          setUserId(data.user.id);
+          setUserType(userData.userType); // Store userType
+          
+          // If user is stable_owner, fetch their stable reference
+          if (userData.userType === 'stable_owner' && userData.stable && userData.stable._ref) {
+            setUserStable(userData.stable._ref);
+          }
+          
           setIsAuthenticated(true);
         } else {
           throw new Error('User not authenticated.');
@@ -83,7 +95,7 @@ const ContactClient = () => {
           {t('addBook:authError')}: {error}
         </div>
       )}
-      <ServiceFormWizard userId={userId} /> {/* Pass userId as prop */}
+      <ServiceFormWizard userId={userId} userType={userType} userStable={userStable} /> {/* Pass userType and userStable as props */}
     </Layout>
   );
 };

@@ -17,6 +17,7 @@ import { ReviewStep } from "./ReviewStep";
 import { SuccessCelebration } from "./SuccessCelebration";
 
 const FORM_STEPS = [
+  "Service Management",
   "Basic Info",
   "Description",
   "Contact & Location",
@@ -46,7 +47,7 @@ const serviceDetailKeyMap = {
   suppliers: "supplierDetails",
 };
 
-const ServiceFormWizard = ({userId}) => {
+const ServiceFormWizard = ({userId, userType, userStable}) => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [animateDirection, setAnimateDirection] = useState("next");
@@ -56,6 +57,7 @@ const ServiceFormWizard = ({userId}) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [additionalImagePreviews, setAdditionalImagePreviews] = useState([]);
   const [formData, setFormData] = useState({
+    serviceManagementType: "",
     name_ar: "",
     name_en: "",
     years_of_experience: "",
@@ -93,29 +95,35 @@ const ServiceFormWizard = ({userId}) => {
   const [showCelebration, setShowCelebration] = useState(false);
 
   const handleCountryChange = (value) => {
-    setSelectedCountry(value);
+    // Ensure we're only using the ID string, not a DOM element
+    const countryId = typeof value === 'object' ? value.target?.value : value;
+    setSelectedCountry(countryId);
     setFormData((prev) => ({
       ...prev,
-      country: value,
+      country: countryId,
       governorate: "",
       city: "",
     }));
   };
 
   const handleGovernorateChange = (value) => {
-    setSelectedGovernorate(value);
+    // Ensure we're only using the ID string, not a DOM element
+    const governorateId = typeof value === 'object' ? value.target?.value : value;
+    setSelectedGovernorate(governorateId);
     setFormData((prev) => ({
       ...prev,
-      governorate: value,
+      governorate: governorateId,
       city: "",
     }));
   };
 
   const handleCityChange = (value) => {
-    setSelectedCity(value);
+    // Ensure we're only using the ID string, not a DOM element
+    const cityId = typeof value === 'object' ? value.target?.value : value;
+    setSelectedCity(cityId);
     setFormData((prev) => ({
       ...prev,
-      city: value,
+      city: cityId,
     }));
   };
 
@@ -265,11 +273,11 @@ const ServiceFormWizard = ({userId}) => {
     }
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e, type) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
 
-      if (e.target.name === "profile_image") {
+      if (type === "profile") {
         const file = files[0];
         const imageUrl = URL.createObjectURL(file);
 
@@ -284,7 +292,7 @@ const ServiceFormWizard = ({userId}) => {
         });
 
         setImagePreview(imageUrl);
-      } else if (e.target.name === "images") {
+      } else if (type === "additional") {
         const newPreviews = files.map((file) => URL.createObjectURL(file));
 
         setFormData((prev) => {
@@ -470,155 +478,117 @@ const ServiceFormWizard = ({userId}) => {
 
     switch (step) {
       case 1:
-        if (!formData.name_ar)
-          newErrors.name_ar = "Service name in Arabic is required";
-        if (!formData.name_en)
-          newErrors.name_en = "Service name in English is required";
-        if (!formData.years_of_experience)
-          newErrors.years_of_experience = "Years of experience is required";
+        // Service Management Type validation
+        // If userType is provided, we'll skip this validation as it's auto-set
+        if (!userType && !formData.serviceManagementType) {
+          newErrors.serviceManagementType = "Service management type is required";
+        }
         break;
-
       case 2:
-        if (!formData.about_ar || formData.about_ar.length < 50)
-          newErrors.about_ar =
-            "Description in Arabic must be at least 50 characters";
-        if (!formData.about_en || formData.about_en.length < 50)
-          newErrors.about_en =
-            "Description in English must be at least 50 characters";
-        if (!formData.past_experience_ar)
-          newErrors.past_experience_ar =
-            "Past experience in Arabic is required";
-        if (!formData.past_experience_en)
-          newErrors.past_experience_en =
-            "Past experience in English is required";
+        // Basic Info validation
+        if (!formData.name_en) {
+          newErrors.name_en = "English name is required";
+        } else if (formData.name_en.length < 3) {
+          newErrors.name_en = "Name must be at least 3 characters";
+        }
+
+        if (!formData.name_ar) {
+          newErrors.name_ar = "Arabic name is required";
+        } else if (formData.name_ar.length < 3) {
+          newErrors.name_ar = "Name must be at least 3 characters";
+        }
+
+        if (!formData.years_of_experience) {
+          newErrors.years_of_experience = "Years of experience is required";
+        } else if (isNaN(formData.years_of_experience)) {
+          newErrors.years_of_experience = "Years of experience must be a number";
+        }
         break;
 
       case 3:
-        if (!formData.servicePhone)
-          newErrors.servicePhone = "Service phone number is required";
-        if (!formData.serviceEmail)
-          newErrors.serviceEmail = "Service email is required";
-        else if (!/\S+@\S+\.\S+/.test(formData.serviceEmail))
-          newErrors.serviceEmail = "Invalid email format";
-
-        if (!selectedCountry) newErrors.country = "Country is required";
-        if (selectedCountry && !selectedGovernorate)
-          newErrors.governorate = "Governorate is required";
-        if (selectedGovernorate && !selectedCity)
-          newErrors.city = "City is required";
-        if (!formData.address_details)
-          newErrors.address_details = "Address details are required";
+        // Description validation
+        if (!formData.about_ar || formData.about_ar.length < 50) {
+          newErrors.about_ar = "Description in Arabic must be at least 50 characters";
+        }
+        if (!formData.about_en || formData.about_en.length < 50) {
+          newErrors.about_en = "Description in English must be at least 50 characters";
+        }
+        if (!formData.past_experience_ar) {
+          newErrors.past_experience_ar = "Past experience in Arabic is required";
+        }
+        if (!formData.past_experience_en) {
+          newErrors.past_experience_en = "Past experience in English is required";
+        }
         break;
 
       case 4:
-        if (!formData.images || formData.images.length === 0)
-          newErrors.images = "At least one image is required";
-
-        const validLinks = formData.social_links.filter(
-          (link) => link.url.trim() !== ""
-        );
-        if (validLinks.length < 3) {
-          newErrors.social_links = "At least 3 social links are required";
+        // Contact & Location validation
+        if (!formData.servicePhone) {
+          newErrors.servicePhone = "Phone number is required";
         }
+        if (!formData.serviceEmail) {
+          newErrors.serviceEmail = "Email is required";
+        } else if (!/^\S+@\S+\.\S+$/.test(formData.serviceEmail)) {
+          newErrors.serviceEmail = "Invalid email format";
+        }
+        if (!formData.country) {
+          newErrors.country = "Country is required";
+        }
+        if (!formData.governorate) {
+          newErrors.governorate = "Governorate is required";
+        }
+        if (!formData.city) {
+          newErrors.city = "City is required";
+        }
+        if (!formData.address_details) {
+          newErrors.address_details = "Address details are required";
+        }
+        if (
+          formData.address_link &&
+          !/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/.test(
+            formData.address_link
+          )
+        ) {
+          newErrors.address_link = "Invalid URL format";
+        }
+        break;
 
+      case 5:
+        // Media & Files validation
+        if (!formData.images || formData.images.length === 0) {
+          newErrors.profileImage = "Profile image is required";
+        }
         formData.social_links.forEach((link, index) => {
-          if (link.url.trim() !== "" && !isValidUrl(link.url)) {
-            newErrors[`social_link_${index}`] = "Invalid URL format";
+          if (link.url && !/^https?:\/\//.test(link.url)) {
+            newErrors[`social_links_${index}`] = "Invalid URL format";
           }
         });
         break;
 
-      case 5:
-        if (!formData.service_type)
-          newErrors.service_type = "Service type is required";
-        const serviceDetailKey = serviceDetailKeyMap[formData.service_type];
-        if (serviceDetailKey) {
-          const details = formData.service_details[serviceDetailKey] || {};
-          if (
-            formData.service_type === "horse_stable" &&
-            !details.stableDescription
-          ) {
-            newErrors[`${serviceDetailKey}.stableDescription`] =
-              "Stable description is required";
-          }
-          if (formData.service_type === "hoof_trimmer") {
-            if (!details.specialization) {
-              newErrors[`${serviceDetailKey}.specialization`] =
-                "Specialization is required";
-            }
-            if (!details.methodsAndTools) {
-              newErrors[`${serviceDetailKey}.methodsAndTools`] =
-                "Methods and tools are required";
-            }
-          }
-          // Add validation for other service types as needed
-        }
-        break;
-
       case 6:
-        if (!formData.price || isNaN(Number(formData.price)))
-          newErrors.price = "Valid price is required";
-        if (!formData.priceUnit) newErrors.priceUnit = "Price unit is required";
+        // Service Type validation
+        if (!formData.service_type) {
+          newErrors.service_type = "Service type is required";
+        }
         break;
 
       case 7:
-        if (!formData.name_ar)
-          newErrors.name_ar = "Service name in Arabic is required";
-        if (!formData.name_en)
-          newErrors.name_en = "Service name in English is required";
-        if (!formData.years_of_experience)
-          newErrors.years_of_experience = "Years of experience is required";
-        if (!formData.about_ar || formData.about_ar.length < 50)
-          newErrors.about_ar =
-            "Description in Arabic must be at least 50 characters";
-        if (!formData.about_en || formData.about_en.length < 50)
-          newErrors.about_en =
-            "Description in English must be at least 50 characters";
-        if (!formData.past_experience_ar)
-          newErrors.past_experience_ar =
-            "Past experience in Arabic is required";
-        if (!formData.past_experience_en)
-          newErrors.past_experience_en =
-            "Past experience in English is required";
-        if (!formData.servicePhone)
-          newErrors.servicePhone = "Service phone number is required";
-        if (!formData.serviceEmail)
-          newErrors.serviceEmail = "Service email is required";
-        if (!formData.country) newErrors.country = "Country is required";
-        if (!formData.governorate)
-          newErrors.governorate = "Governorate is required";
-        if (!formData.city) newErrors.city = "City is required";
-        if (!formData.images || formData.images.length === 0)
-          newErrors.images = "At least one image is required";
-        if (!formData.service_type)
-          newErrors.service_type = "Service type is required";
-        if (!formData.price || isNaN(Number(formData.price)))
-          newErrors.price = "Valid price is required";
-        if (!formData.priceUnit) newErrors.priceUnit = "Price unit is required";
-        const reviewServiceDetailKey =
-          serviceDetailKeyMap[formData.service_type];
-        if (reviewServiceDetailKey) {
-          const details =
-            formData.service_details[reviewServiceDetailKey] || {};
-          if (
-            formData.service_type === "horse_stable" &&
-            !details.stableDescription
-          ) {
-            newErrors[`${reviewServiceDetailKey}.stableDescription`] =
-              "Stable description is required";
-          }
-          if (formData.service_type === "hoof_trimmer") {
-            if (!details.specialization) {
-              newErrors[`${reviewServiceDetailKey}.specialization`] =
-                "Specialization is required";
-            }
-            if (!details.methodsAndTools) {
-              newErrors[`${reviewServiceDetailKey}.methodsAndTools`] =
-                "Methods and tools are required";
-            }
-          }
-          // Add validation for other service types as needed
+        // Pricing validation
+        if (!formData.price) {
+          newErrors.price = "Price is required";
+        } else if (isNaN(formData.price) || Number(formData.price) <= 0) {
+          newErrors.price = "Price must be a positive number";
         }
+        if (!formData.priceUnit) {
+          newErrors.priceUnit = "Price unit is required";
+        }
+        break;
+
+      case 8:
+        // Review step - no validation needed
+        break;
+
+      default:
         break;
     }
 
@@ -650,6 +620,22 @@ const ServiceFormWizard = ({userId}) => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Set serviceManagementType based on userType
+  useEffect(() => {
+    if (userType) {
+      const serviceManagementType = userType === 'stable_owner' ? 'fulltime' : 'freelancer';
+      setFormData(prev => ({
+        ...prev,
+        serviceManagementType
+      }));
+      
+      // Skip the first step if we're auto-setting the service management type
+      if (currentStep === 1) {
+        setCurrentStep(2);
+      }
+    }
+  }, [userType, currentStep]);
 
   const prepareSubmitData = () => {
     const imagesWithKeys = formData.images.map((file, index) => {
@@ -686,7 +672,18 @@ const ServiceFormWizard = ({userId}) => {
       images: imagesWithKeys.map((item) => item.file),
       service_details: formData.service_details,
       userId: userId, // Include userId
+      serviceManagementType: formData.serviceManagementType,
     };
+    
+    // Add stableRef if user is stable_owner and serviceManagementType is fulltime
+    if (userType === 'stable_owner' && formData.serviceManagementType === 'fulltime' && userStable) {
+      submitData.stableRef = userStable;
+    }
+    
+    // For provider type, ensure no stableRef and empty associatedStables
+    if (userType === 'provider') {
+      submitData.associatedStables = [];
+    }
 
     return submitData;
   };
@@ -744,6 +741,60 @@ const ServiceFormWizard = ({userId}) => {
     }
   };
 
+  const renderServiceManagementTypeStep = () => {
+    // If userType is set, we should skip this step, but in case it's shown
+    // we'll disable the options and show a message
+    if (userType) {
+      const managementType = userType === 'stable_owner' ? 'fulltime' : 'freelancer';
+      const typeLabel = userType === 'stable_owner' ? 'Full-time (Stable-Managed)' : 'Freelancer';
+      
+      return (
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold">Service Management Type</h3>
+          <div className="p-4 rounded-lg border border-primary bg-primary/5">
+            <p className="text-center">Based on your account type, your service will be managed as: <strong>{typeLabel}</strong></p>
+          </div>
+        </div>
+      );
+    }
+    
+    // Original implementation for users without a specific type
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold">Select Service Management Type</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+          <div
+            onClick={() => handleChange({ target: { name: "serviceManagementType", value: "fulltime" } })}
+            className={`cursor-pointer p-6 rounded-lg border transition-all ${formData.serviceManagementType === "fulltime" ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary"} hover:shadow-lg`}
+          >
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="text-3xl">🏢</div>
+              <div>
+                <h3 className="font-semibold">Full-time (Stable-Managed)</h3>
+                <p className="text-sm text-muted-foreground">Services managed by a stable with full-time staff</p>
+              </div>
+            </div>
+          </div>
+          <div
+            onClick={() => handleChange({ target: { name: "serviceManagementType", value: "freelancer" } })}
+            className={`cursor-pointer p-6 rounded-lg border transition-all ${formData.serviceManagementType === "freelancer" ? "border-primary bg-primary/5 shadow-md" : "border-border hover:border-primary"} hover:shadow-lg`}
+          >
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="text-3xl">👤</div>
+              <div>
+                <h3 className="font-semibold">Freelancer</h3>
+                <p className="text-sm text-muted-foreground">Independent service providers working on their own</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {errors.serviceManagementType && (
+          <p className="text-red-500 text-sm mt-1">{errors.serviceManagementType}</p>
+        )}
+      </div>
+    );
+  };
+
   const renderServiceTypeStep = () => (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Select Service Type</h3>
@@ -788,16 +839,19 @@ const ServiceFormWizard = ({userId}) => {
   );
 
   const renderContent = () => {
-    if (currentStep === 5) {
+    if (currentStep === 1) {
+      return renderServiceManagementTypeStep();
+    }
+    if (currentStep === 6) {
       return renderServiceTypeStep();
     }
-    if (currentStep === 7) {
+    if (currentStep === 8) {
       return renderReviewStep();
     }
     return (
       <FormStepContent
         key={`step-${currentStep}`}
-        step={currentStep}
+        step={currentStep - 1} // Adjust step number for FormStepContent
         animateDirection={animateDirection}
         formData={formData}
         setFormData={setFormData}

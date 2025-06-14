@@ -4,12 +4,6 @@ import { motion } from "framer-motion";
 export const ServiceTypeSelector = ({ selectedType, onSelect }) => {
   const serviceTypes = [
     {
-      id: "horse_stable",
-      name: "Horse Stable", 
-      description: "Manage and run horse stables",
-      icon: "🏢"
-    },
-    {
       id: "veterinary",
       name: "Veterinary Services",
       description: "Medical care for horses",

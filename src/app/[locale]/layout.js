@@ -56,6 +56,7 @@ export default async function RootLayout({ children, params }) {
 		"addBook",
 		"addCourse",
 		"addProduct",
+		"addStable"
 	]);
 
 	return (

@@ -28,15 +28,22 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const FormStepContent = ({
-  formData,
-  handleChange,
-  errors,
   step,
   animateDirection,
-  handleNestedChange,
-  handleNestedArrayChange,
-  addNestedArrayItem,
-  removeNestedArrayItem,
+  formData,
+  setFormData,
+  errors,
+  setErrors,
+  showTips,
+  toggleTip,
+  handleChange,
+  handleFileChange,
+  imagePreview,
+  setImagePreview,
+  fileInputRef,
+  handleLinkChange,
+  addLink,
+  removeLink,
   selectedCountry,
   selectedGovernorate,
   selectedCity,
@@ -46,840 +53,634 @@ const FormStepContent = ({
   handleCountryChange,
   handleGovernorateChange,
   handleCityChange,
-  handleFileChange,
-  imagePreview,
-  setImagePreview,
-  fileInputRef,
-  handleLinkChange,
-  addLink,
-  removeLink,
+  isRTL,
+  handleNestedChange,
+  handleNestedArrayChange,
+  addNestedArrayItem,
+  removeNestedArrayItem,
+  getServiceTypeLabel,
+  getPriceUnitLabel,
   additionalImagePreviews,
   removeProfileImage,
   removeAdditionalImage,
 }) => {
-  const variants = {
-    enter: (direction) => ({
-      x: direction === "next" ? 1000 : -1000,
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction) => ({
-      zIndex: 0,
-      x: direction === "next" ? -1000 : 1000,
-      opacity: 0,
-    }),
-  };
-
-  const getLinkIcon = (linkType) => {
-    switch (linkType) {
-      case "facebook":
-        return <Facebook className="h-5 w-5 text-blue-600" />;
-      case "youtube":
-        return <Youtube className="h-5 w-5 text-red-600" />;
-      case "linkedin":
-        return <Linkedin className="h-5 w-5 text-blue-700" />;
-      case "x":
-        return <Twitter className="h-5 w-5 text-black" />;
-      case "instagram":
-        return <Instagram className="h-5 w-5 text-pink-600" />;
-      case "website":
-      default:
-        return <Globe className="h-5 w-5 text-gray-600" />;
-    }
-  };
-
-  const renderMediaFields = () => {
-    const linkTypes = [
-      {
-        value: "website",
-        label: "Website",
-        icon: <Globe className="h-4 w-4" />,
-      },
-      {
-        value: "facebook",
-        label: "Facebook",
-        icon: <Facebook className="h-4 w-4" />,
-      },
-      {
-        value: "youtube",
-        label: "YouTube",
-        icon: <Youtube className="h-4 w-4" />,
-      },
-      {
-        value: "linkedin",
-        label: "LinkedIn",
-        icon: <Linkedin className="h-4 w-4" />,
-      },
-      {
-        value: "x",
-        label: "X (Twitter)",
-        icon: <Twitter className="h-4 w-4" />,
-      },
-      {
-        value: "instagram",
-        label: "Instagram",
-        icon: <Instagram className="h-4 w-4" />,
-      },
-      {
-        value: "pinterest",
-        label: "Pinterest",
-        icon: <PinIcon className="h-4 w-4" />,
-      },
-      {
-        value: "tiktok",
-        label: "TikTok",
-        icon: <Plus className="h-4 w-4 rotate-45" />,
-      },
-    ];
-
-    return (
-      <motion.div
-        key={step}
-        custom={animateDirection}
-        variants={variants}
-        initial="enter"
-        animate="center"
-        exit="exit"
-        transition={{
-          x: { type: "spring", stiffness: 300, damping: 30 },
-          opacity: { duration: 0.2 },
-        }}
-        className="grid gap-8"
-      >
-        <div className="grid gap-4">
-          <Label htmlFor="profile_image" className="text-lg font-medium">
-            Profile Image
-          </Label>
-          <div className="flex flex-col items-center gap-4">
-            <Input
-              type="file"
-              id="profile_image"
-              name="profile_image"
-              onChange={handleFileChange}
-              accept="image/*"
-              ref={fileInputRef}
-              className="hidden"
-            />
-
-            {imagePreview ? (
-              <div className="relative w-40 h-40 rounded-lg overflow-hidden border-4 border-primary/10">
-                <Image
-                  fill
-                  src={imagePreview}
-                  alt="Profile Preview"
-                  className="object-cover w-full h-full"
-                />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/50">
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-white hover:bg-white/90"
-                      onClick={() => fileInputRef?.current?.click()}
-                    >
-                      <Upload className="h-4 w-4 mr-1" />
-                      Change
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        if (removeProfileImage) removeProfileImage();
-                      }}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div
-                onClick={() => fileInputRef?.current?.click()}
-                className="w-40 h-40 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-primary/70 transition-colors bg-gray-50"
-              >
-                <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-500">Click to upload</span>
-                <span className="text-xs text-gray-400 mt-1">
-                  JPG, PNG, GIF
-                </span>
-              </div>
-            )}
-          </div>
-          {errors.images && !imagePreview && (
-            <p className="text-destructive text-sm mt-1">
-              Profile image is required
-            </p>
-          )}
-        </div>
-
-        <div className="grid gap-4">
-          <Label htmlFor="additional-images" className="text-lg font-medium">
-            Additional Images
-          </Label>
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-4">
-              {additionalImagePreviews &&
-                additionalImagePreviews.map((preview, index) => (
-                  <div
-                    key={`img-${index}`}
-                    className="relative w-24 h-24 rounded-md overflow-hidden border border-gray-200"
-                  >
-                    <Image
-                      fill
-                      src={preview}
-                      alt={`Additional image ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeAdditionalImage && removeAdditionalImage(index)
-                      }
-                      className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-sm hover:bg-gray-100"
-                    >
-                      <X className="h-4 w-4 text-gray-700" />
-                    </button>
-                  </div>
-                ))}
-
-              <label
-                htmlFor="images"
-                className="w-24 h-24 rounded-md border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-primary/70 transition-colors bg-gray-50"
-              >
-                <Plus className="h-6 w-6 text-gray-400" />
-                <span className="text-xs text-gray-500 mt-1">Add Image</span>
-              </label>
-
-              <Input
-                type="file"
-                id="images"
-                name="images"
-                onChange={handleFileChange}
-                accept="image/*"
-                multiple
-                className="hidden"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4">
-          <Label className="text-lg font-medium">Social Links</Label>
-          <div className="space-y-3">
-            {formData.social_links &&
-              formData.social_links.map((link, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div className="w-1/3">
-                    <Select
-                      value={link.linkType || ""}
-                      onValueChange={(value) =>
-                        handleLinkChange &&
-                        handleLinkChange(index, "linkType", value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type">
-                          {link.linkType && (
-                            <div className="flex items-center gap-2">
-                              {getLinkIcon(link.linkType)}
-                              <span>
-                                {linkTypes.find(
-                                  (p) => p.value === link.linkType
-                                )?.label || "Select type"}
-                              </span>
-                            </div>
-                          )}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {linkTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <div className="flex items-center gap-2">
-                              {type.icon}
-                              <span>{type.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex-1 relative">
-                    <div className="flex-1 relative">
-                      <Input
-                        type="url"
-                        placeholder={`Enter ${
-                          linkTypes.find((p) => p.value === link.linkType)
-                            ?.label || "website"
-                        } URL`}
-                        value={link.url || ""}
-                        onChange={(e) =>
-                          handleLinkChange &&
-                          handleLinkChange(index, "url", e.target.value)
-                        }
-                        className="pl-8 placeholder:pl-6" // 32px padding, placeholder starts at 24px
-                      />
-                      <div className="absolute left-2 top-1/2 -translate-y-1/2">
-                        {getLinkIcon(link.linkType)}
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeLink && removeLink(index)}
-                    className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-              ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => addLink && addLink()}
-              className="mt-2"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Link
-            </Button>
-            {errors.social_links && (
-              <p className="text-destructive text-sm mt-2">
-                {errors.social_links}
-              </p>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
-
   const renderStepContent = () => {
+    // Step numbers are now adjusted since we added a new first step
     switch (step) {
-      case 1:
+      case 1: // Basic Info (was step 1, now step 2)
         return (
-          <motion.div
-            key={step}
-            custom={animateDirection}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className="grid gap-4"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="name_ar">اسم الخدمة (AR)</Label>
-                <Input
-                  type="text"
-                  id="name_ar"
-                  name="name_ar"
-                  value={formData.name_ar || ""}
-                  onChange={handleChange}
-                  className="mt-1"
-                />
-                {errors.name_ar && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.name_ar}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="name_en">Service Name (EN)</Label>
-                <Input
+                <label
+                  htmlFor="name_en"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Service Name (English)
+                </label>
+                <input
                   type="text"
                   id="name_en"
                   name="name_en"
-                  value={formData.name_en || ""}
+                  value={formData.name_en}
                   onChange={handleChange}
-                  className="mt-1"
+                  className={`w-full p-2 border rounded-md ${errors.name_en ? "border-red-500" : "border-gray-300"}`}
+                  placeholder="Enter service name in English"
                 />
                 {errors.name_en && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.name_en}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.name_en}</p>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="name_ar"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Service Name (Arabic)
+                </label>
+                <input
+                  type="text"
+                  id="name_ar"
+                  name="name_ar"
+                  value={formData.name_ar}
+                  onChange={handleChange}
+                  className={`w-full p-2 border rounded-md ${errors.name_ar ? "border-red-500" : "border-gray-300"}`}
+                  placeholder="أدخل اسم الخدمة بالعربية"
+                  dir="rtl"
+                />
+                {errors.name_ar && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name_ar}</p>
                 )}
               </div>
             </div>
+
             <div>
-              <Label htmlFor="years_of_experience">Years of Experience</Label>
-              <Input
+              <label
+                htmlFor="years_of_experience"
+                className="block text-sm font-medium mb-1"
+              >
+                Years of Experience
+              </label>
+              <input
                 type="number"
                 id="years_of_experience"
                 name="years_of_experience"
-                value={formData.years_of_experience || ""}
+                value={formData.years_of_experience}
                 onChange={handleChange}
-                className="mt-1"
+                className={`w-full p-2 border rounded-md ${errors.years_of_experience ? "border-red-500" : "border-gray-300"}`}
+                placeholder="Enter years of experience"
+                min="0"
               />
               {errors.years_of_experience && (
-                <p className="text-destructive text-sm mt-1">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.years_of_experience}
                 </p>
               )}
             </div>
-          </motion.div>
+          </div>
         );
 
-      case 2:
+      case 2: // Description (was step 2, now step 3)
         return (
-          <motion.div
-            key={step}
-            custom={animateDirection}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className="grid gap-4"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="about_ar">عن الخدمة (AR)</Label>
-                <Textarea
-                  id="about_ar"
-                  name="about_ar"
-                  value={formData.about_ar || ""}
-                  onChange={handleChange}
-                  className="mt-1"
-                />
-                {errors.about_ar && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.about_ar}
-                  </p>
-                )}
+          <div className="space-y-6">
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label
+                  htmlFor="about_en"
+                  className="block text-sm font-medium"
+                >
+                  Description (English)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => toggleTip("about_en")}
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                >
+                  {showTips.about_en ? "Hide Tips" : "Show Tips"}
+                </button>
               </div>
-              <div>
-                <Label htmlFor="about_en">About Service (EN)</Label>
-                <Textarea
-                  id="about_en"
-                  name="about_en"
-                  value={formData.about_en || ""}
-                  onChange={handleChange}
-                  className="mt-1"
-                />
-                {errors.about_en && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.about_en}
+              {showTips.about_en && (
+                <div className="bg-blue-50 p-3 rounded-md mb-2 text-sm">
+                  <p>
+                    Provide a detailed description of your service in English.
+                    Include what makes your service unique, your approach, and
+                    what clients can expect.
                   </p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="past_experience_ar">الخبرة السابقة (AR)</Label>
-                <Textarea
-                  id="past_experience_ar"
-                  name="past_experience_ar"
-                  value={formData.past_experience_ar || ""}
-                  onChange={handleChange}
-                  className="mt-1"
-                />
-                {errors.past_experience_ar && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.past_experience_ar}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="past_experience_en">Past Experience (EN)</Label>
-                <Textarea
-                  id="past_experience_en"
-                  name="past_experience_en"
-                  value={formData.past_experience_en || ""}
-                  onChange={handleChange}
-                  className="mt-1"
-                />
-                {errors.past_experience_en && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.past_experience_en}
-                  </p>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        );
-
-      case 3:
-        return (
-          <motion.div
-            key={step}
-            custom={animateDirection}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className="space-y-6"
-          >
-            <div className="grid gap-4">
-              <Label htmlFor="serviceEmail">Service Email</Label>
-              <Input
-                type="email"
-                id="serviceEmail"
-                name="serviceEmail"
-                value={formData.serviceEmail || ""}
+                </div>
+              )}
+              <textarea
+                id="about_en"
+                name="about_en"
+                value={formData.about_en}
                 onChange={handleChange}
-              />
-              {errors.serviceEmail && (
-                <p className="text-destructive text-sm">
-                  {errors.serviceEmail}
+                rows="4"
+                className={`w-full p-2 border rounded-md ${errors.about_en ? "border-red-500" : "border-gray-300"}`}
+                placeholder="Describe your service in detail (minimum 50 characters)"
+              ></textarea>
+              {errors.about_en && (
+                <p className="text-red-500 text-sm mt-1">{errors.about_en}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                {formData.about_en.length}/500 characters
+              </p>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label
+                  htmlFor="about_ar"
+                  className="block text-sm font-medium"
+                >
+                  Description (Arabic)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => toggleTip("about_ar")}
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                >
+                  {showTips.about_ar ? "Hide Tips" : "Show Tips"}
+                </button>
+              </div>
+              {showTips.about_ar && (
+                <div className="bg-blue-50 p-3 rounded-md mb-2 text-sm">
+                  <p dir="rtl">
+                    قدم وصفًا مفصلاً لخدمتك باللغة العربية. اشرح ما يجعل خدمتك
+                    فريدة من نوعها، ونهجك، وما يمكن للعملاء توقعه.
+                  </p>
+                </div>
+              )}
+              <textarea
+                id="about_ar"
+                name="about_ar"
+                value={formData.about_ar}
+                onChange={handleChange}
+                rows="4"
+                className={`w-full p-2 border rounded-md ${errors.about_ar ? "border-red-500" : "border-gray-300"}`}
+                placeholder="صف خدمتك بالتفصيل (الحد الأدنى 50 حرفًا)"
+                dir="rtl"
+              ></textarea>
+              {errors.about_ar && (
+                <p className="text-red-500 text-sm mt-1">{errors.about_ar}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                {formData.about_ar.length}/500 characters
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="past_experience_en"
+                className="block text-sm font-medium mb-1"
+              >
+                Past Experience (English)
+              </label>
+              <textarea
+                id="past_experience_en"
+                name="past_experience_en"
+                value={formData.past_experience_en}
+                onChange={handleChange}
+                rows="3"
+                className={`w-full p-2 border rounded-md ${errors.past_experience_en ? "border-red-500" : "border-gray-300"}`}
+                placeholder="Describe your past experience and notable achievements"
+              ></textarea>
+              {errors.past_experience_en && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.past_experience_en}
                 </p>
               )}
             </div>
 
-            <div className="grid gap-4">
-              <Label htmlFor="servicePhone">Service Phone</Label>
-              <Input
-                type="tel"
-                id="servicePhone"
-                name="servicePhone"
-                value={formData.servicePhone || ""}
+            <div>
+              <label
+                htmlFor="past_experience_ar"
+                className="block text-sm font-medium mb-1"
+              >
+                Past Experience (Arabic)
+              </label>
+              <textarea
+                id="past_experience_ar"
+                name="past_experience_ar"
+                value={formData.past_experience_ar}
                 onChange={handleChange}
-              />
-              {errors.servicePhone && (
-                <p className="text-destructive text-sm">
-                  {errors.servicePhone}
+                rows="3"
+                className={`w-full p-2 border rounded-md ${errors.past_experience_ar ? "border-red-500" : "border-gray-300"}`}
+                placeholder="صف خبرتك السابقة وإنجازاتك البارزة"
+                dir="rtl"
+              ></textarea>
+              {errors.past_experience_ar && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.past_experience_ar}
                 </p>
               )}
             </div>
+          </div>
+        );
 
-            <div className="grid gap-4">
-              <Label htmlFor="country">Country</Label>
-              <Select
-                value={selectedCountry}
-                onValueChange={handleCountryChange}
-              >
-                <SelectTrigger id="country">
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries?.map((country) => (
-                    <SelectItem key={country._id} value={country._id}>
-                      {country.name_en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.country && (
-                <p className="text-destructive text-sm">{errors.country}</p>
-              )}
+      case 3: // Contact & Location (was step 3, now step 4)
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  htmlFor="servicePhone"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="servicePhone"
+                  name="servicePhone"
+                  value={formData.servicePhone}
+                  onChange={handleChange}
+                  className={`w-full p-2 border rounded-md ${errors.servicePhone ? "border-red-500" : "border-gray-300"}`}
+                  placeholder="Enter phone number"
+                />
+                {errors.servicePhone && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.servicePhone}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="serviceEmail"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="serviceEmail"
+                  name="serviceEmail"
+                  value={formData.serviceEmail}
+                  onChange={handleChange}
+                  className={`w-full p-2 border rounded-md ${errors.serviceEmail ? "border-red-500" : "border-gray-300"}`}
+                  placeholder="Enter email address"
+                />
+                {errors.serviceEmail && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.serviceEmail}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="grid gap-4">
-              <Label htmlFor="governorate">Governorate</Label>
-              <Select
-                value={selectedGovernorate}
-                onValueChange={handleGovernorateChange}
-                disabled={!selectedCountry || !governorates?.length}
-              >
-                <SelectTrigger id="governorate">
-                  <SelectValue placeholder="Select governorate" />
-                </SelectTrigger>
-                <SelectContent>
-                  {governorates?.map((governorate) => (
-                    <SelectItem key={governorate._id} value={governorate._id}>
-                      {governorate.name_en}
-                    </SelectItem>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label
+                  htmlFor="country"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Country
+                </label>
+                <select
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleCountryChange}
+                  className={`w-full p-2 border rounded-md ${errors.country ? "border-red-500" : "border-gray-300"}`}
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((country) => (
+                    <option key={country._id} value={country._id}>
+                      {isRTL ? country.name_ar : country.name_en}
+                    </option>
                   ))}
-                </SelectContent>
-              </Select>
-              {errors.governorate && (
-                <p className="text-destructive text-sm">{errors.governorate}</p>
-              )}
+                </select>
+                {errors.country && (
+                  <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="governorate"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Governorate
+                </label>
+                <select
+                  id="governorate"
+                  name="governorate"
+                  value={formData.governorate}
+                  onChange={handleGovernorateChange}
+                  className={`w-full p-2 border rounded-md ${errors.governorate ? "border-red-500" : "border-gray-300"}`}
+                  disabled={!selectedCountry}
+                >
+                  <option value="">Select Governorate</option>
+                  {governorates.map((governorate) => (
+                    <option key={governorate._id} value={governorate._id}>
+                      {isRTL ? governorate.name_ar : governorate.name_en}
+                    </option>
+                  ))}
+                </select>
+                {errors.governorate && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.governorate}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="city"
+                  className="block text-sm font-medium mb-1"
+                >
+                  City
+                </label>
+                <select
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleCityChange}
+                  className={`w-full p-2 border rounded-md ${errors.city ? "border-red-500" : "border-gray-300"}`}
+                  disabled={!selectedGovernorate}
+                >
+                  <option value="">Select City</option>
+                  {cities.map((city) => (
+                    <option key={city._id} value={city._id}>
+                      {isRTL ? city.name_ar : city.name_en}
+                    </option>
+                  ))}
+                </select>
+                {errors.city && (
+                  <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+                )}
+              </div>
             </div>
 
-            <div className="grid gap-4">
-              <Label htmlFor="city">City</Label>
-              <Select
-                value={selectedCity}
-                onValueChange={handleCityChange}
-                disabled={!selectedGovernorate || !cities?.length}
+            <div>
+              <label
+                htmlFor="address_details"
+                className="block text-sm font-medium mb-1"
               >
-                <SelectTrigger id="city">
-                  <SelectValue placeholder="Select city" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities?.map((city) => (
-                    <SelectItem key={city._id} value={city._id}>
-                      {city.name_en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.city && (
-                <p className="text-destructive text-sm">{errors.city}</p>
-              )}
-            </div>
-
-            <div className="grid gap-4">
-              <Label htmlFor="address_details">Address Details</Label>
-              <Textarea
+                Address Details
+              </label>
+              <textarea
                 id="address_details"
                 name="address_details"
-                value={formData.address_details || ""}
+                value={formData.address_details}
                 onChange={handleChange}
+                rows="2"
+                className={`w-full p-2 border rounded-md ${errors.address_details ? "border-red-500" : "border-gray-300"}`}
                 placeholder="Enter detailed address"
-              />
+              ></textarea>
               {errors.address_details && (
-                <p className="text-destructive text-sm">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.address_details}
                 </p>
               )}
             </div>
 
-            <div className="grid gap-4">
-              <Label htmlFor="address_link">Maps Link (Optional)</Label>
-              <Input
+            <div>
+              <label
+                htmlFor="address_link"
+                className="block text-sm font-medium mb-1"
+              >
+                Google Maps Link (Optional)
+              </label>
+              <input
                 type="url"
                 id="address_link"
                 name="address_link"
-                value={formData.address_link || ""}
+                value={formData.address_link}
                 onChange={handleChange}
-                placeholder="https://maps.google.com/..."
+                className={`w-full p-2 border rounded-md ${errors.address_link ? "border-red-500" : "border-gray-300"}`}
+                placeholder="Enter Google Maps link"
               />
               {errors.address_link && (
-                <p className="text-destructive text-sm">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.address_link}
                 </p>
               )}
             </div>
-          </motion.div>
+          </div>
         );
 
-      case 4:
-        return renderMediaFields();
-
-      case 5:
+      case 4: // Media & Files (was step 4, now step 5)
         return (
-          <motion.div
-            key={step}
-            custom={animateDirection}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className="grid gap-4"
-          >
+          <div className="space-y-6">
             <div>
-              <Label htmlFor="service_type">Service Type</Label>
-              <Select
-                value={formData.service_type || ""}
-                onValueChange={(value) => {
-                  handleChange({
-                    target: {
-                      name: "service_type",
-                      value,
-                      addEventListener: function () {},
-                      dispatchEvent: function () {
-                        return true;
-                      },
-                      removeEventListener: function () {},
-                    },
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a service type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="horse_stable">Horse Stable</SelectItem>
-                  <SelectItem value="veterinary">
-                    Veterinary Services
-                  </SelectItem>
-                  <SelectItem value="competitions">
-                    Horse Competitions
-                  </SelectItem>
-                  <SelectItem value="housing">Horse Housing</SelectItem>
-                  <SelectItem value="horse_trainer">Horse Trainer</SelectItem>
-                  <SelectItem value="hoof_trimmer">Hoof Trimmer</SelectItem>
-                  <SelectItem value="horse_grooming">Horse Grooming</SelectItem>
-                  <SelectItem value="event_judging">Event Judging</SelectItem>
-                  <SelectItem value="marketing_promotion">
-                    Marketing & Promotion
-                  </SelectItem>
-                  <SelectItem value="event_commentary">
-                    Event Commentary
-                  </SelectItem>
-                  <SelectItem value="consulting_services">
-                    Consulting Services
-                  </SelectItem>
-                  <SelectItem value="photography_services">
-                    Photography Services
-                  </SelectItem>
-                  <SelectItem value="horse_transport">
-                    Horse Transport
-                  </SelectItem>
-                  <SelectItem value="contractors">Contractors</SelectItem>
-                  <SelectItem value="horse_catering">Horse Catering</SelectItem>
-                  <SelectItem value="trip_coordinator">
-                    Trip Coordinator
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.service_type && (
-                <p className="text-destructive text-sm mt-1">
-                  {errors.service_type}
+              <label className="block text-sm font-medium mb-1">
+                Profile Image
+              </label>
+              <div className="flex items-center space-x-4">
+                <div
+                  className={`w-32 h-32 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer ${errors.profileImage ? "border-red-500" : "border-gray-300"}`}
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  {imagePreview ? (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={imagePreview}
+                        alt="Profile Preview"
+                        className="w-full h-full object-cover rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeProfileImage();
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500 text-sm text-center">
+                      Click to upload
+                      <br />
+                      profile image
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => handleFileChange(e, "profile")}
+                  className="hidden"
+                  accept="image/*"
+                />
+                <div className="text-sm text-gray-500">
+                  <p>Upload a clear, professional image</p>
+                  <p>Maximum size: 5MB</p>
+                  <p>Formats: JPG, PNG</p>
+                </div>
+              </div>
+              {errors.profileImage && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.profileImage}
                 </p>
               )}
             </div>
-          </motion.div>
-        );
 
-      case 6:
-        return (
-          <motion.div
-            key={step}
-            custom={animateDirection}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className="space-y-4"
-          >
             <div>
-              <Label htmlFor="price">Price</Label>
-              <Input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price || ""}
-                onChange={handleChange}
-                className="mt-1"
+              <label className="block text-sm font-medium mb-1">
+                Additional Images (Optional)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {additionalImagePreviews.map((preview, index) => (
+                  <div
+                    key={index}
+                    className="relative w-full h-24 border rounded-md overflow-hidden"
+                  >
+                    <img
+                      src={preview}
+                      alt={`Additional ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeAdditionalImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {additionalImagePreviews.length < 5 && (
+                  <div
+                    className="w-full h-24 border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer"
+                    onClick={() =>
+                      document
+                        .getElementById("additionalImagesInput")
+                        .click()
+                    }
+                  >
+                    <span className="text-gray-500 text-sm text-center">
+                      + Add Image
+                    </span>
+                  </div>
+                )}
+              </div>
+              <input
+                type="file"
+                id="additionalImagesInput"
+                onChange={(e) => handleFileChange(e, "additional")}
+                className="hidden"
+                accept="image/*"
               />
-              {errors.price && (
-                <p className="text-destructive text-sm mt-1">{errors.price}</p>
-              )}
+              <p className="text-sm text-gray-500 mt-2">
+                You can upload up to 5 additional images
+              </p>
             </div>
+
             <div>
-              <Label htmlFor="priceUnit">Price Unit</Label>
-              <Select
-                value={formData.priceUnit || ""}
-                onValueChange={(value) => {
-                  handleChange({
-                    target: {
-                      name: "priceUnit",
-                      value,
-                      addEventListener: function () {},
-                      dispatchEvent: function () {
-                        return true;
-                      },
-                      removeEventListener: function () {},
-                    },
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select price unit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="per_half_hour">
-                    Per Half-Hour || لكل نصف ساعة
-                  </SelectItem>
-                  <SelectItem value="per_hour">Per Hour || لكل ساعة</SelectItem>
-                  <SelectItem value="per_day">Per Day || لكل يوم</SelectItem>
-                  <SelectItem value="per_project">
-                    Per Project || لكل مشروع
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.priceUnit && (
-                <p className="text-destructive text-sm mt-1">
-                  {errors.priceUnit}
-                </p>
+              <label className="block text-sm font-medium mb-2">
+                Social Media & Website Links
+              </label>
+              {formData.social_links.map((link, index) => (
+                <div key={index} className="mb-3">
+                  <div className="flex space-x-2">
+                    <select
+                      value={link.linkType}
+                      onChange={(e) =>
+                        handleLinkChange(index, "linkType", e.target.value)
+                      }
+                      className="p-2 border rounded-md w-1/3"
+                    >
+                      <option value="website">Website</option>
+                      <option value="instagram">Instagram</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="twitter">Twitter</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="youtube">YouTube</option>
+                      <option value="tiktok">TikTok</option>
+                    </select>
+                    <input
+                      type="url"
+                      value={link.url}
+                      onChange={(e) =>
+                        handleLinkChange(index, "url", e.target.value)
+                      }
+                      className={`p-2 border rounded-md flex-1 ${errors[`social_links_${index}`] ? "border-red-500" : "border-gray-300"}`}
+                      placeholder="Enter URL"
+                    />
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => removeLink(index)}
+                        className="p-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {errors[`social_links_${index}`] && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors[`social_links_${index}`]}
+                    </p>
+                  )}
+                </div>
+              ))}
+              {formData.social_links.length < 5 && (
+                <button
+                  type="button"
+                  onClick={addLink}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  + Add another link
+                </button>
               )}
             </div>
-          </motion.div>
+          </div>
         );
 
-      case 7:
+      case 5: // Pricing (was step 6, now step 7)
         return (
-          <motion.div
-            key={step}
-            custom={animateDirection}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            className="grid gap-6"
-          >
-            <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
-                <div>
-                  <h4 className="font-medium mb-2">Basic Information</h4>
-                  <p>
-                    <strong>Name (AR):</strong> {formData.name_ar}
-                  </p>
-                  <p>
-                    <strong>Name (EN):</strong> {formData.name_en}
-                  </p>
-                  <p>
-                    <strong>Years of Experience:</strong>{" "}
-                    {formData.years_of_experience}
-                  </p>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  htmlFor="price"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Price
+                </label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    className={`w-full p-2 border rounded-l-md ${errors.price ? "border-red-500" : "border-gray-300"}`}
+                    placeholder="Enter price"
+                    min="0"
+                    step="0.01"
+                  />
+                  <select
+                    name="priceUnit"
+                    value={formData.priceUnit}
+                    onChange={handleChange}
+                    className="p-2 border border-l-0 rounded-r-md bg-gray-50"
+                  >
+                    <option value="per_hour">Per Hour</option>
+                    <option value="per_day">Per Day</option>
+                    <option value="per_week">Per Week</option>
+                    <option value="per_month">Per Month</option>
+                    <option value="per_service">Per Service</option>
+                  </select>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">Contact Details</h4>
-                  <p>
-                    <strong>Phone:</strong> {formData.servicePhone}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {formData.serviceEmail}
-                  </p>
-                  <p>
-                    <strong>Address:</strong> {formData.address_details}
-                  </p>
-                </div>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <h4 className="font-medium mb-2">Service Details</h4>
-                <p>
-                  <strong>Service Type:</strong> {formData.service_type}
-                </p>
-                <p>
-                  <strong>Price:</strong> {formData.price} {formData.priceUnit}
-                </p>
+                {errors.price && (
+                  <p className="text-red-500 text-sm mt-1">{errors.price}</p>
+                )}
               </div>
             </div>
-          </motion.div>
+          </div>
         );
 
       default:
-        return null;
+        return <div>Unknown step</div>;
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full">
       {renderStepContent()}
-      {step === 5 && formData.service_type && renderServiceTypeFields()}
     </div>
   );
 };

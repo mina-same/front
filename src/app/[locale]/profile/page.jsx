@@ -13,6 +13,7 @@ import {
   BookOpen,
   LogOut,
   Briefcase,
+  Home, // Added Home icon
 } from "lucide-react";
 import { urlFor } from "@/lib/sanity";
 import Overview from "./overview";
@@ -25,11 +26,11 @@ import Services from "./Services";
 import SupplierProducts from "./SupplierProducts.jsx";
 import EducationalService from "./EducationalService.jsx";
 import Reservations from "./Reservations";
+import StableOwner from "./StableOwner"; // Added StableOwner import
 import { client } from "@/lib/sanity";
 import { LiaHorseHeadSolid } from "react-icons/lia";
 import Layout from "components/layout/Layout";
 import Image from 'next/image';
-
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -54,6 +55,7 @@ const Profile = () => {
     "services",
     "educational_service",
     "supplier_products",
+    "stable_owner", // Added stable_owner
     "signout",
   ];
 
@@ -167,19 +169,21 @@ const Profile = () => {
       case "billing":
         return <Billing />;
       case "orders":
-        return <Orders userId={userId}/>;
+        return <Orders userId={userId} />;
       case "reservations":
         return <Reservations />;
       case "favorites":
-        return <Favorites userId={userId}/>;
+        return <Favorites userId={userId} />;
       case "horses":
         return <Horses userId={userId} />;
       case "services":
-        return <Services userId={userId}/>;
+        return <Services userId={userId} />;
       case "educational_service":
         return <EducationalService userId={userId} />;
       case "supplier_products":
         return <SupplierProducts userId={userId} />;
+      case "stable_owner": // Added case for stable_owner
+        return <StableOwner userId={userId} />;
       default:
         return <Overview userData={userData} />;
     }
@@ -262,6 +266,15 @@ const Profile = () => {
           },
         ]
       : []),
+    ...(userData?.userType === "stable_owner" // Added Stable Owner tab
+      ? [
+          {
+            id: "stable_owner",
+            label: "Stable Owner",
+            icon: <Home className="w-5 h-5 opacity-60 mr-2" />,
+          },
+        ]
+      : []),
   ];
 
   const logoutLink = [
@@ -317,6 +330,8 @@ const Profile = () => {
                               ? "bg-green-100 text-green-700 hover:bg-green-200"
                               : userData.userType === "suppliers"
                               ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                              : userData.userType === "stable_owner" // Added stable_owner styling
+                              ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
                               : "bg-orange-100 text-orange-700 hover:bg-orange-200"
                           }`}
                         >
