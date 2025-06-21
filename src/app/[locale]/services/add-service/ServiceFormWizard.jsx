@@ -11,9 +11,10 @@ import {
   fetchCountries,
   fetchGovernorates,
   fetchCities,
+  processServiceTypeDetails,
 } from "@/lib/sanity";
 import { ServiceTypeSelector } from "./ServiceTypeSelector";
-import { ReviewStep } from "./ReviewStep";
+import ReviewStep from "./ReviewStep";
 import { SuccessCelebration } from "./SuccessCelebration";
 
 const FORM_STEPS = [
@@ -354,38 +355,50 @@ const ServiceFormWizard = ({userId, userType, userStable}) => {
   };
 
   const addLink = () => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      social_links: [...prev.social_links, { url: "", linkType: "website" }],
+      social_links: [
+        ...(Array.isArray(prev.social_links) ? prev.social_links : []),
+        { url: "", linkType: "website" }
+      ]
     }));
   };
 
   const removeLink = (index) => {
-    if (formData.social_links.length > 3) {
-      const newLinks = formData.social_links.filter((_, i) => i !== index);
-      setFormData((prev) => ({ ...prev, social_links: newLinks }));
-    } else {
-      toast.error("You must have at least 3 social links");
-    }
+    setFormData(prev => ({
+      ...prev,
+      social_links: (Array.isArray(prev.social_links) ? prev.social_links : []).filter((_, i) => i !== index)
+    }));
   };
+
+  // Utility to set deep value by dot notation
+  function setDeep(obj, path, value) {
+    const keys = path.split('.');
+    let temp = obj;
+    for (let i = 0; i < keys.length - 1; i++) {
+      if (!temp[keys[i]]) temp[keys[i]] = {};
+      temp = temp[keys[i]];
+    }
+    temp[keys[keys.length - 1]] = value;
+  }
 
   const handleNestedChange = (category, field, value) => {
     setFormData((prev) => {
       const updatedServiceDetails = { ...prev.service_details };
-
       if (!updatedServiceDetails[category]) {
         updatedServiceDetails[category] = {};
       }
-
       if (field === "") {
         updatedServiceDetails[category] = value;
+      } else if (category.includes('.')) {
+        // Deep update for dot notation
+        setDeep(updatedServiceDetails, `${category}.${field}`, value);
       } else {
         updatedServiceDetails[category] = {
           ...updatedServiceDetails[category],
           [field]: value,
         };
       }
-
       return {
         ...prev,
         service_details: updatedServiceDetails,
@@ -668,20 +681,21 @@ const ServiceFormWizard = ({userId, userType, userStable}) => {
         })),
       price: formData.price ? parseFloat(formData.price) : undefined,
       priceUnit: formData.priceUnit,
-      service_type: formData.service_type,
+      serviceType: formData.service_type,
       images: imagesWithKeys.map((item) => item.file),
-      service_details: formData.service_details,
-      userId: userId, // Include userId
-      serviceManagementType: formData.serviceManagementType,
+      service_details: processServiceTypeDetails(formData.service_details),
+      userId: userId,
     };
-    
-    // Add stableRef if user is stable_owner and serviceManagementType is fulltime
-    if (userType === 'stable_owner' && formData.serviceManagementType === 'fulltime' && userStable) {
-      submitData.stableRef = userStable;
-    }
-    
-    // For provider type, ensure no stableRef and empty associatedStables
-    if (userType === 'provider') {
+
+    // Set serviceManagementType and related fields based on userType
+    if (userType === 'stable_owner') {
+      submitData.serviceManagementType = 'fulltime';
+      if (userStable) {
+        submitData.stableRef = { _type: 'reference', _ref: userStable };
+      }
+    } else if (userType === 'provider') {
+      submitData.serviceManagementType = 'freelancer';
+      submitData.userRef = { _type: 'reference', _ref: userId };
       submitData.associatedStables = [];
     }
 
@@ -720,7 +734,7 @@ const ServiceFormWizard = ({userId, userType, userStable}) => {
 
         setTimeout(() => {
           setShowCelebration(false);
-          router.push("profile?tab=services");
+          router.replace("/profile?tab=stable_owner");
         }, 3000);
       } else {
         toast.error("Failed to add service", {
@@ -827,67 +841,54 @@ const ServiceFormWizard = ({userId, userType, userStable}) => {
   );
 
   const renderReviewStep = () => (
-    <div className="space-y-6">
-      <ReviewStep
-        formData={formData}
-        getServiceTypeLabel={getServiceTypeLabel}
-        getPriceUnitLabel={getPriceUnitLabel}
-        additionalImagePreviews={additionalImagePreviews}
-        imagePreview={imagePreview}
-      />
+    <div className="w-full">
+      <ReviewStep formData={formData} />
     </div>
   );
 
   const renderContent = () => {
+    console.log("Current step:", currentStep);
     if (currentStep === 1) {
       return renderServiceManagementTypeStep();
-    }
-    if (currentStep === 6) {
+    } else if (currentStep === 6) {
       return renderServiceTypeStep();
-    }
-    if (currentStep === 8) {
+    } else if (currentStep === 8) {
       return renderReviewStep();
+    } else {
+      return (
+        <FormStepContent
+          step={currentStep}
+          formData={formData}
+          handleChange={handleChange}
+          handleFileChange={handleFileChange}
+          handleLinkChange={handleLinkChange}
+          addLink={addLink}
+          removeLink={removeLink}
+          handleNestedChange={handleNestedChange}
+          handleNestedArrayChange={handleNestedArrayChange}
+          addNestedArrayItem={addNestedArrayItem}
+          removeNestedArrayItem={removeNestedArrayItem}
+          removeProfileImage={removeProfileImage}
+          removeAdditionalImage={removeAdditionalImage}
+          imagePreview={imagePreview}
+          additionalImagePreviews={additionalImagePreviews}
+          fileInputRef={fileInputRef}
+          additionalImagesRef={additionalImagesRef}
+          countries={countries}
+          governorates={governorates}
+          cities={cities}
+          selectedCountry={selectedCountry}
+          selectedGovernorate={selectedGovernorate}
+          selectedCity={selectedCity}
+          handleCountryChange={handleCountryChange}
+          handleGovernorateChange={handleGovernorateChange}
+          handleCityChange={handleCityChange}
+          showTips={showTips}
+          toggleTip={toggleTip}
+          errors={errors}
+        />
+      );
     }
-    return (
-      <FormStepContent
-        key={`step-${currentStep}`}
-        step={currentStep - 1} // Adjust step number for FormStepContent
-        animateDirection={animateDirection}
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        setErrors={setErrors}
-        showTips={showTips}
-        toggleTip={toggleTip}
-        handleChange={handleChange}
-        handleFileChange={handleFileChange}
-        imagePreview={imagePreview}
-        setImagePreview={setImagePreview}
-        fileInputRef={fileInputRef}
-        handleLinkChange={handleLinkChange}
-        addLink={addLink}
-        removeLink={removeLink}
-        selectedCountry={selectedCountry}
-        selectedGovernorate={selectedGovernorate}
-        selectedCity={selectedCity}
-        countries={countries}
-        governorates={governorates}
-        cities={cities}
-        handleCountryChange={handleCountryChange}
-        handleGovernorateChange={handleGovernorateChange}
-        handleCityChange={handleCityChange}
-        isRTL={false}
-        handleNestedChange={handleNestedChange}
-        handleNestedArrayChange={handleNestedArrayChange}
-        addNestedArrayItem={addNestedArrayItem}
-        removeNestedArrayItem={removeNestedArrayItem}
-        getServiceTypeLabel={getServiceTypeLabel}
-        getPriceUnitLabel={getPriceUnitLabel}
-        additionalImagePreviews={additionalImagePreviews}
-        removeProfileImage={removeProfileImage}
-        removeAdditionalImage={removeAdditionalImage}
-      />
-    );
   };
 
   return (

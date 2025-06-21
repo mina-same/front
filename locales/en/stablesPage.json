@@ -1,0 +1,36 @@
+{
+    "heroTitle": "Premium Horse",
+    "heroSubtitle": "Stables",
+    "heroDescription": "Discover exceptional equestrian facilities with world-class amenities and professional care for your horses.",
+    "explore": "Explore Stables",
+    "learnMore": "Learn More",
+    "searchPlaceholder": "Search stables by name...",
+    "results": "{{count, plural, zero {No stables available} one {1 stable found} other {{{count} premium stables found}}}",
+    "resultsDescription": "Showing the best equestrian facilities",
+    "noResults": "No stables found matching your criteria",
+    "clearFilters": "Clear all filters",
+    "errorMessage": "An error occurred while fetching stables. Please try again later.",
+    "currency": "SAR",
+    "priceOnRequest": "Price on request",
+    "viewDetails": "View Details",
+    "linkCopied": "Link copied to clipboard",
+    "more": "more",
+    "filters": {
+      "allPrices": "All Prices",
+      "lowPrice": "Under 2000 SAR",
+      "mediumPrice": "2000-3000 SAR",
+      "highPrice": "Above 3000 SAR",
+      "allCities": "All Cities"
+    },
+    "priceUnits": {
+      "per_day": "per day",
+      "per_month": "per month"
+    },
+    "stableTypes": {
+      "educational": "Educational",
+      "competition": "Competition",
+      "recreational": "Recreational",
+      "breeding": "Breeding",
+      "rehabilitation": "Rehabilitation"
+    }
+  }

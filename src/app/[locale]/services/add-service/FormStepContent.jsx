@@ -65,9 +65,39 @@ const FormStepContent = ({
   removeAdditionalImage,
 }) => {
   const renderStepContent = () => {
-    // Step numbers are now adjusted since we added a new first step
+    console.log('Current step in FormStepContent:', step);
+    console.log('Step type:', typeof step);
+    console.log('Step value:', step);
     switch (step) {
-      case 1: // Basic Info (was step 1, now step 2)
+      case 1: // Service Management
+        return (
+          <div className="space-y-6">
+            <div>
+              <label
+                htmlFor="serviceManagementType"
+                className="block text-sm font-medium mb-1"
+              >
+                Service Management Type
+              </label>
+              <select
+                id="serviceManagementType"
+                name="serviceManagementType"
+                value={formData.serviceManagementType || ""}
+                onChange={handleChange}
+                className={`w-full p-2 border rounded-md ${errors.serviceManagementType ? "border-red-500" : "border-gray-300"}`}
+              >
+                <option value="">Select Service Management Type</option>
+                <option value="individual">Individual</option>
+                <option value="company">Company</option>
+              </select>
+              {errors.serviceManagementType && (
+                <p className="text-red-500 text-sm mt-1">{errors.serviceManagementType}</p>
+              )}
+            </div>
+          </div>
+        );
+
+      case 2: // Basic Info
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -82,7 +112,7 @@ const FormStepContent = ({
                   type="text"
                   id="name_en"
                   name="name_en"
-                  value={formData.name_en}
+                  value={formData.name_en || ""}
                   onChange={handleChange}
                   className={`w-full p-2 border rounded-md ${errors.name_en ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Enter service name in English"
@@ -102,7 +132,7 @@ const FormStepContent = ({
                   type="text"
                   id="name_ar"
                   name="name_ar"
-                  value={formData.name_ar}
+                  value={formData.name_ar || ""}
                   onChange={handleChange}
                   className={`w-full p-2 border rounded-md ${errors.name_ar ? "border-red-500" : "border-gray-300"}`}
                   placeholder="أدخل اسم الخدمة بالعربية"
@@ -125,7 +155,7 @@ const FormStepContent = ({
                 type="number"
                 id="years_of_experience"
                 name="years_of_experience"
-                value={formData.years_of_experience}
+                value={formData.years_of_experience || ""}
                 onChange={handleChange}
                 className={`w-full p-2 border rounded-md ${errors.years_of_experience ? "border-red-500" : "border-gray-300"}`}
                 placeholder="Enter years of experience"
@@ -140,7 +170,7 @@ const FormStepContent = ({
           </div>
         );
 
-      case 2: // Description (was step 2, now step 3)
+      case 3: // Description
         return (
           <div className="space-y-6">
             <div>
@@ -171,7 +201,7 @@ const FormStepContent = ({
               <textarea
                 id="about_en"
                 name="about_en"
-                value={formData.about_en}
+                value={formData.about_en || ""}
                 onChange={handleChange}
                 rows="4"
                 className={`w-full p-2 border rounded-md ${errors.about_en ? "border-red-500" : "border-gray-300"}`}
@@ -181,7 +211,7 @@ const FormStepContent = ({
                 <p className="text-red-500 text-sm mt-1">{errors.about_en}</p>
               )}
               <p className="text-xs text-gray-500 mt-1">
-                {formData.about_en.length}/500 characters
+                {formData.about_en?.length}/500 characters
               </p>
             </div>
 
@@ -212,7 +242,7 @@ const FormStepContent = ({
               <textarea
                 id="about_ar"
                 name="about_ar"
-                value={formData.about_ar}
+                value={formData.about_ar || ""}
                 onChange={handleChange}
                 rows="4"
                 className={`w-full p-2 border rounded-md ${errors.about_ar ? "border-red-500" : "border-gray-300"}`}
@@ -223,7 +253,7 @@ const FormStepContent = ({
                 <p className="text-red-500 text-sm mt-1">{errors.about_ar}</p>
               )}
               <p className="text-xs text-gray-500 mt-1">
-                {formData.about_ar.length}/500 characters
+                {formData.about_ar?.length}/500 characters
               </p>
             </div>
 
@@ -237,7 +267,7 @@ const FormStepContent = ({
               <textarea
                 id="past_experience_en"
                 name="past_experience_en"
-                value={formData.past_experience_en}
+                value={formData.past_experience_en || ""}
                 onChange={handleChange}
                 rows="3"
                 className={`w-full p-2 border rounded-md ${errors.past_experience_en ? "border-red-500" : "border-gray-300"}`}
@@ -260,7 +290,7 @@ const FormStepContent = ({
               <textarea
                 id="past_experience_ar"
                 name="past_experience_ar"
-                value={formData.past_experience_ar}
+                value={formData.past_experience_ar || ""}
                 onChange={handleChange}
                 rows="3"
                 className={`w-full p-2 border rounded-md ${errors.past_experience_ar ? "border-red-500" : "border-gray-300"}`}
@@ -276,7 +306,7 @@ const FormStepContent = ({
           </div>
         );
 
-      case 3: // Contact & Location (was step 3, now step 4)
+      case 4: // Contact & Location
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -291,7 +321,7 @@ const FormStepContent = ({
                   type="tel"
                   id="servicePhone"
                   name="servicePhone"
-                  value={formData.servicePhone}
+                  value={formData.servicePhone || ""}
                   onChange={handleChange}
                   className={`w-full p-2 border rounded-md ${errors.servicePhone ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Enter phone number"
@@ -314,7 +344,7 @@ const FormStepContent = ({
                   type="email"
                   id="serviceEmail"
                   name="serviceEmail"
-                  value={formData.serviceEmail}
+                  value={formData.serviceEmail || ""}
                   onChange={handleChange}
                   className={`w-full p-2 border rounded-md ${errors.serviceEmail ? "border-red-500" : "border-gray-300"}`}
                   placeholder="Enter email address"
@@ -338,7 +368,7 @@ const FormStepContent = ({
                 <select
                   id="country"
                   name="country"
-                  value={formData.country}
+                  value={formData.country || ""}
                   onChange={handleCountryChange}
                   className={`w-full p-2 border rounded-md ${errors.country ? "border-red-500" : "border-gray-300"}`}
                 >
@@ -364,7 +394,7 @@ const FormStepContent = ({
                 <select
                   id="governorate"
                   name="governorate"
-                  value={formData.governorate}
+                  value={formData.governorate || ""}
                   onChange={handleGovernorateChange}
                   className={`w-full p-2 border rounded-md ${errors.governorate ? "border-red-500" : "border-gray-300"}`}
                   disabled={!selectedCountry}
@@ -393,7 +423,7 @@ const FormStepContent = ({
                 <select
                   id="city"
                   name="city"
-                  value={formData.city}
+                  value={formData.city || ""}
                   onChange={handleCityChange}
                   className={`w-full p-2 border rounded-md ${errors.city ? "border-red-500" : "border-gray-300"}`}
                   disabled={!selectedGovernorate}
@@ -421,7 +451,7 @@ const FormStepContent = ({
               <textarea
                 id="address_details"
                 name="address_details"
-                value={formData.address_details}
+                value={formData.address_details || ""}
                 onChange={handleChange}
                 rows="2"
                 className={`w-full p-2 border rounded-md ${errors.address_details ? "border-red-500" : "border-gray-300"}`}
@@ -445,7 +475,7 @@ const FormStepContent = ({
                 type="url"
                 id="address_link"
                 name="address_link"
-                value={formData.address_link}
+                value={formData.address_link || ""}
                 onChange={handleChange}
                 className={`w-full p-2 border rounded-md ${errors.address_link ? "border-red-500" : "border-gray-300"}`}
                 placeholder="Enter Google Maps link"
@@ -459,7 +489,7 @@ const FormStepContent = ({
           </div>
         );
 
-      case 4: // Media & Files (was step 4, now step 5)
+      case 5: // Media & Files
         return (
           <div className="space-y-6">
             <div>
@@ -572,11 +602,11 @@ const FormStepContent = ({
               <label className="block text-sm font-medium mb-2">
                 Social Media & Website Links
               </label>
-              {formData.social_links.map((link, index) => (
+              {(formData.social_links || []).map((link, index) => (
                 <div key={index} className="mb-3">
                   <div className="flex space-x-2">
                     <select
-                      value={link.linkType}
+                      value={link.linkType || ""}
                       onChange={(e) =>
                         handleLinkChange(index, "linkType", e.target.value)
                       }
@@ -592,7 +622,7 @@ const FormStepContent = ({
                     </select>
                     <input
                       type="url"
-                      value={link.url}
+                      value={link.url || ""}
                       onChange={(e) =>
                         handleLinkChange(index, "url", e.target.value)
                       }
@@ -629,7 +659,50 @@ const FormStepContent = ({
           </div>
         );
 
-      case 5: // Pricing (was step 6, now step 7)
+      case 6: // Service Type
+        return (
+          <div className="space-y-6">
+            <div>
+              <label
+                htmlFor="service_type"
+                className="block text-sm font-medium mb-1"
+              >
+                Service Type
+              </label>
+              <select
+                id="service_type"
+                name="service_type"
+                value={formData.service_type || ""}
+                onChange={handleChange}
+                className={`w-full p-2 border rounded-md ${errors.service_type ? "border-red-500" : "border-gray-300"}`}
+              >
+                <option value="">Select Service Type</option>
+                <option value="horse_stable">Horse Stable</option>
+                <option value="veterinary">Veterinary</option>
+                <option value="competitions">Competitions</option>
+                <option value="housing">Housing</option>
+                <option value="trip_coordinator">Trip Coordinator</option>
+                <option value="horse_catering">Horse Catering</option>
+                <option value="horse_transport">Horse Transport</option>
+                <option value="contractors">Contractors</option>
+                <option value="horse_trainer">Horse Trainer</option>
+                <option value="hoof_trimmer">Hoof Trimmer</option>
+                <option value="horse_grooming">Horse Grooming</option>
+                <option value="event_judging">Event Judging</option>
+                <option value="marketing_promotion">Marketing & Promotion</option>
+                <option value="event_commentary">Event Commentary</option>
+                <option value="consulting_services">Consulting Services</option>
+                <option value="photography_services">Photography Services</option>
+                <option value="suppliers">Suppliers</option>
+              </select>
+              {errors.service_type && (
+                <p className="text-red-500 text-sm mt-1">{errors.service_type}</p>
+              )}
+            </div>
+          </div>
+        );
+
+      case 7: // Pricing
         return (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -640,38 +713,53 @@ const FormStepContent = ({
                 >
                   Price
                 </label>
-                <div className="flex">
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    className={`w-full p-2 border rounded-l-md ${errors.price ? "border-red-500" : "border-gray-300"}`}
-                    placeholder="Enter price"
-                    min="0"
-                    step="0.01"
-                  />
-                  <select
-                    name="priceUnit"
-                    value={formData.priceUnit}
-                    onChange={handleChange}
-                    className="p-2 border border-l-0 rounded-r-md bg-gray-50"
-                  >
-                    <option value="per_hour">Per Hour</option>
-                    <option value="per_day">Per Day</option>
-                    <option value="per_week">Per Week</option>
-                    <option value="per_month">Per Month</option>
-                    <option value="per_service">Per Service</option>
-                  </select>
-                </div>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price || ""}
+                  onChange={handleChange}
+                  className={`w-full p-2 border rounded-md ${errors.price ? "border-red-500" : "border-gray-300"}`}
+                  placeholder="Enter price"
+                  min="0"
+                  step="0.01"
+                />
                 {errors.price && (
                   <p className="text-red-500 text-sm mt-1">{errors.price}</p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="priceUnit"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Price Unit
+                </label>
+                <select
+                  id="priceUnit"
+                  name="priceUnit"
+                  value={formData.priceUnit || ""}
+                  onChange={handleChange}
+                  className={`w-full p-2 border rounded-md ${errors.priceUnit ? "border-red-500" : "border-gray-300"}`}
+                >
+                  <option value="per_hour">Per Hour</option>
+                  <option value="per_day">Per Day</option>
+                  <option value="per_week">Per Week</option>
+                  <option value="per_month">Per Month</option>
+                  <option value="per_service">Per Service</option>
+                  <option value="fixed">Fixed Price</option>
+                </select>
+                {errors.priceUnit && (
+                  <p className="text-red-500 text-sm mt-1">{errors.priceUnit}</p>
                 )}
               </div>
             </div>
           </div>
         );
+
+      case 8: // Review & Submit
+        return <div>Review & Submit</div>;
 
       default:
         return <div>Unknown step</div>;

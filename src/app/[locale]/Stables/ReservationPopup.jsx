@@ -1,23 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar, Horse, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { client } from "@/lib/sanity";
+import { client } from "../../../../lib/sanity";
 import { v4 as uuidv4 } from "uuid";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Layout from "components/layout/Layout";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 
-const ReservationPage = () => {
+const ReservationPopup = ({ isOpen, onClose, stableId, stableName, userRef }) => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
-  const params = useParams();
-  const router = useRouter();
-  const { stableId, stableName } = params;
 
   // State management
   const [step, setStep] = useState(1); // Multi-step form
@@ -43,6 +37,8 @@ const ReservationPage = () => {
 
   // Fetch user and stable data
   useEffect(() => {
+    if (!isOpen) return;
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -112,7 +108,7 @@ const ReservationPage = () => {
     };
 
     fetchData();
-  }, [stableId]);
+  }, [isOpen, stableId]);
 
   // Calculate total price
   useEffect(() => {
@@ -204,7 +200,7 @@ const ReservationPage = () => {
       await client.create(reservation);
       setSuccess(true);
       setTimeout(() => {
-        router.push(`/stables/${stableId}`);
+        onClose();
         setStep(1);
         setReservationType("");
         setBoarding({
@@ -275,7 +271,7 @@ const ReservationPage = () => {
           className="p-4 bg-gray-100 hover:bg-gray-200 rounded-lg text-left flex items-center transition-all"
         >
           <div className="mr-3 text-primary flex items-center">
-            <Horse size={20} />
+            <Horse size={20} className="mr-1" />
             <CheckCircle size={20} />
           </div>
           <div>
@@ -759,21 +755,36 @@ const ReservationPage = () => {
     </motion.div>
   );
 
+  if (!isOpen) return null;
+
   return (
-    <Layout>
-      <div className="bg-gray-50 min-h-screen py-10" dir={isRTL ? "rtl" : "ltr"}>
-        <div className="max-w-3xl mx-auto bg-white rounded-2xl p-6 shadow-md">
-          <Link
-            href={`/stables/${stableId}`}
-            className="inline-flex items-center text-primary hover:underline mb-6"
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          className="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 relative"
+          onClick={(e) => e.stopPropagation()}
+          dir={isRTL ? "rtl" : "ltr"}
+        >
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            aria-label={t("reservation:close")}
           >
-            <X size={24} className="mr-2" />
-            {t("reservation:backToStable")}
-          </Link>
+            <X size={24} />
+          </button>
 
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-center">
-              {t("reservation:title", { stableName: decodeURIComponent(stableName) })}
+            <h1 className="text-2xl font-bold text-center">
+              {t("reservation:title", { stableName })}
             </h1>
             <div className="flex justify-between mt-2 text-sm text-gray-500">
               <span>{t("reservation:step")} {step} {t("reservation:of")} 3</span>
@@ -817,10 +828,10 @@ const ReservationPage = () => {
               {step === 3 && renderStep3()}
             </form>
           )}
-        </div>
-      </div>
-    </Layout>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
-export default ReservationPage;
+export default ReservationPopup;

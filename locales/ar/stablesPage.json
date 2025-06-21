@@ -1,0 +1,36 @@
+{
+    "heroTitle": "إسطبلات الخيول المميزة",
+    "heroSubtitle": "الفروسية",
+    "heroDescription": "اكتشف مرافق الفروسية الاستثنائية مع وسائل راحة عالمية ورعاية مهنية لخيولك.",
+    "explore": "استكشف الإسطبلات",
+    "learnMore": "تعرف على المزيد",
+    "searchPlaceholder": "ابحث عن الإسطبلات بالاسم...",
+    "results": "{count, plural, zero {لا توجد إسطبلات متاحة} one {تم العثور على إسطبل واحد} other {تم العثور على {count} إسطبلات مميزة}}",
+    "resultsDescription": "عرض أفضل مرافق الفروسية",
+    "noResults": "لم يتم العثور على إسطبلات تطابق معاييرك",
+    "clearFilters": "مسح جميع الفلاتر",
+    "errorMessage": "حدث خطأ أثناء جلب الإسطبلات. يرجى المحاولة مرة أخرى لاحقًا.",
+    "currency": "ريال سعودي",
+    "priceOnRequest": "السعر عند الطلب",
+    "viewDetails": "عرض التفاصيل",
+    "linkCopied": "تم نسخ الرابط إلى الحافظة",
+    "more": "أخرى",
+    "filters": {
+        "allPrices": "جميع الأسعار",
+        "lowPrice": "أقل من ٢٠٠٠ ريال سعودي",
+        "mediumPrice": "٢٠٠٠ - ٣٠٠٠ ريال سعودي",
+        "highPrice": "أعلى من ٣٠٠٠ ريال سعودي",
+        "allCities": "جميع المدن"
+    },
+    "priceUnits": {
+        "per_day": "يوميًا",
+        "per_month": "شهريًا"
+    },
+    "stableTypes": {
+        "educational": "تعليمي",
+        "competition": "منافسة",
+        "recreational": "ترفيهي",
+        "breeding": "تربية",
+        "rehabilitation": "إعادة تأهيل"
+    }
+}

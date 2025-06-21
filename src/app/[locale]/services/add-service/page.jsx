@@ -40,7 +40,7 @@ const ContactClient = () => {
 
         if (data.authenticated) {
           // Fetch userType from Sanity
-          const query = `*[_type == "user" && _id == $userId]{ userType, stable }[0]`;
+          const query = `*[_type == "user" && _id == $userId]{ userType }[0]`;
           const params = { userId: data.user.id };
           const userData = await client.fetch(query, params);
 
@@ -55,9 +55,16 @@ const ContactClient = () => {
           setUserId(data.user.id);
           setUserType(userData.userType); // Store userType
           
-          // If user is stable_owner, fetch their stable reference
-          if (userData.userType === 'stable_owner' && userData.stable && userData.stable._ref) {
-            setUserStable(userData.stable._ref);
+          // If user is stable_owner, fetch their stable reference from stables collection
+          if (userData.userType === 'stable_owner') {
+            const stableQuery = `*[_type == \"stables\" && userRef._ref == $userId][0]{ _id }`;
+            const stableParams = { userId: data.user.id };
+            const stableData = await client.fetch(stableQuery, stableParams);
+            if (stableData && stableData._id) {
+              setUserStable(stableData._id);
+            } else {
+              setUserStable(null); // or handle error
+            }
           }
           
           setIsAuthenticated(true);

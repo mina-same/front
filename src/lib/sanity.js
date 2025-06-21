@@ -249,22 +249,21 @@ async function uploadMultipleFiles(files) {
   }
 }
 
-function processServiceTypeDetails(details) {
+export function processServiceTypeDetails(details) {
   const processedDetails = { ...details };
-
   Object.keys(processedDetails).forEach((key) => {
     if (Array.isArray(processedDetails[key])) {
       processedDetails[key] = processedDetails[key].map((item, index) => {
         const processedItem = { ...item, _key: item._key || `item-${Date.now()}-${index}` };
         // Convert price to number for additionalServices
-        if (key === 'additionalServices' && processedItem.price) {
-          processedItem.price = parseFloat(processedItem.price);
+        if (key === 'additionalServices') {
+          if (processedItem.price) processedItem.price = parseFloat(processedItem.price);
+          if (processedItem.additional_price) processedItem.additional_price = parseFloat(processedItem.additional_price);
         }
         return processedItem;
       });
     }
   });
-
   return processedDetails;
 }
 
@@ -296,7 +295,7 @@ export async function addService(service) {
   try {
     console.log('Beginning service submission process');
 
-    // Validate service_type
+    // Validate serviceType
     const serviceTypeFieldMap = {
       horse_stable: "horseStabelDetails",
       veterinary: "VeterinaryDetails",
@@ -317,8 +316,8 @@ export async function addService(service) {
       suppliers: "supplierDetails"
     };
 
-    if (!service.service_type || !serviceTypeFieldMap[service.service_type]) {
-      console.error(`Invalid or missing service_type: ${service.service_type}`);
+    if (!service.serviceType || !serviceTypeFieldMap[service.serviceType]) {
+      console.error(`Invalid or missing serviceType: ${service.serviceType}`);
       return { success: false, error: 'Invalid service type' };
     }
 
@@ -348,7 +347,7 @@ export async function addService(service) {
     }
 
     // Handle file uploads for certifications
-    const serviceDetailKey = serviceTypeFieldMap[service.service_type];
+    const serviceDetailKey = serviceTypeFieldMap[service.serviceType];
     if (serviceDetailKey && service.service_details[serviceDetailKey]) {
       const details = service.service_details[serviceDetailKey];
       if (details.certifications && Array.isArray(details.certifications)) {
@@ -415,16 +414,25 @@ export async function addService(service) {
       links: formattedLinks,
       price: serviceCopy.price ? parseFloat(serviceCopy.price) : 0,
       priceUnit: serviceCopy.priceUnit || "per_hour",
-      serviceType: serviceCopy.service_type,
+      serviceType: serviceCopy.serviceType,
       statusAdminApproved: false,
-      isMainService: true,
       serviceAverageRating: 0,
-      serviceRatingCount: 0,
-      providerRef: {
-        _type: 'reference',
-        _ref: providerId
-      }
+      serviceRatingCount: 0
     };
+
+    // Add service management fields if present (already formatted as references if needed)
+    if (service.serviceManagementType) {
+      serviceDocument.serviceManagementType = service.serviceManagementType;
+    }
+    if (service.stableRef) {
+      serviceDocument.stableRef = service.stableRef;
+    }
+    if (service.userRef) {
+      serviceDocument.userRef = service.userRef;
+    }
+    if (service.associatedStables) {
+      serviceDocument.associatedStables = service.associatedStables;
+    }
 
     // Add images if available
     if (additionalImages.length > 0) {

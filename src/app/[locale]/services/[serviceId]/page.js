@@ -4,8 +4,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   MapPin, Phone, Mail, Calendar, Clock, Award, Users, Heart, Share2, Star, Shield, ChevronLeft, ChevronRight,
-  CheckCircle, AlertTriangle, X, Link2, Instagram, Facebook, Youtube, Twitter, Linkedin, Pinterest, TikTok
+  CheckCircle, AlertTriangle, X, Link2, Instagram, Facebook, Youtube, Twitter, Linkedin, TikTok
 } from 'lucide-react';
+import { FaPinterest } from "react-icons/fa";
 import { client, urlFor } from '../../../../lib/sanity';
 import Layout from 'components/layout/Layout';
 import Image from 'next/image';
@@ -112,7 +113,7 @@ const SocialMediaIcon = ({ linkType, url }) => {
     youtube: <Youtube size={20} />,
     x: <Twitter size={20} />,
     linkedin: <Linkedin size={20} />,
-    pinterest: <Pinterest size={20} />,
+    pinterest: <FaPinterest size={20} />,
     tiktok: <TikTok size={20} />,
   };
   return (

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -33,10 +32,10 @@ const VeterinaryFields = ({
   ];
   
   const handleSpecialtyChange = (specialty, isChecked) => {
+    // Only store string IDs
     const updatedSpecialties = isChecked 
       ? [...(specialties || []), specialty] 
       : (specialties || []).filter(s => s !== specialty);
-    
     handleNestedChange('VeterinaryDetails', 'specialties', updatedSpecialties);
   };
 
@@ -138,7 +137,7 @@ const VeterinaryFields = ({
               <Input
                 type="number"
                 value={service.additional_price || ''}
-                onChange={(e) => handleNestedArrayChange('VeterinaryDetails.additionalServices', index, 'additional_price', e.target.value)}
+                onChange={(e) => handleNestedArrayChange('VeterinaryDetails.additionalServices', index, 'additional_price', e.target.value.replace(/[^\d.]/g, ''))}
                 placeholder="0.00"
                 className="w-full border rounded-lg"
               />

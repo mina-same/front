@@ -52,7 +52,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 
 // StepIndicator Component
 const StepIndicator = ({ step, totalSteps, isRTL, t }) => {
-  console.log({ step, totalSteps, isRTL, t }); // Debug props
   const steps = [
     t('user:authTitle'),
     t('user:verifyEmail'),
@@ -63,107 +62,74 @@ const StepIndicator = ({ step, totalSteps, isRTL, t }) => {
   ];
 
   return (
-    <div className="relative" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Mobile view */}
-      <div className="md:hidden mb-8">
+    <div className="relative sticky top-0 z-10 bg-white py-4" dir={isRTL ? 'ltr' : 'ltr'}>
+      {/* Mobile View */}
+      <div className="md:hidden mb-6">
         <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : 'justify-between'}`}>
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'gap-2'}`}>
-            <div className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shadow-md border border-gold/20">
+            <div className="bg-gradient-to-r from-[#1a1a1a] to-[#d4af37] text-white w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border border-[#d4af37]/30">
               {step}
             </div>
-            <span className={`text-sm font-medium ${isRTL ? 'font-arabic' : ''}`}>
+            <span className={`text-base font-semibold ${isRTL ? 'font-arabic' : ''}`}>
               {steps[step - 1]}
             </span>
           </div>
-          <span className={`text-sm text-muted-foreground font-medium ${isRTL ? 'font-arabic' : ''}`}>
+          <span className={`text-sm text-gray-500 font-medium ${isRTL ? 'font-arabic' : ''}`}>
             {t('user:stepOf', { current: step, total: totalSteps })}
           </span>
         </div>
-
-        <div className="mt-4 h-2 w-full bg-gray-100 rounded-full overflow-hidden shadow-inner">
+        <div className="mt-4 h-3 w-full bg-gray-100 rounded-full overflow-hidden shadow-sm">
           <motion.div
-            className="h-full bg-gradient-to-r from-black to-black/80"
+            className="h-full bg-gradient-to-r from-[#1a1a1a] to-[#d4af37]"
             style={{ width: `${(step / totalSteps) * 100}%` }}
             initial={{ width: 0 }}
             animate={{ width: `${(step / totalSteps) * 100}%` }}
             transition={{ duration: 0.5, ease: 'easeInOut' }}
-          >
-            <div
-              className="absolute right-0 -top-1 h-4 w-1 bg-gold rounded-full shadow-md"
-              style={{ transform: isRTL ? 'translateX(-50%)' : 'translateX(50%)' }}
-            ></div>
-          </motion.div>
+          />
         </div>
       </div>
 
-      {/* Desktop view */}
-      <div className="md:block hidden">
-        <div className="flex flex-col items-center">
-          <div className="relative w-full mb-12">
-            <div className="absolute top-7 left-0 w-full h-0.5 bg-gray-200"></div>
-            <div
-              className={`absolute top-7 h-0.5 bg-gradient-to-${isRTL ? 'l' : 'r'} from-black to-gold transition-all duration-500 ease-in-out`}
-              style={{ width: `${(Math.max(0, step - 1) / (totalSteps - 1)) * 100}%`, [isRTL ? 'right' : 'left']: 0 }}
-            ></div>
-
-            <div className={`flex ${isRTL ? 'flex-row-reverse' : 'justify-between'} relative`}>
-              {steps.map((stepLabel, index) => {
-                const stepNum = index + 1;
-                const isActive = step >= stepNum;
-                const isCompleted = step > stepNum;
-
-                return (
-                  <div key={stepNum} className="flex flex-col items-center relative">
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0.5 }}
-                      animate={{
-                        scale: isActive ? 1 : 0.8,
-                        opacity: isActive ? 1 : 0.6,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      className={`flex items-center justify-center w-14 h-14 rounded-full border-2 shadow-md z-10 ${isCompleted
-                        ? 'bg-black border-gold text-white'
-                        : isActive
-                          ? 'bg-white border-black text-black'
-                          : 'bg-white border-gray-300 text-gray-400'
-                        }`}
-                    >
-                      {isCompleted ? (
-                        <Check className="w-6 h-6 text-gold" />
-                      ) : (
-                        <span className="text-base font-medium">{stepNum}</span>
-                      )}
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0.5, y: 10 }}
-                      animate={{
-                        opacity: isActive ? 1 : 0.6,
-                        y: isActive ? 0 : 5,
-                      }}
-                      transition={{ duration: 0.3, delay: 0.1 }}
-                      className={`absolute -bottom-8 whitespace-nowrap text-xs font-medium px-2 py-1 rounded ${isActive
-                        ? 'text-black bg-white shadow-sm border border-gray-100'
-                        : 'text-gray-500'
-                        } ${isRTL ? 'font-arabic' : ''}`}
-                    >
-                      {stepLabel}
-                    </motion.div>
-
-                    {step === stepNum && (
-                      <motion.div
-                        className="absolute -bottom-2 w-full flex justify-center"
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.2 }}
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#d4af37] shadow-sm"></div>
-                      </motion.div>
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <div className="relative w-full max-w-5xl mx-auto mb-10">
+          <div className="absolute top-5 left-0 w-full h-1 bg-gray-200"></div>
+          <div
+            className={`absolute top-5 h-1 bg-gradient-to-${isRTL ? 'l' : 'r'} from-[#1a1a1a] to-[#d4af37] transition-all duration-500 ease-in-out`}
+            style={{ width: `${((step - 1) / (totalSteps - 1)) * 100}%`, [isRTL ? 'right' : 'left']: 0 }}
+          />
+          <div className={`flex ${isRTL ? 'flex-row-reverse' : 'justify-between'} gap-8`}>
+            {steps.map((label, index) => {
+              const stepNum = index + 1;
+              const isActive = step >= stepNum;
+              const isCompleted = step > stepNum;
+              return (
+                <div key={stepNum} className="flex flex-col items-center relative flex-1">
+                  <motion.div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md z-10 border-2 ${isCompleted
+                      ? 'bg-[#1a1a1a] border-[#d4af37] text-white'
+                      : isActive
+                        ? 'bg-white border-[#1a1a1a] text-[#1a1a1a]'
+                        : 'bg-gray-100 border-gray-300 text-gray-400'
+                      }`}
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: isActive ? 1 : 0.8 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {isCompleted ? (
+                      <Check className="w-6 h-6 text-[#d4af37]" />
+                    ) : (
+                      <span className="text-lg font-bold">{stepNum}</span>
                     )}
-                  </div>
-                );
-              })}
-            </div>
+                  </motion.div>
+                  <span
+                    className={`absolute top-14 text-sm font-medium text-center ${isActive ? 'text-[#1a1a1a]' : 'text-gray-500'
+                      } ${isRTL ? 'font-arabic' : ''}`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -183,7 +149,11 @@ const Navigation = ({ step, totalSteps, isLoading, isFormValid, isRTL, t, prevSt
           whileTap={{ scale: 0.95 }}
           className="px-6 py-3 border-2 border-black/10 text-black rounded-xl hover:border-black hover:bg-black/5 flex items-center space-x-2"
         >
-          <ArrowLeft className="w-5 h-5" />
+          {isRTL ? (
+            <ArrowRight className="w-5 h-5" />
+          ) : (
+            <ArrowLeft className="w-5 h-5" />
+          )}
           <span>{t('user:previous')}</span>
         </motion.button>
       )}
@@ -205,7 +175,11 @@ const Navigation = ({ step, totalSteps, isLoading, isFormValid, isRTL, t, prevSt
           ) : (
             <>
               <span>{step === 1 ? t('user:signUpNow') : t('user:next')}</span>
-              <ArrowRight className="w-5 h-5" />
+              {isRTL ? (
+                <ArrowLeft className="w-5 h-5" />
+              ) : (
+                <ArrowRight className="w-5 h-5" />
+              )}
             </>
           )}
         </motion.button>
@@ -270,15 +244,23 @@ export default function SignUpForm() {
     },
     providerDetails: { services: [] },
     supplierDetails: {
+      storeNameEn: '',
+      storeNameAr: '',
+      storeLinks: [{ platform: '', link: '' }], // Initialize with one empty link
+      products: [], // Will be populated later via another form
+      storeLogo: null,
+      storeLocationLink: '',
+      storeAddress: '',
       certifications: null,
     },
     educationalDetails: {
-      certifications: null,
+      certifications: [],
       courses: [],
       books: [],
       libraryDescription: '',
       yearsOfExperience: 0,
     },
+    stableOwnerDetails: {}, // As per previous requirement
   });
   const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState({});
@@ -667,13 +649,28 @@ export default function SignUpForm() {
           if (pd.services.length === 0) newErrors.services = t('user:error.servicesRequired');
           stepValid = Object.keys(newErrors).length === 0;
         } else if (formData.personalInfo.userType === 'suppliers') {
-          stepValid = Object.keys(newErrors).length === 0;
+          const sd = formData.supplierDetails;
+          if (!sd.storeNameEn) newErrors.storeNameEn = t('user:error.storeNameEnRequired');
+          if (!sd.storeNameAr) newErrors.storeNameAr = t('user:error.storeNameArRequired');
+          if (sd.storeLinks.length > 0) {
+            const hasInvalidLink = sd.storeLinks.some((link) => !link.platform || !link.link);
+            if (hasInvalidLink) {
+              newErrors.storeLinksPlatform = t('user:error.storeLinksPlatformRequired');
+              newErrors.storeLinksLink = t('user:error.storeLinksLinkRequired');
+            }
+          }
+          stepValid = Object.keys(newErrors).length === 0
         } else if (formData.personalInfo.userType === 'educational_services') {
           const ed = formData.educationalDetails;
           if (ed.courses.length === 0 && ed.books.length === 0)
             newErrors.coursesBooks = t('user:error.coursesOrBooksRequired');
           if (ed.yearsOfExperience < 0)
             newErrors.yearsOfExperience = t('user:error.yearsOfExperienceInvalid');
+          stepValid = Object.keys(newErrors).length === 0;
+        } else if (formData.personalInfo.userType === 'stable_owner') {
+          const sod = formData.stableOwnerDetails;
+          if (!sod.stableName) newErrors.stableName = t('user:error.stableNameRequired');
+          if (!sod.certifications) newErrors.certifications = t('user:error.certificationsRequired');
           stepValid = Object.keys(newErrors).length === 0;
         }
         break;
@@ -807,20 +804,20 @@ export default function SignUpForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep(step)) return;
-  
+
     setIsLoading(true);
-  
+
     try {
       const userData = {
         _type: 'user',
         isProfileCompleted: true,
       };
-  
+
       if (formData.personalInfo.phone) userData.phoneNumber = formData.personalInfo.phone;
       if (formData.personalInfo.gender) userData.kind = formData.personalInfo.gender;
       if (formData.personalInfo.birthDate) userData.birthDate = formData.personalInfo.birthDate;
       if (formData.personalInfo.userType) userData.userType = formData.personalInfo.userType;
-  
+
       if (formData.locationInfo.country)
         userData.country = { _type: 'reference', _ref: formData.locationInfo.country };
       if (formData.locationInfo.governorate)
@@ -831,12 +828,12 @@ export default function SignUpForm() {
         userData.addressDetails = formData.locationInfo.addressDetails;
       if (formData.locationInfo.addressLink)
         userData.addressLink = formData.locationInfo.addressLink;
-  
+
       if (formData.identityInfo.nationalNumber)
         userData.nationalNumber = formData.identityInfo.nationalNumber;
       if (formData.identityInfo.fullName)
         userData.fullName = formData.identityInfo.fullName;
-  
+
       if (formData.personalInfo.userType === 'rider') {
         const rd = formData.riderDetails;
         userData.riderDetails = {
@@ -889,12 +886,12 @@ export default function SignUpForm() {
           userData.riderDetails.medicalCertificates = medCertUploads;
         }
       }
-  
+
       if (formData.personalInfo.userType === 'provider') {
         userData.providerDetails = {
           offeredServices: formData.providerDetails.services,
         };
-  
+
         const serviceDocs = await Promise.all(
           formData.providerDetails.services.map(async (serviceType) => {
             const serviceData = {
@@ -922,16 +919,36 @@ export default function SignUpForm() {
           })
         );
         console.log('Created service documents:', serviceDocs);
-  
+
         userData.provider = serviceDocs.map(doc => ({
           _type: 'reference',
           _ref: doc._id,
         }));
       }
-  
+
       if (formData.personalInfo.userType === 'suppliers') {
         const sd = formData.supplierDetails;
-        userData.supplierDetails = {};
+        userData.supplierDetails = {
+          storeNameEn: sd.storeNameEn,
+          storeNameAr: sd.storeNameAr,
+          storeLinks: sd.storeLinks.filter((link) => link.platform && link.link), // Only include valid links
+          products: [], // Empty as products are added later
+        };
+        if (sd.storeLocationLink) userData.supplierDetails.storeLocationLink = sd.storeLocationLink;
+        if (sd.storeAddress) userData.supplierDetails.storeAddress = sd.storeAddress;
+
+        // Upload store logo
+        if (sd.storeLogo) {
+          const imageAsset = await client.assets.upload('image', sd.storeLogo, {
+            filename: `${userId}-store-logo-${Date.now()}`,
+          });
+          userData.supplierDetails.storeLogo = {
+            _type: 'image',
+            asset: { _type: 'reference', _ref: imageAsset._id },
+          };
+        }
+
+        // Upload certifications
         if (sd.certifications) {
           const certAsset = await client.assets.upload('file', sd.certifications, {
             filename: `${userId}-supplier-cert-${Date.now()}`,
@@ -942,7 +959,7 @@ export default function SignUpForm() {
           };
         }
       }
-  
+
       if (formData.personalInfo.userType === 'educational_services') {
         const ed = formData.educationalDetails;
         userData.educationalDetails = {
@@ -967,21 +984,37 @@ export default function SignUpForm() {
           };
         }
       }
-  
+
       if (formData.personalInfo.imageFile) {
         const imageAsset = await client.assets.upload('image', formData.personalInfo.imageFile, {
           filename: `${userId}-profile-image-${Date.now()}`,
         });
         userData.image = { _type: 'image', asset: { _type: 'reference', _ref: imageAsset._id } };
       }
-  
+
+      if (formData.personalInfo.userType === 'stable_owner') {
+        const sod = formData.stableOwnerDetails;
+        userData.stableOwnerDetails = {
+          stableName: sod.stableName,
+        };
+        if (sod.certifications) {
+          const certAsset = await client.assets.upload('file', sod.certifications, {
+            filename: `${userId}-stable-owner-cert-${Date.now()}`,
+          });
+          userData.stableOwnerDetails.certifications = {
+            _type: 'file',
+            asset: { _type: 'reference', _ref: certAsset._id },
+          };
+        }
+      }
+
       try {
         await client.patch(userId).set(userData).commit();
       } catch (sanityError) {
         console.error('Sanity patch error:', sanityError);
         throw new Error(t('user:error.sanityPatchFailed', { details: sanityError.message }));
       }
-  
+
       setShowConfetti(true);
       setTimeout(() => {
         setShowConfetti(false);
@@ -1032,7 +1065,7 @@ export default function SignUpForm() {
               <div className="bg-gradient-to-r from-black to-gray-800 p-2 rounded-xl">
                 <User className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900">{t('user:authTitle')}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 ml-3 mr-3">{t('user:authTitle')}</h2>
             </div>
             {error && (
               <div className={`p-4 bg-red-50 text-red-700 rounded-xl text-sm ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
@@ -1046,7 +1079,7 @@ export default function SignUpForm() {
                   value={su.userName}
                   onChange={(e) => handleChange('signUp', 'userName', e.target.value)}
                   placeholder={t('user:username')}
-                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic pr-4' : 'text-left pl-4'}`}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
                 {errors.userName && (
@@ -1061,7 +1094,7 @@ export default function SignUpForm() {
                   value={su.email}
                   onChange={(e) => handleChange('signUp', 'email', e.target.value)}
                   placeholder={t('user:email')}
-                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic pr-4' : 'text-left pl-4'}`}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
                 {errors.email && (
@@ -1076,7 +1109,7 @@ export default function SignUpForm() {
                   value={su.password}
                   onChange={(e) => handleChange('signUp', 'password', e.target.value)}
                   placeholder={t('user:password')}
-                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic pr-4' : 'text-left pl-4'}`}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
                 <button
@@ -1102,7 +1135,7 @@ export default function SignUpForm() {
                   value={su.confirmPassword}
                   onChange={(e) => handleChange('signUp', 'confirmPassword', e.target.value)}
                   placeholder={t('user:confirmPassword')}
-                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic pr-4' : 'text-left pl-4'}`}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
                 <button
@@ -1166,7 +1199,7 @@ export default function SignUpForm() {
               <div className="bg-gradient-to-r from-black to-gray-800 p-2 rounded-xl">
                 <Shield className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900">{t('user:verifyEmail')}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 ml-3 mr-3">{t('user:verifyEmail')}</h2>
             </div>
             <p className={`text-muted-foreground text-sm ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
               {t('user:enterVerificationCode', { email: su2.email })}
@@ -1205,7 +1238,7 @@ export default function SignUpForm() {
               <div className="bg-gradient-to-r from-black to-gray-800 p-2 rounded-xl">
                 <User className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900">{t('user:basicInfo')}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 ml-3 mr-3">{t('user:basicInfo')}</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="sm:col-span-2 flex flex-col items-center">
@@ -1263,11 +1296,11 @@ export default function SignUpForm() {
                   country={'sa'}
                   value={pi.phone}
                   onChange={(phone) => handleChange('personalInfo', 'phone', phone)}
-                  inputClass={`rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold text-black ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                  inputClass={`rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold text-black ${isRTL ? 'text-right font-arabic pr-4' : 'text-left pl-4'}`}
                   containerClass="w-full"
                   specialLabel=""
                   style={{ direction: isRTL ? 'rtl' : 'ltr' }}
-                  flagStyle={{ marginRight: '0px', marginLeft: '0px' }}
+                  flagStyle={isRTL ? { marginLeft: '8px', marginRight: '0px' } : { marginRight: '8px', marginLeft: '0px' }}
                   containerStyle={isRTL ? { marginRight: '30px', marginLeft: '0px' } : { marginLeft: '30px', marginRight: '0px' }}
                 />
                 {errors.phone && (
@@ -1308,7 +1341,7 @@ export default function SignUpForm() {
                   type="date"
                   value={pi.birthDate}
                   onChange={(e) => handleChange('personalInfo', 'birthDate', e.target.value)}
-                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                  className={`p-4 rounded-xl border border-gray-100 shadow-sm focus:ring-gold focus:border-gold ${isRTL ? 'text-right font-arabic pr-4' : 'text-left pl-4'}`}
                   dir={isRTL ? 'rtl' : 'ltr'}
                 />
                 {errors.birthDate && (
@@ -1322,15 +1355,20 @@ export default function SignUpForm() {
                   {t('user:userType')}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
-                  {['rider', 'provider', 'suppliers', 'educational_services'].map(type => (
+                  {[
+                    { type: 'rider', icon: User },
+                    { type: 'provider', icon: Briefcase },
+                    { type: 'suppliers', icon: Package },
+                    { type: 'educational_services', icon: GraduationCap },
+                    { type: 'stable_owner', icon: MapPin },
+                  ].map(({ type, icon: Icon }) => (
                     <Button
                       key={type}
                       variant={pi.userType === type ? 'default' : 'outline'}
                       onClick={() => handleChange('personalInfo', 'userType', type)}
-                      className={`p-4 rounded-xl ${pi.userType === type ? 'bg-gold/10 border border-gold/30 text-gold hover:bg-gold/20' : 'border-gray-300 hover:bg-gray-50'
-                        } flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}
+                      className={`p-4 rounded-xl ${pi.userType === type ? 'bg-gold/10 border border-gold/30 text-gold hover:bg-gold/20' : 'border-gray-300 hover:bg-gray-50'} flex items-center gap-3 transition-all duration-200 ${isRTL ? 'space-x-reverse font-arabic text-right' : 'text-left'}`}
                     >
-                      <User className="w-6 h-6" />
+                      <Icon className="w-6 h-6" />
                       <span>{t(`user:${type}`)}</span>
                     </Button>
                   ))}
@@ -1353,7 +1391,7 @@ export default function SignUpForm() {
               <div className="bg-gradient-to-r from-black to-gray-800 p-2 rounded-xl">
                 <MapPin className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900">{t('user:location')}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 ml-3 mr-3">{t('user:location')}</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
@@ -1494,7 +1532,7 @@ export default function SignUpForm() {
               <div className="bg-gradient-to-r from-black to-gray-800 p-2 rounded-xl">
                 <FileText className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900">{t('user:identity')}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 ml-3 mr-3">{t('user:identity')}</h2>
             </div>
             <div className="grid grid-cols-1 gap-6">
               <div>
@@ -1544,7 +1582,7 @@ export default function SignUpForm() {
                 <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-3 rounded-xl shadow-md">
                   <User className="w-7 h-7 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">{t('user:riderDetails')}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 ml-3 mr-3">{t('user:riderDetails')}</h2>
               </div>
 
               <div className="space-y-8">
@@ -1792,8 +1830,8 @@ export default function SignUpForm() {
           const pd = formData.providerDetails;
           return (
             <div className="space-y-8 p-8 bg-white rounded-2xl shadow-lg">
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-                <div className="bg-gradient-to-r from-blue-700 to-blue-900 p-4 rounded-xl shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className={`bg-gradient-to-r from-blue-700 to-blue-900 p-4 rounded-xl shadow-lg ${isRTL ? 'ml-0 mr-3' : 'mr-0 ml-3'}`}>
                   <Briefcase className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-extrabold text-gray-900">{t('user:providerDetails')}</h2>
@@ -1836,40 +1874,192 @@ export default function SignUpForm() {
         } else if (formData.personalInfo.userType === 'suppliers') {
           const sd = formData.supplierDetails;
           return (
-            <div className="space-y-8 p-6 bg-white rounded-xl shadow-sm">
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse' : 'space-x-4'}`}>
-                <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-3 rounded-xl shadow-md">
-                  <Package className="w-7 h-7 text-white" />
+            <div className="space-y-6 p-6 bg-[#f9fafb] rounded-xl shadow-sm">
+              <div className={`flex items-center ${isRTL ? 'space-x-reverse' : 'space-x-3'}`}>
+                <div className="bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] p-2 rounded-xl">
+                  <Package className="w-6 h-6 text-[#d4af37]" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">{t('user:supplierDetails')}</h2>
+                <h2 className={`text-2xl font-bold ml-3 mr-3 ${isRTL ? 'font-arabic' : ''}`}>{t('user:supplierDetails')}</h2>
               </div>
-        
-              <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                <label className={`block text-base font-semibold text-gray-800 mb-3 ${isRTL ? 'font-arabic text-right' : 'text-left'} flex items-center gap-2`}>
-                  <Award className="w-5 h-5 text-blue-600" />
-                  <span>{t('user:certifications')}</span>
-                </label>
-                <div className="flex items-center gap-3">
-                  <label
-                    className={`px-5 py-4 bg-blue-50 text-blue-600 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors flex items-center gap-2`}
-                  >
-                    <Upload className="w-5 h-5" />
-                    <span className="font-medium">{sd.certifications ? sd.certifications.name : t('user:uploadFile')}</span>
-                    <input
-                      type="file"
-                      onChange={(e) => handleFileChange('supplierDetails', 'certifications', e.target.files[0])}
-                      className="hidden"
-                    />
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:storeNameEn')}
                   </label>
-                  {sd.certifications && (
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleChange('supplierDetails', 'certifications', null)}
-                      className="p-3 bg-red-50 text-red-600 rounded-full hover:bg-red-100 transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </Button>
+                  <Input
+                    type="text"
+                    value={sd.storeNameEn}
+                    onChange={(e) => handleChange('supplierDetails', 'storeNameEn', e.target.value)}
+                    placeholder={t('user:enterStoreNameEn')}
+                    className={`p-4 rounded-xl border border-gray-200 shadow-sm focus:ring-[#d4af37] focus:border-[#d4af37] ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
+                  />
+                  {errors.storeNameEn && (
+                    <p className={`text-[#ef4444] text-sm mt-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                      {errors.storeNameEn}
+                    </p>
                   )}
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:storeNameAr')}
+                  </label>
+                  <Input
+                    type="text"
+                    value={sd.storeNameAr}
+                    onChange={(e) => handleChange('supplierDetails', 'storeNameAr', e.target.value)}
+                    placeholder={t('user:enterStoreNameAr')}
+                    className={`p-4 rounded-xl border border-gray-200 shadow-sm focus:ring-[#d4af37] focus:border-[#d4af37] ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
+                  />
+                  {errors.storeNameAr && (
+                    <p className={`text-[#ef4444] text-sm mt-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                      {errors.storeNameAr}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:storeLinks')}
+                  </label>
+                  {sd.storeLinks.map((link, index) => (
+                    <div key={index} className="flex gap-3 mb-3 items-center">
+                      <Select
+                        value={link.platform}
+                        onValueChange={(value) => {
+                          const updatedLinks = [...sd.storeLinks];
+                          updatedLinks[index].platform = value;
+                          handleChange('supplierDetails', 'storeLinks', updatedLinks);
+                        }}
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                      >
+                        <SelectTrigger
+                          className={`w-1/3 p-4 rounded-xl border border-gray-200 shadow-sm focus:ring-[#d4af37] focus:border-[#d4af37] ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                        >
+                          <SelectValue placeholder={t('user:selectPlatform')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['website', 'facebook', 'twitter', 'youtube', 'instagram'].map((platform) => (
+                            <SelectItem key={platform} value={platform}>
+                              {t(`user:platform.${platform}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="url"
+                        value={link.link}
+                        onChange={(e) => {
+                          const updatedLinks = [...sd.storeLinks];
+                          updatedLinks[index].link = e.target.value;
+                          handleChange('supplierDetails', 'storeLinks', updatedLinks);
+                        }}
+                        placeholder={t('user:enterLink')}
+                        className={`flex-1 p-4 rounded-xl border border-gray-200 shadow-sm focus:ring-[#d4af37] focus:border-[#d4af37] ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                      />
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          const updatedLinks = sd.storeLinks.filter((_, i) => i !== index);
+                          handleChange('supplierDetails', 'storeLinks', updatedLinks);
+                        }}
+                        className="p-2 text-[#ef4444] hover:bg-[#fef2f2]"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => handleChange('supplierDetails', 'storeLinks', [...sd.storeLinks, { platform: '', link: '' }])}
+                    className="mt-2 text-[#1a1a1a] border-[#1a1a1a] hover:bg-[#d4af37]/10"
+                  >
+                    {t('user:addAnotherLink')}
+                  </Button>
+                  {errors.storeLinks && (
+                    <p className={`text-[#ef4444] text-sm mt-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                      {errors.storeLinks}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:storeLogo')}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="px-4 py-2 bg-black text-white rounded-xl cursor-pointer hover:bg-[#d4af37]/10 flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-[#d4af37]" />
+                      <span>{sd.storeLogo ? sd.storeLogo.name : t('user:uploadLogo')}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange('supplierDetails', 'storeLogo', e.target.files[0])}
+                        className="hidden"
+                      />
+                    </label>
+                    {sd.storeLogo && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleChange('supplierDetails', 'storeLogo', null)}
+                        className="p-2 text-[#ef4444] hover:bg-[#fef2f2]"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:storeLocationLink')}
+                  </label>
+                  <Input
+                    type="url"
+                    value={sd.storeLocationLink}
+                    onChange={(e) => handleChange('supplierDetails', 'storeLocationLink', e.target.value)}
+                    placeholder={t('user:enterLocationLink')}
+                    className={`p-4 rounded-xl border border-gray-200 shadow-sm focus:ring-[#d4af37] focus:border-[#d4af37] ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:storeAddress')}
+                  </label>
+                  <Input
+                    type="text"
+                    value={sd.storeAddress}
+                    onChange={(e) => handleChange('supplierDetails', 'storeAddress', e.target.value)}
+                    placeholder={t('user:enterStoreAddress')}
+                    className={`p-4 rounded-xl border border-gray-200 shadow-sm focus:ring-[#d4af37] focus:border-[#d4af37] ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:certifications')}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="px-4 py-2 bg-black text-white rounded-xl cursor-pointer hover:bg-[#d4af37]/10 flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-white" />
+                      <span>{sd.certifications ? sd.certifications.name : t('user:uploadFile')}</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                        onChange={(e) => handleFileChange('supplierDetails', 'certifications', e.target.files[0])}
+                        className="hidden"
+                      />
+                    </label>
+                    {sd.certifications && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleChange('supplierDetails', 'certifications', null)}
+                        className="p-2 text-[#ef4444] hover:bg-[#fef2f2]"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1882,9 +2072,10 @@ export default function SignUpForm() {
                 <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-3 rounded-xl shadow-md">
                   <GraduationCap className="w-7 h-7 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">{t('user:educationalDetails')}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 ml-3 mr-3">{t('user:educationalDetails')}</h2>
               </div>
 
+              {/* Library Description */}
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
                 <label className={`block text-base font-semibold text-gray-800 mb-3 ${isRTL ? 'font-arabic text-right' : 'text-left'} flex items-center gap-2`}>
                   <Library className="w-5 h-5 text-blue-600" />
@@ -1900,6 +2091,7 @@ export default function SignUpForm() {
                 />
               </div>
 
+              {/* Years of Experience */}
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
                 <label className={`block text-base font-semibold text-gray-800 mb-3 ${isRTL ? 'font-arabic text-right' : 'text-left'} flex items-center gap-2`}>
                   <Clock className="w-5 h-5 text-blue-600" />
@@ -1920,15 +2112,14 @@ export default function SignUpForm() {
                 )}
               </div>
 
+              {/* Certifications */}
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
                 <label className={`block text-base font-semibold text-gray-800 mb-3 ${isRTL ? 'font-arabic text-right' : 'text-left'} flex items-center gap-2`}>
                   <Award className="w-5 h-5 text-blue-600" />
-                  <span>{t('user:certifications')}</span>
+                  {t('user:certifications')}
                 </label>
                 <div className="flex items-center gap-3">
-                  <label
-                    className={`px-5 py-4 bg-blue-50 text-blue-600 rounded-xl cursor-pointer hover:bg-blue-100 transition-colors flex items-center gap-2`}
-                  >
+                  <label className={`px-5 py-4 bg-black text-white rounded-xl cursor-pointer hover:bg-blue-100 transition-colors flex items-center gap-2`}>
                     <Upload className="w-5 h-5" />
                     <span className="font-medium">{ed.certifications ? ed.certifications.name : t('user:uploadFile')}</span>
                     <input
@@ -1945,6 +2136,69 @@ export default function SignUpForm() {
                     >
                       <Trash2 className="w-5 h-5" />
                     </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        } else if (formData.personalInfo.userType === 'stable_owner') {
+          const sod = formData.stableOwnerDetails;
+          return (
+            <div className="space-y-6 p-6 bg-[#f9fafb] rounded-xl shadow-sm">
+              <div className={`flex items-center ${isRTL ? 'flex-row-reverse gap-x-3 text-right' : 'gap-x-3 text-left'}`}>
+                <div className={`bg-gradient-to-r from-[#1a1a1a] to-[#2a2a2a] p-2 rounded-xl ${isRTL ? 'ml-0 mr-3' : 'mr-0 ml-3'}`}>
+                  <MapPin className="w-6 h-6 text-[#d4af37]" />
+                </div>
+                <h2 className={`text-2xl font-bold ${isRTL ? 'font-arabic' : ''}`}>{t('user:stableOwnerDetails')}</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:stableName')}
+                  </label>
+                  <Input
+                    type="text"
+                    value={sod.stableName || ''}
+                    onChange={(e) => handleChange('stableOwnerDetails', 'stableName', e.target.value)}
+                    placeholder={t('user:enterStableName')}
+                    className={`p-4 rounded-xl border border-gray-200 shadow-sm focus:ring-[#d4af37] focus:border-[#d4af37] ${isRTL ? 'text-right font-arabic' : 'text-left'}`}
+                    dir={isRTL ? 'rtl' : 'ltr'}
+                  />
+                  {errors.stableName && (
+                    <p className={`text-[#ef4444] text-sm mt-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                      {errors.stableName}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium text-gray-700 mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                    {t('user:certifications')}
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="px-4 py-2 bg-black text-white rounded-xl cursor-pointer hover:bg-[#d4af37]/10 flex items-center gap-2">
+                      <Upload className="w-5 h-5 text-[#d4af37]" />
+                      <span>{sod.certifications ? sod.certifications.name : t('user:uploadFile')}</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.png"
+                        onChange={(e) => handleFileChange('stableOwnerDetails', 'certifications', e.target.files[0])}
+                        className="hidden"
+                      />
+                    </label>
+                    {sod.certifications && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleChange('stableOwnerDetails', 'certifications', null)}
+                        className="p-2 text-[#ef4444] hover:bg-[#fef2f2]"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    )}
+                  </div>
+                  {errors.certifications && (
+                    <p className={`text-[#ef4444] text-sm mt-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                      {errors.certifications}
+                    </p>
                   )}
                 </div>
               </div>

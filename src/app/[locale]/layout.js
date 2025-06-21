@@ -56,12 +56,14 @@ export default async function RootLayout({ children, params }) {
 		"addBook",
 		"addCourse",
 		"addProduct",
-		"addStable"
+		"addStable",
+		"stablesPage",
+		"stableDetails"
 	]);
 
 	return (
-		<html lang={locale}>
-			<body className={`${poppins.variable} ${montserrat.variable}`}>
+		<html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className={locale === 'ar' ? 'rtl' : 'ltr'}>
+			<body className={`${poppins.variable} ${montserrat.variable} ${locale === 'ar' ? 'rtl' : 'ltr'}`}>
 					<TranslationsProvider
 						locale={locale}
 						namespaces={["home"]}

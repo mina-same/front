@@ -32,7 +32,7 @@ const FormNavigation = ({
         onClick={isLastStep ? undefined : nextStep}
         className={`flex items-center justify-center px-8 py-2.5 rounded-xl font-medium transition-all duration-300 focus:outline-none focus:ring-2 ${
           isLastStep 
-            ? 'bg-gold text-white hover:bg-gold/90 focus:ring-gold/30' 
+            ? 'bg-black text-white hover:bg-gold/90 focus:ring-gold/30' 
             : 'bg-black text-white hover:bg-black/90 focus:ring-black/30'
         }`}
         whileHover={{ x: isLastStep ? 0 : 5 }}
