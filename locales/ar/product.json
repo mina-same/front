@@ -1,0 +1,83 @@
+{
+  "productCard": {
+    "addToCart": "إضافة إلى السلة",
+    "addedToCart": "تمت الإضافة إلى السلة",
+    "viewDetails": "عرض التفاصيل",
+    "wishlist": "إضافة إلى المفضلة",
+    "removeWishlist": "إزالة من المفضلة",
+    "loginRequired": "يجب تسجيل الدخول لإدارة قائمة المفضلة الخاصة بك.",
+    "loginHere": "تسجيل الدخول هنا",
+    "outOfStock": "غير متوفر",
+    "inStock": "متوفر",
+    "sale": "تخفيض",
+    "new": "جديد",
+    "rental": "للإيجار",
+    "forSale": "للبيع",
+    "startingAt": "يبدأ من",
+    "perUnit": "لكل"
+  },
+  "productFilter": {
+    "filters": "الفلاتر",
+    "search": "البحث عن منتجات...",
+    "categories": {
+      "all": "جميع الفئات",
+      "feed_nutrition": "التغذية والعلف",
+      "tack_equipment": "معدات الفروسية",
+      "apparel_accessories": "الملابس والإكسسوارات",
+      "health_wellness": "الصحة والعافية",
+      "barn_stable": "مستلزمات الإسطبل",
+      "riding_competition": "الركوب والمنافسة",
+      "other": "أخرى"
+    },
+    "listingType": {
+      "all": "جميع القوائم",
+      "sell": "للبيع",
+      "rent": "للإيجار"
+    },
+    "price": "نطاق السعر",
+    "rating": {
+      "any": "أي تقييم",
+      "4plus": "4+ نجوم",
+      "3plus": "3+ نجوم",
+      "2plus": "2+ نجوم",
+      "1plus": "1+ نجمة"
+    },
+    "availability": {
+      "inStock": "متوفر",
+      "outOfStock": "غير متوفر"
+    },
+    "activeFilters": "الفلاتر النشطة",
+    "clearAll": "مسح الكل",
+    "apply": "تطبيق الفلاتر",
+    "reset": "إعادة تعيين"
+  },
+  "productsList": {
+    "noProductsFound": "لم يتم العثور على منتجات",
+    "noProductsMatchSearch": "لم نتمكن من العثور على أي منتجات تطابق",
+    "noProductsMatchFilter": "لا توجد منتجات تطابق معايير التصفية الحالية.",
+    "tryExploring": "حاول استكشاف فئات أخرى أو إضافة منتج جديد!",
+    "clearFilters": "مسح الفلاتر",
+    "browseAll": "تصفح جميع المنتجات"
+  },
+  "rentalDatePopup": {
+    "title": "اختر فترة الإيجار",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "startDateTime": "تاريخ ووقت البدء",
+    "endDateTime": "تاريخ ووقت الانتهاء",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "errors": {
+      "required": "تاريخ البدء والانتهاء مطلوبان.",
+      "futureDate": "يجب أن يكون تاريخ البدء في المستقبل.",
+      "startBeforeEnd": "يجب أن يكون تاريخ البدء قبل تاريخ الانتهاء.",
+      "minDuration": {
+        "hour": "يجب أن تكون مدة الإيجار ساعة واحدة على الأقل.",
+        "day": "يجب أن تكون مدة الإيجار يوم واحد على الأقل.",
+        "week": "يجب أن تكون مدة الإيجار أسبوع واحد على الأقل.",
+        "month": "يجب أن تكون مدة الإيجار شهر واحد على الأقل.",
+        "year": "يجب أن تكون مدة الإيجار سنة واحدة على الأقل."
+      }
+    }
+  }
+}
