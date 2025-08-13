@@ -4,15 +4,21 @@ import { Button } from "../../src/components/ui/button";
 import { Input } from "../../src/components/ui/input";
 import { Label } from "../../src/components/ui/label";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { useParams } from "next/navigation";
 
 const RentalDatePopup = ({ isOpen, onClose, onSubmit, rentalDurationUnit }) => {
+    const { locale } = useParams();
+    const { t } = useTranslation('product');
+    const isRTL = locale === 'ar';
+    
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [error, setError] = useState("");
 
     const validateDates = () => {
         if (!startDate || !endDate) {
-            setError("Both start and end dates are required.");
+            setError(t('rentalDatePopup.errors.bothRequired'));
             return false;
         }
 
@@ -21,12 +27,12 @@ const RentalDatePopup = ({ isOpen, onClose, onSubmit, rentalDurationUnit }) => {
         const now = new Date();
 
         if (start < now) {
-            setError("Start date must be in the future.");
+            setError(t('rentalDatePopup.errors.futureDate'));
             return false;
         }
 
         if (start > end) {
-            setError("Start date must be before end date.");
+            setError(t('rentalDatePopup.errors.startBeforeEnd'));
             return false;
         }
 
@@ -41,31 +47,31 @@ const RentalDatePopup = ({ isOpen, onClose, onSubmit, rentalDurationUnit }) => {
         switch (rentalDurationUnit) {
             case "hour":
                 if (diffHours < 1) {
-                    setError("Rental duration must be at least 1 hour.");
+                    setError(t('rentalDatePopup.errors.minHour'));
                     return false;
                 }
                 break;
             case "day":
                 if (diffDays < 1) {
-                    setError("Rental duration must be at least 1 day.");
+                    setError(t('rentalDatePopup.errors.minDay'));
                     return false;
                 }
                 break;
             case "week":
                 if (diffWeeks < 1) {
-                    setError("Rental duration must be at least 1 week.");
+                    setError(t('rentalDatePopup.errors.minWeek'));
                     return false;
                 }
                 break;
             case "month":
                 if (diffMonths < 1) {
-                    setError("Rental duration must be at least 1 month.");
+                    setError(t('rentalDatePopup.errors.minMonth'));
                     return false;
                 }
                 break;
             case "year":
                 if (diffYears < 1) {
-                    setError("Rental duration must be at least 1 year.");
+                    setError(t('rentalDatePopup.errors.minYear'));
                     return false;
                 }
                 break;
@@ -98,14 +104,14 @@ const RentalDatePopup = ({ isOpen, onClose, onSubmit, rentalDurationUnit }) => {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" dir={isRTL ? 'rtl' : 'ltr'}>
                 <DialogHeader>
-                    <DialogTitle>Select Rental Dates</DialogTitle>
+                    <DialogTitle>{t('rentalDatePopup.title')}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="startDate" className="text-right">
-                            Start Date
+                        <Label htmlFor="startDate" className={isRTL ? "text-left" : "text-right"}>
+                            {isHourly ? t('rentalDatePopup.startDateTime') : t('rentalDatePopup.startDate')}
                         </Label>
                         <Input
                             id="startDate"
@@ -117,8 +123,8 @@ const RentalDatePopup = ({ isOpen, onClose, onSubmit, rentalDurationUnit }) => {
                         />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="endDate" className="text-right">
-                            End Date
+                        <Label htmlFor="endDate" className={isRTL ? "text-left" : "text-right"}>
+                            {isHourly ? t('rentalDatePopup.endDateTime') : t('rentalDatePopup.endDate')}
                         </Label>
                         <Input
                             id="endDate"
@@ -131,11 +137,11 @@ const RentalDatePopup = ({ isOpen, onClose, onSubmit, rentalDurationUnit }) => {
                     </div>
                     {error && <p className="text-red-500 text-sm">{error}</p>}
                 </div>
-                <DialogFooter>
+                <DialogFooter className={isRTL ? "justify-start flex-row-reverse" : ""}>
                     <Button variant="outline" onClick={onClose}>
-                        Cancel
+                        {t('rentalDatePopup.cancel')}
                     </Button>
-                    <Button onClick={handleSubmit}>Confirm</Button>
+                    <Button onClick={handleSubmit}>{t('rentalDatePopup.confirm')}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

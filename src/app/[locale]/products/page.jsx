@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "../../../components/ui/button";
 import ProductFilter from "../../../../components/product/ProductFilter";
@@ -8,8 +8,14 @@ import ProductsList from "../../../../components/product/ProductsList";
 import { Package2, Filter, LayoutGrid, LayoutList } from "lucide-react";
 import Layout from "components/layout/Layout";
 import { client } from "../../../lib/sanity";
+import { useTranslation } from "react-i18next";
+import TranslationsProvider from "../../../../components/TranslationsProvider";
 
-const ProductsPage = () => {
+export const ProductsPageContent = () => {
+  const { t } = useTranslation(['productsPage', 'product']);
+  const params = useParams();
+  const isRtl = params.locale === 'ar';
+
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -186,7 +192,7 @@ const ProductsPage = () => {
     return (
       <Layout className="min-h-screen bg-[#f8f1e9]">
         <div className="container mx-auto py-12 px-4 text-center">
-          <p className="text-[#1a1a1a] text-lg">Loading products...</p>
+          <p className="text-[#1a1a1a] text-lg">{t('loading')}</p>
         </div>
       </Layout>
     );
@@ -196,14 +202,14 @@ const ProductsPage = () => {
     return (
       <Layout className="min-h-screen bg-[#f8f1e9]">
         <div className="container mx-auto py-12 px-4 text-center">
-          <p className="text-[#1a1a1a] text-lg">{error}</p>
+          <p className="text-[#1a1a1a] text-lg">{error || t('error')}</p>
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout className="min-h-screen bg-[#f8f1e9]">
+    <Layout className="min-h-screen bg-[#f8f1e9]" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-white">
         <div
@@ -215,15 +221,14 @@ const ProductsPage = () => {
         ></div>
         <div className="absolute inset-0 bg-black opacity-60"></div>
         <div className="absolute bottom-0 left-0 right-0 h-16"></div>
-        <div className="container mx-auto relative z-10 py-20 px-4">
+        <div className="container mx-auto relative z-10 py-16 md:py-20 px-4">
           <div className="flex flex-col items-center text-center mb-6">
             <Package2 size={42} className="mb-4 animate-fade-in text-white" />
-            <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight text-white">
-              Equestrian Products
+            <h1 className="text-3xl md:text-5xl font-bold mb-3 tracking-tight text-white">
+              {t('hero.title')}
             </h1>
-            <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto text-white">
-              Discover premium quality equestrian products, from tack and
-              equipment to feed and medications.
+            <p className="text-base md:text-xl opacity-90 max-w-2xl mx-auto text-white">
+              {t('hero.subtitle')}
             </p>
           </div>
         </div>
@@ -274,13 +279,13 @@ const ProductsPage = () => {
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center z-20">
                     <div className="text-center">
-                      <h3 className="text-white text-lg font-bold drop-shadow-lg mb-1">
-                        {collection.title}
-                      </h3>
-                      <p className="text-white/90 text-sm drop-shadow-lg">
-                        {collection.titleAr}
-                      </p>
-                    </div>
+                    <h3 className="text-white text-lg font-bold drop-shadow-lg mb-1">
+                      {isRtl ? collection.titleAr : collection.title}
+                    </h3>
+                    <p className="text-white/90 text-sm drop-shadow-lg">
+                      {isRtl ? collection.title : collection.titleAr}
+                    </p>
+                  </div>
                   </div>
                 </div>
               ))}
@@ -292,24 +297,24 @@ const ProductsPage = () => {
       <div className="bg-white pb-12 pt-1">
         <div className="container mx-auto px-4">
           {/* Filter controls */}
-          <div className="flex flex-row items-start md:items-center justify-between mb-6 gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
             <div className="flex items-center">
-              <h2 className="text-2xl font-semibold text-[#1a1a1a]">
-                Browse Products
+              <h2 className="text-xl md:text-2xl font-semibold text-[#1a1a1a]">
+                {t('browse.title')}
               </h2>
-              <span className="ml-3 px-3 py-1 bg-[#e0d7c8] text-[#4a4a4a] rounded-full text-sm">
-                {filteredProducts.length} items
+              <span className={`${isRtl ? 'mr-3' : 'ml-3'} px-3 py-1 bg-[#e0d7c8] text-[#4a4a4a] rounded-full text-sm`}>
+                {filteredProducts.length} {t('browse.items')}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsFilterVisible(!isFilterVisible)}
                 className="flex items-center gap-1 border-[#e0d7c8] text-[#2e4a2e] hover:bg-[#a68b00] hover:text-white transition-colors"
               >
-                <Filter size={16} />
-                {isFilterVisible ? "Hide Filters" : "Show Filters"}
+                <Filter size={16} className={isRtl ? 'ml-1' : 'mr-1'} />
+                {isFilterVisible ? t('browse.hideFilters') : t('browse.showFilters')}
               </Button>
               <div className="border-l h-6 mx-2 border-[#e0d7c8]"></div>
               <div className="flex bg-white border rounded-md overflow-hidden border-[#e0d7c8]">
@@ -341,7 +346,7 @@ const ProductsPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-8">
             {/* Filters sidebar */}
             <div
               className={`transition-all duration-300 ease-in-out ${
@@ -357,6 +362,7 @@ const ProductsPage = () => {
                 setSearchTerm={setSearchTerm}
                 initialCategory={initialCategory}
                 className="bg-white border border-[#e0d7c8] rounded-lg shadow-sm"
+                isRtl={isRtl}
               />
             </div>
 
@@ -371,12 +377,25 @@ const ProductsPage = () => {
                 searchTerm={searchTerm}
                 viewMode={viewMode}
                 className="bg-white border border-[#e0d7c8] rounded-lg shadow-sm"
+                isRtl={isRtl}
               />
             </div>
           </div>
         </div>
       </div>
     </Layout>
+  );
+};
+
+const ProductsPage = ({ params }) => {
+  const unwrappedParams = React.use(params);
+  return (
+    <TranslationsProvider 
+      locale={unwrappedParams.locale} 
+      namespaces={['productsPage', 'product']}
+    >
+      <ProductsPageContent />
+    </TranslationsProvider>
   );
 };
 

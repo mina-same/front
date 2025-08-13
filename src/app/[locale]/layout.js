@@ -69,7 +69,9 @@ export default async function RootLayout({ children, params }) {
 		"notFound",
 		"invitations",
 		"bookDetails",
-		"courseDetails"
+		"courseDetails",
+		"product",
+		"productsPage"
 	]);
 
 	return (
@@ -77,7 +79,7 @@ export default async function RootLayout({ children, params }) {
 			<body className={`${poppins.variable} ${montserrat.variable} ${locale === 'ar' ? 'rtl' : 'ltr'}`}>
 				<TranslationsProvider
 					locale={locale}
-					namespaces={["home", "competitionsPage", "addCompetition", "editCompetition", "notFound", "invitations", "profile", "resourcesPage", "bookDetails", "contact"]}
+					namespaces={["home", "competitionsPage", "addCompetition", "editCompetition", "notFound", "invitations", "profile", "resourcesPage", "bookDetails", "contact", "product"]}
 					resources={resources}
 				>
 					{children}

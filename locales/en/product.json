@@ -1,7 +1,10 @@
 {
   "productCard": {
     "addToCart": "Add to Cart",
+    "addToCartError": "Failed to add product to cart. Please try again.",
+    "addToRentalCart": "Add to Rental Cart",
     "addedToCart": "Added to Cart",
+    "productAdded": "Product Added",
     "viewDetails": "View Details",
     "wishlist": "Add to Wishlist",
     "removeWishlist": "Remove from Wishlist",
@@ -13,12 +16,21 @@
     "new": "New",
     "rental": "Rental",
     "forSale": "For Sale",
+    "forRent": "For Rent",
     "startingAt": "Starting at",
-    "perUnit": "per"
+    "perUnit": "per",
+    "saveNow": "Buy Now & Save",
+    "hour": "hour",
+    "day": "day",
+    "week": "week",
+    "month": "month",
+    "year": "year"
   },
   "productFilter": {
     "filters": "Filters",
     "search": "Search products...",
+    "category": "Category",
+    "listingTypeTitle": "Listing Type",
     "categories": {
       "all": "All Categories",
       "feed_nutrition": "Feed and Nutrition",
@@ -35,6 +47,10 @@
       "rent": "For Rent"
     },
     "price": "Price Range",
+    "min": "Min",
+    "max": "Max",
+    "ratingTitle": "Rating",
+    "availabilityTitle": "Availability",
     "rating": {
       "any": "Any Rating",
       "4plus": "4+ Stars",
@@ -68,16 +84,14 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "errors": {
-      "required": "Both start and end dates are required.",
+      "bothRequired": "Both start and end dates are required.",
       "futureDate": "Start date must be in the future.",
       "startBeforeEnd": "Start date must be before end date.",
-      "minDuration": {
-        "hour": "Rental duration must be at least 1 hour.",
-        "day": "Rental duration must be at least 1 day.",
-        "week": "Rental duration must be at least 1 week.",
-        "month": "Rental duration must be at least 1 month.",
-        "year": "Rental duration must be at least 1 year."
-      }
+      "minHour": "Rental duration must be at least 1 hour.",
+      "minDay": "Rental duration must be at least 1 day.",
+      "minWeek": "Rental duration must be at least 1 week.",
+      "minMonth": "Rental duration must be at least 1 month.",
+      "minYear": "Rental duration must be at least 1 year."
     }
   }
 }

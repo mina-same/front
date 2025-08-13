@@ -1,0 +1,23 @@
+{
+  "hero": {
+    "title": "Equestrian Products",
+    "subtitle": "Discover premium quality equestrian products, from tack and equipment to feed and medications."
+  },
+  "collections": {
+    "feedNutrition": "Feed and Nutrition",
+    "tackEquipment": "Tack and Equipment",
+    "apparelAccessories": "Apparel & Accessories",
+    "healthWellness": "Health & Wellness",
+    "barnStable": "Barn & Stable Supplies",
+    "ridingCompetition": "Riding & Competition",
+    "other": "Other"
+  },
+  "browse": {
+    "title": "Browse Products",
+    "items": "items",
+    "hideFilters": "Hide Filters",
+    "showFilters": "Show Filters"
+  },
+  "loading": "Loading products...",
+  "error": "Failed to load products. Please try again later."
+}

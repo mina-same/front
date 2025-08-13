@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { client } from "@/lib/sanity";
 import { v4 as uuidv4 } from "uuid";
 import RentalDatePopup from "./RentalDatePopup";
+import { useTranslation } from "react-i18next";
+import { useParams } from "next/navigation";
 
 const ProductCard = ({ product, viewMode }) => {
     const isGridView = viewMode === "grid";
@@ -21,6 +23,9 @@ const ProductCard = ({ product, viewMode }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const router = useRouter();
+    const { t } = useTranslation('product');
+    const params = useParams();
+    const isRTL = params.locale === 'ar';
 
     // Verify user authentication and check wishlist status
     useEffect(() => {
@@ -91,9 +96,9 @@ const ProductCard = ({ product, viewMode }) => {
         if (!currentUserId) {
             toast.error(
                 <div>
-                    You must be logged in to manage your wishlist.{" "}
+                    {t('productCard.loginRequired')}{" "}
                     <a href="/login" className="text-blue-600 hover:underline">
-                        Log in here
+                        {t('productCard.loginHere')}
                     </a>
                 </div>
             );
@@ -196,8 +201,8 @@ const ProductCard = ({ product, viewMode }) => {
                     description: "You can view your order in your profile.",
                 });
             } catch (error) {
-                console12.error("Error creating order:", error);
-                toast.error("Failed to add product to cart. Please try again.");
+                console.error("Error creating order:", error);
+                toast.error(t('productCard.addToCartError'));
             } finally {
                 setIsLoading(false); // Clear cart-specific loading
             }
@@ -250,7 +255,7 @@ const ProductCard = ({ product, viewMode }) => {
                                 product.images?.[0] ||
                                 "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=center"
                             }
-                            alt={product.name_en}
+                            alt={isRTL ? product.name_ar || product.name_en : product.name_en || product.name_ar}
                             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                             width={500}
                             height={500}
@@ -263,7 +268,7 @@ const ProductCard = ({ product, viewMode }) => {
                                     : "bg-emerald-500 hover:bg-emerald-600"
                             }`}
                         >
-                            {product.listingType === "rent" ? "For Rent" : "For Sale"}
+                            {product.listingType === "rent" ? t('productCard.forRent') : t('productCard.forSale')}
                         </Badge>
                         <div
                             className={`absolute top-10 right-3 flex flex-col gap-3 opacity-0 transition-all duration-300 transform translate-x-2 ${
@@ -312,7 +317,7 @@ const ProductCard = ({ product, viewMode }) => {
                             className="font-medium text-sm bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 py-1 px-2.5 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 flex items-center gap-1"
                         >
                             <Tag className="w-4 h-4 text-gray-600" />
-                            {product.category.replace("_", " ")}
+                            {t(`productFilter.categories.${product.category}`)}
                         </Badge>
                         <div className="flex items-center">
                             <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 mr-1" />
@@ -325,10 +330,10 @@ const ProductCard = ({ product, viewMode }) => {
 
                     <Link href={`/products/view/${product.id}`} className="block group">
                         <h3 className="font-medium text-lg mb-1 group-hover:text-indigo-600 line-clamp-2">
-                            {product.name_en}
+                            {isRTL ? product.name_ar || product.name_en : product.name_en || product.name_ar}
                         </h3>
                         <p className="text-gray-600 text-sm mb-4 opacity-75 line-clamp-2">
-                            {product.description_en}
+                            {isRTL ? product.description_ar || product.description_en : product.description_en || product.description_ar}
                         </p>
                     </Link>
 
@@ -343,7 +348,7 @@ const ProductCard = ({ product, viewMode }) => {
                                 )}
                                 {product.listingType === "rent" && product.rentalDurationUnit && (
                                     <span className="text-xs text-gray-500 ml-1">
-                                        /{product.rentalDurationUnit}
+                                        /{t(`productCard.${product.rentalDurationUnit}`)}
                                     </span>
                                 )}
                             </div>
@@ -351,7 +356,7 @@ const ProductCard = ({ product, viewMode }) => {
                                 <div className="flex gap-1">
                                     <PiggyBank className="text-green-900 text-xs" />
                                     <span className="text-xs text-green-900 mt-1">
-                                        Buy Now & Save {savingsPercentage}%
+                                        {t('productCard.saveNow')} {savingsPercentage}%
                                     </span>
                                 </div>
                             )}
@@ -363,14 +368,14 @@ const ProductCard = ({ product, viewMode }) => {
                                     variant="outline"
                                     className="bg-green-50 text-green-700 border-green-200"
                                 >
-                                    In Stock
+                                    {t('productCard.inStock')}
                                 </Badge>
                             ) : (
                                 <Badge
                                     variant="outline"
                                     className="bg-red-50 text-red-700 border-red-200"
                                 >
-                                    Out of Stock
+                                    {t('productCard.outOfStock')}
                                 </Badge>
                             )}
                         </div>
@@ -390,10 +395,10 @@ const ProductCard = ({ product, viewMode }) => {
                                 <ShoppingCart className="w-4 h-4 mr-1" />
                             )}
                             {isAdded
-                                ? "Product Added"
-                                : product.listingType === "rent"
-                                ? "Add to Rental Cart"
-                                : "Add to Cart"}
+                                ? t('productCard.productAdded')
+                                    : product.listingType === "rent"
+                                    ? t('productCard.addToRentalCart')
+                                    : t('productCard.addToCart')}
                         </Button>
                         <Button
                             variant="outline"

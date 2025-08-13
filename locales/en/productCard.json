@@ -1,0 +1,17 @@
+{
+  "forRent": "For Rent",
+  "forSale": "For Sale",
+  "inStock": "In Stock",
+  "outOfStock": "Out of Stock",
+  "saveNow": "Save Now",
+  "productAdded": "View in Cart",
+  "addToCart": "Add to Cart",
+  "addToRentalCart": "Rent Now",
+  "loginRequired": "You must be logged in to add items to your wishlist.",
+  "loginHere": "Log in here",
+  "addToCartError": "Failed to add product to cart. Please try again.",
+  "day": "day",
+  "week": "week",
+  "month": "month",
+  "year": "year"
+}

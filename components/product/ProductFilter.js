@@ -27,35 +27,41 @@ import {
 } from "lucide-react";
 import { Slider } from "../../src/components/ui/slider";
 import { Checkbox } from "../../src/components/ui/checkbox";
+import { useTranslation } from "react-i18next";
+import { useParams } from "next/navigation";
 
-const CATEGORY_OPTIONS = [
-  { value: "all", label: "All Categories" },
-  { value: "feed_nutrition", label: "Feed and Nutrition" },
-  { value: "tack_equipment", label: "Tack and Equipment" },
-  { value: "apparel_accessories", label: "Apparel and Accessories" },
-  { value: "health_wellness", label: "Health and Wellness" },
-  { value: "barn_stable", label: "Barn and Stable Supplies" },
-  { value: "riding_competition", label: "Riding and Competition" },
-  { value: "other", label: "Other" },
+// Category options will be populated with translations
+const getCategoryOptions = (t) => [
+  { value: "all", label: t('productFilter.categories.all') },
+  { value: "feed_nutrition", label: t('productFilter.categories.feed_nutrition') },
+  { value: "tack_equipment", label: t('productFilter.categories.tack_equipment') },
+  { value: "apparel_accessories", label: t('productFilter.categories.apparel_accessories') },
+  { value: "health_wellness", label: t('productFilter.categories.health_wellness') },
+  { value: "barn_stable", label: t('productFilter.categories.barn_stable') },
+  { value: "riding_competition", label: t('productFilter.categories.riding_competition') },
+  { value: "other", label: t('productFilter.categories.other') },
 ];
 
-const LISTING_TYPE_OPTIONS = [
-  { value: "all", label: "All Listings" },
-  { value: "sell", label: "For Sale" },
-  { value: "rent", label: "For Rent" },
+// Listing type options with translations
+const getListingTypeOptions = (t) => [
+  { value: "all", label: t('productFilter.listingType.all') },
+  { value: "sell", label: t('productFilter.listingType.sell') },
+  { value: "rent", label: t('productFilter.listingType.rent') },
 ];
 
-const RATING_OPTIONS = [
-  { value: "any", label: "Any Rating" },
-  { value: "4", label: "4+ Stars" },
-  { value: "3", label: "3+ Stars" },
-  { value: "2", label: "2+ Stars" },
-  { value: "1", label: "1+ Star" },
+// Rating options with translations
+const getRatingOptions = (t) => [
+  { value: "any", label: t('productFilter.rating.any') },
+  { value: "4", label: t('productFilter.rating.4plus') },
+  { value: "3", label: t('productFilter.rating.3plus') },
+  { value: "2", label: t('productFilter.rating.2plus') },
+  { value: "1", label: t('productFilter.rating.1plus') },
 ];
 
-const AVAILABILITY_OPTIONS = [
-  { id: "in-stock", label: "In Stock" },
-  { id: "out-of-stock", label: "Out of Stock" },
+// Availability options with translations
+const getAvailabilityOptions = (t) => [
+  { id: "in-stock", label: t('productFilter.availability.inStock') },
+  { id: "out-of-stock", label: t('productFilter.availability.outOfStock') },
 ];
 
 function ProductFilter({
@@ -65,6 +71,16 @@ function ProductFilter({
   setSearchTerm,
   initialCategory = "all", // Default to "all"
 }) {
+  const { t } = useTranslation('product');
+  const params = useParams();
+  const isRTL = params.locale === 'ar';
+  
+  // Get translated options
+  const CATEGORY_OPTIONS = getCategoryOptions(t);
+  const LISTING_TYPE_OPTIONS = getListingTypeOptions(t);
+  const RATING_OPTIONS = getRatingOptions(t);
+  const AVAILABILITY_OPTIONS = getAvailabilityOptions(t);
+  
   const [category, setCategory] = useState(initialCategory);
   const [listingType, setListingType] = useState("all");
   const [priceRange, setPriceRange] = useState([0, 10000]);
@@ -187,8 +203,8 @@ function ProductFilter({
     <div className="bg-white rounded-lg shadow-md p-5 sticky top-24">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center">
-          <Filter className="mr-2 text-[#d4af37]" size={20} />
-          <h3 className="text-lg font-semibold">Filters</h3>
+          <Filter className={`${isRTL ? 'ml-2' : 'mr-2'} text-[#d4af37]`} size={20} />
+          <h3 className="text-lg font-semibold">{t('productFilter.filters')}</h3>
         </div>
         <Button
           variant="ghost"
@@ -196,7 +212,7 @@ function ProductFilter({
           onClick={resetFilters}
           className="text-[#d4af37] hover:text-[#b8972e]"
         >
-          Clear All
+          {t('productFilter.clearAll')}
         </Button>
       </div>
 
@@ -238,12 +254,12 @@ function ProductFilter({
           <Search
             className="absolute text-gray-400"
             size={16}
-            style={{ top: "50%", left: "10px", transform: "translateY(-50%)" }}
+            style={{ top: "50%", [isRTL ? 'right' : 'left']: "10px", transform: "translateY(-50%)" }}
           />
           <Input
             type="text"
-            placeholder="      Search products..."
-            className="pl-10"
+            placeholder={t('productFilter.search')}
+            className={isRTL ? 'pr-10' : 'pl-10'}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -255,7 +271,7 @@ function ProductFilter({
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
               <LayoutGrid size={16} className="mr-2 text-[#d4af37]" />
-              Category
+              {t('productFilter.category')}
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -280,7 +296,7 @@ function ProductFilter({
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
               <Tag size={16} className="mr-2 text-[#d4af37]" />
-              Listing Type
+              {t('productFilter.listingTypeTitle')}
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -304,8 +320,8 @@ function ProductFilter({
         <AccordionItem value="price">
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
-              <DollarSign size={16} className="mr-2 text-[#d4af37]" />
-              Price Range
+              <DollarSign size={16} className={`${isRTL ? 'ml-2' : 'mr-2'} text-[#d4af37]`} />
+              {t('productFilter.price')}
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -320,12 +336,12 @@ function ProductFilter({
               />
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-xs">Min</Label>
+                  <Label className="text-xs">{t('productFilter.min')}</Label>
                   <div className="font-medium">SAR {priceRange[0]}</div>
                 </div>
                 <div className="text-center">-</div>
                 <div>
-                  <Label className="text-xs">Max</Label>
+                  <Label className="text-xs">{t('productFilter.max')}</Label>
                   <div className="font-medium">SAR {priceRange[1]}</div>
                 </div>
               </div>
@@ -337,7 +353,7 @@ function ProductFilter({
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
               <Star size={16} className="mr-2 text-[#d4af37]" />
-              Rating
+              {t('productFilter.ratingTitle')}
             </div>
           </AccordionTrigger>
           <AccordionContent>
@@ -362,7 +378,7 @@ function ProductFilter({
           <AccordionTrigger className="text-sm font-medium">
             <div className="flex items-center">
               <Package size={16} className="mr-2 text-[#d4af37]" />
-              Availability
+              {t('productFilter.availabilityTitle')}
             </div>
           </AccordionTrigger>
           <AccordionContent>
