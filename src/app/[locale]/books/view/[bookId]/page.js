@@ -29,8 +29,9 @@ import { Alert, AlertDescription } from "../../../../../components/ui/alert";
 import { Progress } from "../../../../../components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import ResourceNotFound from "../../../../../../components/shared/ResourceNotFound";
-import { client } from ".@/lib/sanity";
+import { client } from "@/lib/sanity";
 import Layout from "components/layout/Layout";
+import Preloader from "components/elements/Preloader";
 import { Heart, Loader2 } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "react-i18next";
@@ -231,9 +232,10 @@ export default function BookDetails() {
     const handlePurchase = async () => {
         if (!book || !bookId || !currentUserId) {
             showAlert(
-                <>You must be logged in to purchase this book.{" "}
+                <>
+                    {t("bookDetails:errors.userNotAuthenticatedPurchase", "You must be logged in to purchase this book.")}{" "}
                     <Link href="/login" className="text-red-700 hover:underline">
-                        Log in here
+                        {t("bookDetails:login", "Log in here")}
                     </Link>
                 </>,
                 "error"
@@ -269,9 +271,9 @@ export default function BookDetails() {
                     .commit();
                 setHasPurchased(true);
                 setUserOrder({ ...order, status: "completed", paymentStatus: "paid" });
-                showAlert("Book ordered successfully! You can now access the materials.", "success");
+                showAlert(t("bookDetails:orderSuccess", "Book ordered successfully! You can now access the materials."), "success");
             } else {
-                showAlert("Order created! Please complete payment on the orders page.", "success");
+                showAlert(t("bookDetails:orderCreated", "Order created! Please complete payment on the orders page."), "success");
                 router.push("/profile?tab=orders");
             }
         } catch (error) {
@@ -286,18 +288,18 @@ export default function BookDetails() {
         if (navigator.share) {
             navigator
                 .share({
-                    title: `Book: ${book.title}`,
-                    text: `Check out this book: ${book.title} by ${book.author?.fullName || book.author?.name || "Unknown Author"}`,
+                    title: `${t("bookDetails:shareTitle", "Book")} : ${book.title}`,
+                    text: `${t("bookDetails:shareText", "Check out this book:")} ${book.title} ${t("bookDetails:by", "By")} ${book.author?.fullName || book.author?.name || t("bookDetails:unknownAuthor", "Unknown Author")}`,
                     url: window.location.href,
                 })
                 .catch((error) => console.log("Error sharing", error));
         } else {
             navigator.clipboard
                 .writeText(window.location.href)
-                .then(() => showAlert("Link copied to clipboard!", "success"))
+                .then(() => showAlert(t("bookDetails:copySuccess", "Link copied to clipboard!"), "success"))
                 .catch((err) => {
                     console.error("Could not copy text: ", err);
-                    showAlert("Failed to copy link", "error");
+                    showAlert(t("bookDetails:copyFailed", "Failed to copy link"), "error");
                 });
         }
     };
@@ -309,19 +311,19 @@ export default function BookDetails() {
         setIsSubmitting(true);
 
         if (!currentUserId) {
-            showAlert("You must be logged in to rate this book", "error");
+            showAlert(t("bookDetails:reviews.mustLogin", "You must be logged in to rate this book"), "error");
             setIsSubmitting(false);
             return;
         }
         if (userRating < 1 || userRating > 5) {
-            showAlert("Please select a rating between 1 and 5", "error");
+            showAlert(t("bookDetails:reviews.invalidRating", "Please select a rating between 1 and 5"), "error");
             setIsSubmitting(false);
             return;
         }
 
         const existingRating = book.ratings?.some((r) => r.user?._id === currentUserId);
         if (existingRating) {
-            showAlert("You have already rated this book", "error");
+            showAlert(t("bookDetails:reviews.alreadyRated", "You have already rated this book"), "error");
             setIsSubmitting(false);
             return;
         }
@@ -365,10 +367,10 @@ export default function BookDetails() {
             });
             setUserRating(0);
             setUserComment("");
-            showAlert("Rating submitted successfully!", "success");
+            showAlert(t("bookDetails:reviews.submitSuccess", "Rating submitted successfully!"), "success");
         } catch (error) {
             console.error("Error submitting rating:", error);
-            showAlert(`Failed to submit rating: ${error.message}`, "error");
+            showAlert(`${t("bookDetails:reviews.submitFailed", "Failed to submit rating:")} ${error.message}`, "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -501,10 +503,10 @@ export default function BookDetails() {
     const getButtonProps = () => {
         if (!userOrder) {
             return {
-                text: book.price > 0 ? `Purchase for $${book.price.toFixed(2)}` : (
+                text: book.price > 0 ? `${t("bookDetails:buttons.purchaseFor", "Purchase for")} ${book.price.toFixed(2)} SAR` : (
                     <span className="flex items-center gap-2">
                         <Download className="w-4 h-4" />
-                        Download Free
+                        {t("bookDetails:buttons.downloadFree", "Download Free")}
                     </span>
                 ),
                 onClick: handlePurchase,
@@ -515,7 +517,7 @@ export default function BookDetails() {
 
         if (userOrder.status === "pending" && userOrder.paymentStatus === "pending") {
             return {
-                text: "Continue Payment",
+                text: t("bookDetails:buttons.continuePayment", "Continue Payment"),
                 onClick: () => router.push("/profile?tab=orders"),
                 disabled: false,
                 show: true
@@ -524,7 +526,7 @@ export default function BookDetails() {
 
         if (userOrder.status === "completed" && userOrder.paymentStatus === "paid") {
             return {
-                text: "Access Materials",
+                text: t("bookDetails:buttons.accessMaterials", "Access Materials"),
                 onClick: () => router.push("/profile?tab=orders"),
                 disabled: false,
                 show: true
@@ -532,10 +534,10 @@ export default function BookDetails() {
         }
 
         return {
-            text: book.price > 0 ? `Purchase for $${book.price.toFixed(2)}` : (
+            text: book.price > 0 ? `${t("bookDetails:buttons.purchaseFor", "Purchase for")} ${book.price.toFixed(2)} SAR` : (
                 <span className="flex items-center gap-2">
                     <Download className="w-4 h-4" />
-                    Download Free
+                    {t("bookDetails:buttons.downloadFree", "Download Free")}
                 </span>
             ),
             onClick: handlePurchase,
@@ -546,10 +548,9 @@ export default function BookDetails() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#b28a2f]"></div>
-                <p className="mt-4 text-[#1f2937] font-medium">Loading book details...</p>
-            </div>
+            <Layout>
+                <Preloader />
+            </Layout>
         );
     }
 
@@ -592,7 +593,7 @@ export default function BookDetails() {
 
                 <div className="bg-gradient-to-r from-[#b28a2f] to-[#d4af37] text-white">
                     <div className="container mx-auto px-4 py-12">
-                        <div className="flex flex-row md:flex-row gap-8 items-center">
+                        <div className="flex flex-row gap-8 items-center">
                             <div className="w-full md:w-1/3 flex justify-center">
                                 <div className="relative group">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-[#d4af37] to-[#b28a2f] rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
@@ -611,21 +612,21 @@ export default function BookDetails() {
                             <div className="w-full md:w-2/3 space-y-6">
                                 <div>
                                     <Badge className="mb-2 bg-[#fef3c7] text-[#1f2937] hover:bg-[#d4af37] hover:text-white transition-colors">
-                                        {book.category || "Uncategorized"}
+                                        {book.category ? t(`bookDetails:categories.${book.category}`) : t("bookDetails:uncategorized", "Uncategorized")}
                                     </Badge>
                                     <h1 className="text-4xl font-bold tracking-tight">{book.title}</h1>
                                     <p className="text-xl text-[#fef3c7] mt-2">
-                                        By {book.author?.fullName || book.author?.name || "Unknown Author"}
+                                        {t("bookDetails:by", "By")} {book.author?.fullName || book.author?.name || t("bookDetails:unknownAuthor", "Unknown Author")}
                                     </p>
                                 </div>
 
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1">
                                         {renderStars(book.averageRating || 0)}
-                                        <span className="ml-2 text-[#fef3c7]">{book.averageRating?.toFixed(1) || "No ratings"}</span>
+                                        <span className="ml-2 text-[#fef3c7]">{book.averageRating?.toFixed(1) || t("bookDetails:noRatings", "No ratings")}</span>
                                     </div>
                                     <div className="text-[#fef3c7]">
-                                        {totalRatings} {totalRatings === 1 ? "review" : "reviews"}
+                                        {totalRatings} {totalRatings === 1 ? t("bookDetails:reviewWord", "review") : t("bookDetails:reviewsWord", "reviews")}
                                     </div>
                                 </div>
 
@@ -640,8 +641,8 @@ export default function BookDetails() {
                                         >
                                             {buttonProps.disabled ? (
                                                 <span className="flex items-center gap-2">
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#b28a2f]"></div>
-                                                    Processing...
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#b28a2f]"></div>
+                                                {t("bookDetails:processing", "Processing...")}
                                                 </span>
                                             ) : (
                                                 buttonProps.text
@@ -674,7 +675,7 @@ export default function BookDetails() {
                                         variant="outline"
                                         className="bg-transparent border-[#fef3c7] text-[#fef3c7] hover:bg-[#d4af37] hover:text-white hover:border-[#d4af37] transition-colors"
                                     >
-                                        <Share2 className="w-4 h-4 mr-2" /> Share
+                                        <Share2 className="w-4 h-4 mr-2" /> {t("bookDetails:share", "Share")}
                                     </Button>
                                 </div>
                             </div>
@@ -692,7 +693,7 @@ export default function BookDetails() {
                                     className={`flex-shrink-0 w-16 h-24 rounded-md overflow-hidden border-2 transition-all ${activeImage === index ? "border-[#b28a2f] shadow-md" : "border-transparent opacity-70 hover:opacity-100"}`}
                                 >
                                     <Image
-                                        src={book.images?.[activeImage]?.asset?.url || defaultImage}
+                                        src={image?.asset?.url || defaultImage}
                                         alt={`${book.title} - Image ${index + 1}`}
                                         className="w-full h-full object-cover"
                                         width={256}
@@ -708,11 +709,11 @@ export default function BookDetails() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-6">
                             <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-                                <TabsList className="grid grid-cols-4 mb-6 bg-[#f5f5f5] rounded-lg p-1">
-                                    <TabsTrigger value="overview" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">Overview</TabsTrigger>
-                                    <TabsTrigger value="details" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">Details</TabsTrigger>
-                                    <TabsTrigger value="reviews" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">Reviews</TabsTrigger>
-                                    <TabsTrigger value="author" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">Author</TabsTrigger>
+                                    <TabsList className="grid grid-cols-2 sm:grid-cols-4 mb-6 bg-[#f5f5f5] rounded-lg p-1">
+                                        <TabsTrigger value="overview" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("bookDetails:tabs.overview", "Overview")}</TabsTrigger>
+                                        <TabsTrigger value="details" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("bookDetails:tabs.details", "Details")}</TabsTrigger>
+                                        <TabsTrigger value="reviews" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("bookDetails:tabs.reviews", "Reviews")}</TabsTrigger>
+                                        <TabsTrigger value="author" className="text-[#1f2937] data-[state=active]:bg-[#b28a2f] data-[state=active]:text-white rounded-md transition-colors">{t("bookDetails:tabs.author", "Author")}</TabsTrigger>
                                 </TabsList>
 
                                 <TabsContent value="overview" className="space-y-6">
@@ -720,7 +721,7 @@ export default function BookDetails() {
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2 text-[#1f2937]">
                                                 <BookOpen className="w-5 h-5 text-[#b28a2f]" />
-                                                About This Book
+                                                {t("bookDetails:aboutThisBook", "About This Book")}
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
@@ -732,7 +733,7 @@ export default function BookDetails() {
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2 text-[#1f2937]">
                                                 <Star className="w-5 h-5 text-[#b28a2f]" />
-                                                Highlights
+                                                {t("bookDetails:highlights", "Highlights")}
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
@@ -742,9 +743,9 @@ export default function BookDetails() {
                                                         <Book className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-semibold text-[#1f2937]">Format</h4>
+                                                        <h4 className="font-semibold text-[#1f2937]">{t("bookDetails:format", "Format")}</h4>
                                                         <p className="text-[#1f2937]">
-                                                            {book.file ? "Digital PDF / Online Access" : book.accessLink ? "Online Access" : "Not specified"}
+                                                            {book.file ? t("bookDetails:formatTypes.digital", "Digital PDF / Online Access") : book.accessLink ? t("bookDetails:formatTypes.online", "Online Access") : t("bookDetails:notSpecified", "Not specified")}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -754,8 +755,8 @@ export default function BookDetails() {
                                                         <Globe className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-semibold text-[#1f2937]">Language</h4>
-                                                        <p className="text-[#1f2937]">{book.language || "English"}</p>
+                                                        <h4 className="font-semibold text-[#1f2937]">{t("bookDetails:language", "Language")}</h4>
+                                                        <p className="text-[#1f2937]">{book.language || t("bookDetails:english", "English")}</p>
                                                     </div>
                                                 </div>
 
@@ -764,8 +765,8 @@ export default function BookDetails() {
                                                         <User className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-semibold text-[#1f2937]">Author</h4>
-                                                        <p className="text-[#1f2937]">{book.author?.fullName || book.author?.name || "Unknown"}</p>
+                                                        <h4 className="font-semibold text-[#1f2937]">{t("bookDetails:author", "Author")}</h4>
+                                                        <p className="text-[#1f2937]">{book.author?.fullName || book.author?.name || t("bookDetails:unknown", "Unknown")}</p>
                                                     </div>
                                                 </div>
 
@@ -774,8 +775,8 @@ export default function BookDetails() {
                                                         <Calendar className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-semibold text-[#1f2937]">Published</h4>
-                                                        <p className="text-[#1f2937]">{book.publishDate || "Not specified"}</p>
+                                                        <h4 className="font-semibold text-[#1f2937]">{t("bookDetails:published", "Published")}</h4>
+                                                        <p className="text-[#1f2937]">{book.publishDate || t("bookDetails:notSpecified", "Not specified")}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -787,7 +788,7 @@ export default function BookDetails() {
                                             <CardHeader>
                                                 <CardTitle className="flex items-center gap-2 text-[#1f2937]">
                                                     <Book className="w-5 h-5 text-[#b28a2f]" />
-                                                    Book Materials
+                                                    {t("bookDetails:materials.title", "Book Materials")}
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
@@ -803,7 +804,7 @@ export default function BookDetails() {
                                                                 onClick={(e) => {
                                                                     if (!book.file?.asset?.url || !isValidUrl(book.file.asset.url)) {
                                                                         e.preventDefault();
-                                                                        showAlert("Download link is invalid or unavailable. Please try again later.", "error");
+                                                                        showAlert(t("bookDetails:materials.invalidDownloadLink", "Download link is invalid or unavailable. Please try again later."), "error");
                                                                     } else {
                                                                         console.log("Attempting to download file:", book.file.asset.url);
                                                                         window.open(book.file.asset.url, "_blank", "noopener,noreferrer");
@@ -812,13 +813,13 @@ export default function BookDetails() {
                                                                 disabled={!book.file?.asset?.url || !isValidUrl(String(book.file.asset.url))}
                                                             >
                                                                 <Download className="w-4 h-4 mr-2" />
-                                                                Download Book (PDF/ePub)
+                                                                {t("bookDetails:materials.download", "Download Book (PDF/ePub)")}
                                                             </a>
                                                         ) : (
                                                             <Alert className="bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
                                                                 <AlertDescription className="flex items-center gap-2">
                                                                     <Lock className="w-4 h-4 text-[#b28a2f]" />
-                                                                    No downloadable file available for this book.
+                                                                     {t("bookDetails:materials.noFile", "No downloadable file available for this book.")}
                                                                 </AlertDescription>
                                                             </Alert>
                                                         )}
@@ -831,7 +832,7 @@ export default function BookDetails() {
                                                                 onClick={(e) => {
                                                                     if (!book.accessLink || !isValidUrl(book.accessLink)) {
                                                                         e.preventDefault();
-                                                                        showAlert("Online access link is invalid or unavailable. Please try again later.", "error");
+                                                                        showAlert(t("bookDetails:materials.invalidAccessLink", "Online access link is invalid or unavailable. Please try again later."), "error");
                                                                     } else {
                                                                         console.log("Attempting to open access link:", book.accessLink);
                                                                         window.open(book.accessLink, "_blank", "noopener,noreferrer");
@@ -840,13 +841,13 @@ export default function BookDetails() {
                                                                 disabled={!book.accessLink || !isValidUrl(String(book.accessLink))}
                                                             >
                                                                 <ExternalLink className="w-4 h-4 mr-2" />
-                                                                Access Online
+                                                                {t("bookDetails:materials.accessOnline", "Access Online")}
                                                             </a>
                                                         ) : (
                                                             <Alert className="bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
                                                                 <AlertDescription className="flex items-center gap-2">
                                                                     <Lock className="w-4 h-4 text-[#b28a2f]" />
-                                                                    No online access link available for this book.
+                                                                     {t("bookDetails:materials.noAccess", "No online access link available for this book.")}
                                                                 </AlertDescription>
                                                             </Alert>
                                                         )}
@@ -856,14 +857,14 @@ export default function BookDetails() {
                                                         <AlertDescription className="flex items-center gap-2">
                                                             <Lock className="w-4 h-4 text-[#b28a2f]" />
                                                             {book.price > 0 ? (
-                                                                "Purchase this book to access its full content and downloadable materials."
+                                                                t("bookDetails:materials.purchaseToAccess", "Purchase this book to access its full content and downloadable materials.")
                                                             ) : (
                                                                 <>
-                                                                    Click{" "}
+                                                                    {t("bookDetails:click", "Click")} {" "}
                                                                     <a href="#" onClick={handlePurchase} className="text-[#b28a2f] hover:underline">
-                                                                        &apos;Download Free&apos;
+                                                                        {t("bookDetails:downloadFree", "'Download Free'")}
                                                                     </a>{" "}
-                                                                    to access this book.
+                                                                    {t("bookDetails:toAccessThisBook", "to access this book.")}
                                                                 </>
                                                             )}
                                                         </AlertDescription>
@@ -879,64 +880,64 @@ export default function BookDetails() {
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2 text-[#1f2937]">
                                                 <Book className="w-5 h-5 text-[#b28a2f]" />
-                                                Book Specifications
+                                                {t("bookDetails:specs.title", "Book Specifications")}
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6">
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Title</h4>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:specs.titleLabel", "Title")}</h4>
                                                     <p className="text-[#1f2937] font-medium">{book.title}</p>
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Author</h4>
-                                                    <p className="text-[#1f2937] font-medium">{book.author?.fullName || book.author?.name || "Unknown"}</p>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:specs.authorLabel", "Author")}</h4>
+                                                    <p className="text-[#1f2937] font-medium">{book.author?.fullName || book.author?.name || t("bookDetails:unknown", "Unknown")}</p>
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Category</h4>
-                                                    <Badge variant="outline" className="mt-1 bg-[#fef3c7] text-[#1f2937] border-[#d4af37] hover:bg-[#d4af37] hover:text-white">{book.category || "Uncategorized"}</Badge>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:specs.category", "Category")}</h4>
+                                                    <Badge variant="outline" className="mt-1 bg-[#fef3c7] text-[#1f2937] border-[#d4af37] hover:bg-[#d4af37] hover:text-white">{book.category || t("bookDetails:uncategorized", "Uncategorized")}</Badge>
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Language</h4>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:specs.language", "Language")}</h4>
                                                     <p className="text-[#1f2937] font-medium">{book.language || "English"}</p>
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Pages</h4>
-                                                    <p className="text-[#1f2937] font-medium">{book.pageCount || "Not specified"}</p>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:specs.pages", "Pages")}</h4>
+                                                    <p className="text-[#1f2937] font-medium">{book.pageCount || t("bookDetails:notSpecified", "Not specified")}</p>
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Publication Date</h4>
-                                                    <p className="text-[#1f2937] font-medium">{book.publishDate || "Not specified"}</p>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:specs.publicationDate", "Publication Date")}</h4>
+                                                    <p className="text-[#1f2937] font-medium">{book.publishDate || t("bookDetails:notSpecified", "Not specified")}</p>
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Format</h4>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:format", "Format")}</h4>
                                                     <div className="flex gap-2 mt-1">
                                                         {book.file && (
                                                             <Badge variant="outline" className="bg-[#fef3c7] text-[#1f2937] hover:bg-[#d4af37] hover:text-white border-[#d4af37]">
-                                                                PDF
+                                                                {t("bookDetails:formatTypes.digital", "Digital PDF / Online Access")}
                                                             </Badge>
                                                         )}
                                                         {book.accessLink && (
                                                             <Badge variant="outline" className="bg-[#fef3c7] text-[#1f2937] hover:bg-[#d4af37] hover:text-white border-[#d4af37]">
-                                                                Online Access
+                                                                {t("bookDetails:formatTypes.online", "Online Access")}
                                                             </Badge>
                                                         )}
                                                         {!book.file && !book.accessLink && (
-                                                            <span className="text-[#1f2937]/70">Not specified</span>
+                                                            <span className="text-[#1f2937]/70">{t("bookDetails:notSpecified", "Not specified")}</span>
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">Price</h4>
+                                                    <h4 className="text-sm font-medium text-[#1f2937]/70">{t("bookDetails:specs.price", "Price")}</h4>
                                                     <p className="text-[#1f2937] font-medium">
-                                                        {book.price > 0 ? `$${book.price.toFixed(2)}` : "Free"}
+                                                        {book.price > 0 ? `${book.price.toFixed(2)} SAR` : t("bookDetails:free", "Free")}
                                                     </p>
                                                 </div>
                                             </div>
@@ -945,7 +946,7 @@ export default function BookDetails() {
                                                 <Alert className="mt-8 bg-[#fef3c7] border-[#d4af37] text-[#1f2937]">
                                                     <AlertDescription className="flex items-center gap-2">
                                                         <Lock className="w-4 h-4 text-[#b28a2f]" />
-                                                        Purchase this book to access its full content and downloadable materials.
+                                                        {t("bookDetails:materials.purchaseToAccess", "Purchase this book to access its full content and downloadable materials.")}
                                                     </AlertDescription>
                                                 </Alert>
                                             )}
@@ -958,7 +959,7 @@ export default function BookDetails() {
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2 text-[#1f2937]">
                                                 <Star className="w-5 h-5 text-[#b28a2f]" />
-                                                Reader Reviews
+                                                {t("bookDetails:reviews.title", "Reader Reviews")}
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
@@ -971,7 +972,7 @@ export default function BookDetails() {
                                                             </div>
                                                             <div className="mt-2">{renderStars(book.averageRating || 0)}</div>
                                                             <div className="mt-1 text-[#1f2937]/70">
-                                                                {totalRatings} {totalRatings === 1 ? "review" : "reviews"}
+                                                                {totalRatings} {totalRatings === 1 ? t("bookDetails:reviewWord", "review") : t("bookDetails:reviewsWord", "reviews")}
                                                             </div>
                                                         </div>
 
@@ -982,7 +983,7 @@ export default function BookDetails() {
 
                                                                 return (
                                                                     <div key={star} className="flex items-center gap-4 my-1">
-                                                                        <div className="w-8 text-sm text-[#1f2937]">{`${star} star`}</div>
+                                                                        <div className="w-8 text-sm text-[#1f2937]">{`${star} ${t("bookDetails:reviews.stars", "stars")}`}</div>
                                                                         <Progress
                                                                             value={percentage}
                                                                             className="h-2 flex-grow bg-[#e5e7eb]"
@@ -1000,23 +1001,23 @@ export default function BookDetails() {
                                                     <div className="bg-[#fef3c7] p-5 rounded-lg shadow-sm border border-[#d4af37] mb-6">
                                                         <h4 className="text-lg font-semibold text-[#1f2937] mb-3 flex items-center gap-2">
                                                             <MessageSquare size={20} className="text-[#b28a2f]" />
-                                                            Rate This Book
+                                                            {t("bookDetails:reviews.rateThisBook", "Rate This Book")}
                                                         </h4>
                                                         <form onSubmit={handleRatingSubmit}>
                                                             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
                                                                 <div className="flex items-center bg-white py-2 px-3 rounded-md border border-[#e5e7eb] shadow-sm">
                                                                     {renderStars(userRating, true)}
                                                                     <span className="ml-2 text-sm text-[#1f2937] min-w-20">
-                                                                        {userRating ? `${userRating}/5` : "Select a rating"}
+                                                                        {userRating ? `${userRating}/5` : t("bookDetails:reviews.selectRating", "Select a rating")}
                                                                     </span>
                                                                 </div>
-                                                                <span className="text-xs text-[#1f2937]/70">Click to rate</span>
+                                                                <span className="text-xs text-[#1f2937]/70">{t("bookDetails:reviews.clickToRate", "Click to rate")}</span>
                                                             </div>
                                                             <div className="relative mb-4">
                                                                 <textarea
                                                                     value={userComment}
                                                                     onChange={(e) => setUserComment(e.target.value)}
-                                                                    placeholder="Leave a comment"
+                                                                    placeholder={t("bookDetails:reviews.leaveComment", "Leave a comment")}
                                                                     maxLength={200}
                                                                     className="w-full p-3 border border-[#e5e7eb] rounded-md focus:outline-none focus:ring-2 focus:ring-[#d4af37] bg-white text-[#1f2937]"
                                                                     rows={3}
@@ -1031,7 +1032,7 @@ export default function BookDetails() {
                                                                 className="w-full bg-gradient-to-r from-[#b28a2f] to-[#d4af37] hover:from-[#d4af37] hover:to-[#b28a2f] disabled:bg-[#e5e7eb] disabled:cursor-not-allowed text-white font-medium"
                                                             >
                                                                 <Star size={18} className="mr-2" />
-                                                                {isSubmitting ? "Submitting..." : "Submit Rating"}
+                                                                {isSubmitting ? t("bookDetails:reviews.submitting", "Submitting...") : t("bookDetails:reviews.submitRating", "Submit Rating")}
                                                             </Button>
                                                         </form>
                                                     </div>
@@ -1045,12 +1046,12 @@ export default function BookDetails() {
                                                                 <div className="flex justify-between items-start mb-2">
                                                                     <div>
                                                                         <div className="font-medium text-[#1f2937]">
-                                                                            {rating.user?.userName || rating.user?.name || "Anonymous Reader"}
+                                                                            {rating.user?.userName || rating.user?.name || t("bookDetails:reviews.anonymous", "Anonymous Reader")}
                                                                         </div>
                                                                         <div className="flex items-center gap-2 mt-1">
                                                                             {renderStars(rating.value)}
                                                                             <span className="text-sm text-[#1f2937]/70">
-                                                                                {rating.date ? new Date(rating.date).toLocaleDateString() : "No date"}
+                                                                                {rating.date ? new Date(rating.date).toLocaleDateString() : t("bookDetails:reviews.noDate", "No date")}
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -1067,9 +1068,9 @@ export default function BookDetails() {
                                                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#fef3c7] text-[#b28a2f] mb-4">
                                                         <MessageSquareOff className="w-10 h-10" />
                                                     </div>
-                                                    <h3 className="text-lg font-medium text-[#1f2937] mb-2">No Reviews Yet</h3>
+                                                <h3 className="text-lg font-medium text-[#1f2937] mb-2">{t("bookDetails:reviews.noReviews", "No Reviews Yet")}</h3>
                                                     <p className="text-[#1f2937]/70 max-w-md mx-auto">
-                                                        Be the first to review this book and share your thoughts with other readers.
+                                                        {t("bookDetails:reviews.beTheFirst", "Be the first to review this book and share your thoughts with other readers.")}
                                                     </p>
                                                 </div>
                                             )}
@@ -1082,7 +1083,7 @@ export default function BookDetails() {
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2 text-[#1f2937]">
                                                 <User className="w-5 h-5 text-[#b28a2f]" />
-                                                About the Author
+                                                {t("bookDetails:authorSection.title", "About the Author")}
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
@@ -1103,7 +1104,7 @@ export default function BookDetails() {
 
                                                 <div className={`flex flex-col justify-center w-full ${book.author?.image ? "md:w-3/4" : ""}`}>
                                                     <h3 className="text-xl font-semibold text-[#1f2937] mb-2">
-                                                        {book.author?.fullName || book.author?.name || "Unknown Author"}
+                                                        {book.author?.fullName || book.author?.name || t("bookDetails:unknownAuthor", "Unknown Author")}
                                                     </h3>
                                                     {book.author?.userName && (
                                                         <p className="text-[#1f2937]/70 mb-2">@{book.author.userName}</p>
@@ -1119,14 +1120,14 @@ export default function BookDetails() {
                                                         variant="outline"
                                                     >
                                                         <MessageSquare size={18} className="mr-2" />
-                                                        {showAuthorContact ? "Hide Contact" : "See Contact Details"}
+                                                    {showAuthorContact ? t("bookDetails:authorSection.hideContact", "Hide Contact") : t("bookDetails:authorSection.seeContactDetails", "See Contact Details")}
                                                     </Button>
                                                     {showAuthorContact && (
                                                         <div className="mt-4 p-4 bg-[#fef3c7] rounded-lg border border-[#d4af37] shadow-sm">
                                                             {book.author?.email && (
                                                                 <p className="flex items-center text-sm text-[#1f2937] mb-2">
                                                                     <Mail className="w-4 h-4 mr-2 text-[#b28a2f]" />
-                                                                    <span className="font-medium">Email:</span>
+                                                                    <span className="font-medium">{t("bookDetails:authorSection.email", "Email:")}</span>
                                                                     <a
                                                                         href={`mailto:${book.author.email}`}
                                                                         className="ml-1 text-[#b28a2f] hover:text-[#d4af37] hover:underline"
@@ -1138,7 +1139,7 @@ export default function BookDetails() {
                                                             {book.author?.phoneNumber && (
                                                                 <p className="flex items-center text-sm text-[#1f2937]">
                                                                     <Phone className="w-4 h-4 mr-2 text-[#b28a2f]" />
-                                                                    <span className="font-medium">Phone:</span>
+                                                                    <span className="font-medium">{t("bookDetails:authorSection.phone", "Phone:")}</span>
                                                                     <a
                                                                         href={`tel:${book.author.phoneNumber}`}
                                                                         className="ml-1 text-[#b28a2f] hover:text-[#d4af37] hover:underline"
@@ -1154,7 +1155,7 @@ export default function BookDetails() {
 
                                             {book.author?.otherBooks && book.author.otherBooks.length > 0 && (
                                                 <div className="mt-6">
-                                                    <h4 className="text-lg font-semibold text-[#1f2937] mb-4">Other Books by This Author</h4>
+                                                    <h4 className="text-lg font-semibold text-[#1f2937] mb-4">{t("bookDetails:authorSection.otherBooks", "Other Books by This Author")}</h4>
                                                     <div className="space-y-4">
                                                         {book.author.otherBooks.map((otherBook) => (
                                                             <div
@@ -1193,7 +1194,7 @@ export default function BookDetails() {
                                                 onClick={() => router.push(`/authors/${book.author?._id}`)}
                                             >
                                                 <span className="flex items-center justify-center gap-2">
-                                                    View Author Profile
+                                                    {t("bookDetails:authorSection.viewProfile", "View Author Profile")}
                                                     <ChevronRight className="w-4 h-4" />
                                                 </span>
                                             </Button>
@@ -1206,22 +1207,22 @@ export default function BookDetails() {
                         <div className="space-y-6">
                             <Card className="border-[#e5e7eb] bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                                 <div className="bg-gradient-to-r from-[#b28a2f] to-[#d4af37] px-6 py-4">
-                                    <h3 className="text-xl font-semibold text-white">Get This Book</h3>
+                                    <h3 className="text-xl font-semibold text-white">{t("bookDetails:getThisBook", "Get This Book")}</h3>
                                 </div>
 
                                 <CardContent className="pt-6">
                                     <div className="mb-6">
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-[#1f2937]">Price:</span>
+                                            <span className="text-[#1f2937]">{t("bookDetails:price", "Price:")}</span>
                                             <span className="text-2xl font-bold text-[#b28a2f]">
-                                                {book.price > 0 ? `$${book.price.toFixed(2)}` : "Free"}
+                                                {book.price > 0 ? `${book.price.toFixed(2)} SAR` : t("bookDetails:free", "Free")}
                                             </span>
                                         </div>
 
                                         {book.price > 0 && (
                                             <div className="text-sm text-[#b28a2f] flex items-center gap-1 justify-end mb-4">
                                                 <Lock className="w-3 h-3" />
-                                                Secure payment
+                                                {t("bookDetails:securePayment", "Secure payment")}
                                             </div>
                                         )}
                                     </div>
@@ -1250,19 +1251,19 @@ export default function BookDetails() {
                                                 <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
                                                     <CheckIcon className="w-3 h-3 text-[#b28a2f]" />
                                                 </div>
-                                                Instant digital access
+                                                    {t("bookDetails:instantAccess", "Instant digital access")}
                                             </div>
                                             <div className="flex items-center gap-2 text-[#1f2937]">
                                                 <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
                                                     <CheckIcon className="w-3 h-3 text-[#b28a2f]" />
                                                 </div>
-                                                {book.file ? "Downloadable PDF included" : "Online access"}
+                                                    {book.file ? t("bookDetails:downloadablePdfIncluded", "Downloadable PDF included") : t("bookDetails:onlineAccess", "Online access")}
                                             </div>
                                             <div className="flex items-center gap-2 text-[#1f2937]">
                                                 <div className="w-5 h-5 rounded-full bg-[#fef3c7] flex items-center justify-center">
                                                     <CheckIcon className="w-3 h-3 text-[#b28a2f]" />
                                                 </div>
-                                                Secure payment
+                                                    {t("bookDetails:securePayment", "Secure payment")}
                                             </div>
                                         </div>
                                     )}
@@ -1271,7 +1272,7 @@ export default function BookDetails() {
 
                             <Card className="bg-white border-[#e5e7eb] shadow-md hover:shadow-lg transition-shadow">
                                 <CardHeader>
-                                    <CardTitle className="text-lg text-[#1f2937]">Related Books</CardTitle>
+                                    <CardTitle className="text-lg text-[#1f2937]">{t("bookDetails:relatedBooks", "Related Books")}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     {relatedBooks.length > 0 ? (
@@ -1302,7 +1303,7 @@ export default function BookDetails() {
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-[#1f2937]/70 text-sm">No related books found.</p>
+                                        <p className="text-[#1f2937]/70 text-sm">{t("bookDetails:noRelatedBooks", "No related books found.")}</p>
                                     )}
                                 </CardContent>
                                 <CardFooter>
@@ -1311,7 +1312,7 @@ export default function BookDetails() {
                                         className="w-full text-[#b28a2f] hover:text-[#d4af37] hover:bg-[#fef3c7]"
                                         onClick={() => router.push(`/books?category=${book.category}`)}
                                     >
-                                        View All Related Books
+                                        {t("bookDetails:viewAllRelated", "View All Related Books")}
                                     </Button>
                                 </CardFooter>
                             </Card>

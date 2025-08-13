@@ -51,7 +51,7 @@ const ContactClient = () => {
                             <div className="flex items-center justify-center">
                                 <Image
                                     src="/assets/imgs/illustrations/team.svg"
-                                    alt="Team Illustration"
+                                    alt={t("contact:teamIllustration")}
                                     width={500}
                                     height={300}
                                     style={{ width: "auto", height: "auto" }}

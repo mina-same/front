@@ -384,10 +384,34 @@ const Header = ({ handleHidden }) => {
                 </li>
                 <li>
                   <Link
-                    href="/horseTrimmer"
+                    href="/hoofTrimme"
                     className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                   >
                     {t("header:horseTrimmer")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/horseGrooming"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:horse_grooming")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/resources"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:digital_library_services")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/resources"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:horse_course_provider")}
                   </Link>
                 </li>
                 <li>
@@ -418,7 +442,7 @@ const Header = ({ handleHidden }) => {
                 </li>
                 <li>
                   <Link
-                    href="/suppliers"
+                    href="/SupplierStores"
                     className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                   >
                     {t("header:suppliers")}
@@ -430,6 +454,46 @@ const Header = ({ handleHidden }) => {
                     className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
                   >
                     {t("header:horseCatering")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/consultingServices"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:consulting_services")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/photographyServices"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:photography_services")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/eventJudging"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:event_judging")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/eventCommentary"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:event_commentary")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/marketingPromotion"
+                    className="menu-sub-item text-sm text-blueGray-600 hover:text-blueGray-500"
+                  >
+                    {t("header:marketing_promotion")}
                   </Link>
                 </li>
               </ul>

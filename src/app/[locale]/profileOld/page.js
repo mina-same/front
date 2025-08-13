@@ -837,7 +837,7 @@ const ProfessionalProfileDashboard = () => {
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                                 <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{t("profile:featuredService")}</h3>
                                 <div className="flex items-baseline gap-1 sm:gap-2">
-                                    <span className="text-2xl sm:text-3xl font-bold text-gray-900">${mainService.price}</span>
+                                   <span className="text-2xl sm:text-3xl font-bold text-gray-900">{mainService.price} SAR</span>
                                     <span className="text-sm sm:text-base text-gray-500">{t("profile:session")}</span>
                                 </div>
                             </div>

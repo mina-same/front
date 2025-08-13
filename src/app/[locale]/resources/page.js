@@ -13,12 +13,15 @@ import CoursesList from "./CoursesList";
 import BooksList from "./BooksList";
 import ResourcesFilters from "./ResourcesFilters";
 import Layout from "../../../../components/layout/Layout";
+import { useTranslation } from "react-i18next";
 
 export default function ResourcesPage() {
   const [activeTab, setActiveTab] = useState("courses");
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { t, i18n } = useTranslation("resourcesPage");
+  const isRTL = i18n.dir() === "rtl";
 
   return (
     <Layout>
@@ -31,14 +34,14 @@ export default function ResourcesPage() {
               {/* Tabs navigation */}
               <Tabs defaultValue="courses" value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="flex justify-between gap-4 mb-6">
-                  <TabsList className="bg-gray-100 p-1">
-                    <TabsTrigger value="courses" className="flex items-center gap-2 px-4 py-2">
+              <TabsList className="bg-gray-100 p-1">
+                <TabsTrigger value="courses" className="flex items-center gap-2 px-4 py-2">
                       <BookOpen className="h-4 w-4" />
-                      <span>Courses</span>
+                  <span>{t("tabs.courses")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="books" className="flex items-center gap-2 px-4 py-2">
                       <Book className="h-4 w-4" />
-                      <span>Books</span>
+                  <span>{t("tabs.books")}</span>
                     </TabsTrigger>
                   </TabsList>
 
@@ -65,11 +68,11 @@ export default function ResourcesPage() {
                 {/* Search & Filter UI */}
                 <div className="flex flex-col lg:flex-row gap-4 mb-8">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 ${isRTL ? "right-3" : "left-3"}`} />
                     <Input
                       type="text"
-                      placeholder={`Search ${activeTab}...`}
-                      className="pl-10 w-full"
+                      placeholder={t("searchPlaceholder", { tab: t(`tabs.${activeTab}`) })}
+                      className={`${isRTL ? "pr-10" : "pl-10"} w-full`}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -81,22 +84,22 @@ export default function ResourcesPage() {
                     onClick={() => setShowFilters(!showFilters)}
                   >
                     <Filter className="h-4 w-4" />
-                    <span>Filters</span>
+                    <span>{t("filtersButton")}</span>
                     {showFilters && <X className="h-4 w-4 ml-2" />}
                   </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="flex items-center gap-2">
-                        <span>Sort by</span>
+                        <span>{t("sort.by")}</span>
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>Newest</DropdownMenuItem>
-                      <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                      <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
-                      <DropdownMenuItem>Highest Rated</DropdownMenuItem>
+                      <DropdownMenuItem>{t("sort.newest")}</DropdownMenuItem>
+                      <DropdownMenuItem>{t("sort.priceLowHigh")}</DropdownMenuItem>
+                      <DropdownMenuItem>{t("sort.priceHighLow")}</DropdownMenuItem>
+                      <DropdownMenuItem>{t("sort.highestRated")}</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

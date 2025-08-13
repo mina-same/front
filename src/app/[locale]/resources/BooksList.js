@@ -10,10 +10,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+  import { useTranslation } from "react-i18next";
 
-const mockBooks = [];
+  const mockBooks = [];
 
-export default function BooksList({ viewMode, searchQuery }) {
+  export default function BooksList({ viewMode, searchQuery }) {
   const [books, setBooks] = useState(mockBooks);
   const [loading, setLoading] = useState(true);
   const [hoveredBook, setHoveredBook] = useState(null);
@@ -21,6 +22,8 @@ export default function BooksList({ viewMode, searchQuery }) {
   const [wishlistLoading, setWishlistLoading] = useState({});
   const [currentUserId, setCurrentUserId] = useState(null);
   const router = useRouter();
+    const { t, i18n } = useTranslation("resourcesPage");
+    const isRTL = i18n.dir() === "rtl";
 
   useEffect(() => {
     const verifyUser = async () => {
@@ -133,9 +136,9 @@ export default function BooksList({ viewMode, searchQuery }) {
       console.log("No user ID, redirecting to login");
       toast.error(
         <div>
-          You must be logged in to manage your wishlist.{" "}
+          {t("authRequired.message")} {" "}
           <a href="/login" className="text-blue-600 hover:underline">
-            Log in here
+            {t("authRequired.loginLink")}
           </a>
         </div>
       );
@@ -145,7 +148,7 @@ export default function BooksList({ viewMode, searchQuery }) {
 
     if (!bookId) {
       console.error("Invalid bookId:", bookId);
-      toast.error("Invalid book. Please try again.");
+      toast.error(t("books.errors.invalid"));
       return;
     }
 
@@ -162,7 +165,7 @@ export default function BooksList({ viewMode, searchQuery }) {
         const index = wishlistBooks.findIndex((item) => item._ref === bookId);
         if (index === -1) {
           console.warn("Book not found in wishlist:", bookId);
-          toast.error("Book not found in wishlist.");
+          toast.error(t("books.errors.notFound"));
           return;
         }
         await client
@@ -172,7 +175,7 @@ export default function BooksList({ viewMode, searchQuery }) {
         setWishlist((prev) => {
           const newWishlist = { ...prev };
           delete newWishlist[bookId];
-          toast.success("Removed from wishlist");
+          toast.success(t("books.success.removed"));
           console.log("Updated wishlist after removal:", newWishlist);
           return newWishlist;
         });
@@ -190,14 +193,14 @@ export default function BooksList({ viewMode, searchQuery }) {
           .commit();
         setWishlist((prev) => {
           const newWishlist = { ...prev, [bookId]: true };
-          toast.success("Added to wishlist");
+          toast.success(t("books.success.added"));
           console.log("Updated wishlist after addition:", newWishlist);
           return newWishlist;
         });
       }
     } catch (error) {
       console.error("Error updating wishlist:", error);
-      toast.error("Failed to update wishlist. Please try again.");
+      toast.error(t("books.errors.updateFailed"));
     } finally {
       setWishlistLoading((prev) => ({ ...prev, [bookId]: false }));
     }
@@ -232,8 +235,8 @@ export default function BooksList({ viewMode, searchQuery }) {
     return (
       <div className="text-center py-16">
         <Book className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">No books found</h3>
-        <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">{t("books.noItemsTitle")}</h3>
+        <p className="text-gray-500">{t("books.noItemsSubtitle")}</p>
       </div>
     );
   }
@@ -267,8 +270,8 @@ export default function BooksList({ viewMode, searchQuery }) {
                 alt={book.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-2 right-2 bg-[#d4af37] text-white text-xs px-2 py-1 rounded">
-                Book
+              <div className={`absolute top-2 ${isRTL ? "left-2" : "right-2"} bg-[#d4af37] text-white text-xs px-2 py-1 rounded`}>
+                {t("books.badge")}
               </div>
             </div>
             <div className={`flex flex-col ${viewMode === "list" ? "md:w-2/3" : ""}`}>
@@ -276,35 +279,35 @@ export default function BooksList({ viewMode, searchQuery }) {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-lg line-clamp-2">{book.title}</h3>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <div className="flex items-center space-x-1">{renderStars(book.averageRating || 0)}</div>
+                    <div className={`flex items-center space-x-2 ${isRTL ? "space-x-reverse" : ""} mt-1`}>
+                      <div className={`flex items-center space-x-1 ${isRTL ? "space-x-reverse" : ""}`}>{renderStars(book.averageRating || 0)}</div>
                       <span className="text-sm text-gray-500">({book.ratingCount || 0})</span>
                     </div>
                   </div>
-                  <div className="text-lg font-bold text-[#d4af37]">${book.price || 0}</div>
+                  <div className="text-lg font-bold text-[#d4af37]">{book.price || 0} SAR</div>
                 </div>
               </CardHeader>
               <CardContent className="pb-2">
                 <p className="text-gray-600 text-sm line-clamp-2 mb-4">{book.description}</p>
                 <div className="flex flex-wrap gap-2 text-sm text-gray-500">
                   <div className="flex items-center">
-                    <User className="w-4 h-4 mr-1" />
-                    {book.author?.fullName || "Unknown Author"}
+                    <User className={`w-4 h-4 ${isRTL ? "ml-1" : "mr-1"}`} />
+                    {book.author?.fullName || t("books.unknownAuthor")}
                   </div>
                   <div className="flex items-center">
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">{book.language || "English"}</span>
+                    <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">{book.language || t("books.languageFallback")}</span>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="pt-2 mt-auto">
                 <Button className="w-full" variant="outline">
-                  View Book
+                  {t("books.viewCta")}
                 </Button>
               </CardFooter>
             </div>
           </Link>
           <div
-            className={`absolute top-3 right-3 flex flex-col gap-3 transition-all duration-300 ${
+            className={`absolute top-3 ${isRTL ? "left-3" : "right-3"} flex flex-col gap-3 transition-all duration-300 ${
               hoveredBook === book._id ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2"
             } z-20`}
           >
@@ -317,7 +320,7 @@ export default function BooksList({ viewMode, searchQuery }) {
                   ? "bg-red-50 text-red-500 border-red-500 hover:bg-red-100 hover:text-red-600"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-red-50 hover:text-red-500 hover:border-red-500"
               } ${wishlistLoading[book._id] ? "opacity-50 cursor-not-allowed" : ""}`}
-              title="Add to Wishlist"
+              title={t("books.wishlistTitle")}
               disabled={wishlistLoading[book._id]}
             >
               {wishlistLoading[book._id] ? (

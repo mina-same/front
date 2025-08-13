@@ -99,7 +99,7 @@ const ForgetPassword = () => {
                                 style={{ width: 'auto', height: 'auto' }}
                                 className="lg:max-w-lg mx-auto"
                                 src="/assets/imgs/illustrations/forgot-password.svg"
-                                alt="Monst"
+                                alt="Forgot password illustration"
                             />
                         </div>
                     </div>

@@ -1,0 +1,108 @@
+{
+  "hero": {
+    "title": "Edit Competition",
+    "subtitle": "Only the creator of this competition can access this page"
+  },
+  "form": {
+    "competitionNames": {
+      "title": "Competition Names",
+      "arabic": "Competition Name (Arabic)",
+      "english": "Competition Name (English)"
+    },
+    "location": {
+      "title": "Location & Address",
+      "address": "Competition Address",
+      "country": "Country",
+      "governorate": "Governorate",
+      "city": "City"
+    },
+    "streaming": {
+      "title": "Live Streaming",
+      "link": "Live Streaming Link"
+    },
+    "about": {
+      "title": "About Competition"
+    },
+    "dateTime": {
+      "title": "Date & Time",
+      "date": "Competition Date"
+    },
+    "actions": {
+      "title": "Competition Actions",
+      "delete": "Delete Competition",
+      "deleteConfirm": "Are you sure you want to delete this competition?",
+      "deleteWarning": "This action cannot be undone!",
+      "deleteSuccess": "Competition deleted successfully",
+      "deleteError": "Failed to delete competition",
+      "cannotDelete": "Cannot delete competition after gifts have been sent"
+    }
+  },
+  "invitations": {
+    "title": "Manage Invitations",
+    "inviteLink": {
+      "title": "Invite Link",
+      "copy": "Copy Link",
+      "copied": "Link copied!",
+      "generate": "Generate New Link"
+    },
+    "inviteUsers": {
+      "title": "Invite Users",
+      "search": "Search for users",
+      "placeholder": "Enter username or email...",
+      "invite": "Invite",
+      "invited": "Invited"
+    },
+    "manageUsers": {
+      "title": "Manage Users",
+      "remove": "Remove",
+      "removeConfirm": "Are you sure you want to remove this user?",
+      "removed": "User removed successfully"
+    }
+  },
+  "competitors": {
+    "title": "Competitors",
+    "editHorse": {
+      "title": "Edit Horse Selection",
+      "mainHorse": "Main Horse",
+      "surpriseHorse": "Surprise Horse",
+      "surpriseName": "Surprise Horse Name",
+      "activeHorse": "Active Horse",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "Changes saved successfully"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending Acceptance"
+    }
+  },
+  "navigation": {
+    "back": "Back to Competition",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "saved": "Saved!"
+  },
+  "validation": {
+    "authRequired": "Authentication Required! 🔐",
+    "authRequiredDesc": "Please log in to continue.",
+    "notOwner": "You are not authorized to edit this competition",
+    "competitionNotFound": "Competition not found"
+  },
+  "success": {
+    "updated": "Competition updated successfully! 🎉",
+    "invitationSent": "Invitation sent successfully! 📨",
+    "userRemoved": "User removed successfully! ✅"
+  },
+  "errors": {
+    "general": "Error! ❌",
+    "updateFailed": "Failed to update competition. Please try again.",
+    "invitationFailed": "Failed to send invitation: {{error}}",
+    "removeFailed": "Failed to remove user: {{error}}"
+  },
+  "loading": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "sending": "Sending..."
+  }
+}

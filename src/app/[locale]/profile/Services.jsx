@@ -19,16 +19,11 @@ import {
   Trash,
   Users,
   Clock,
-  UserPlus,
 } from "lucide-react";
 import { client, urlFor } from "../../../lib/sanity";
 import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import userFallbackImage from "../../../../public/assets/imgs/elements/user.png";
-import NewProviderServiceForm from "../../../../components/elements/NewProviderServiceForm";
-import AddServiceForm from "../../../../components/elements/AddServiceForm";
-import JoinServiceForm from "../../../../components/elements/JoinServiceForm";
-import ServiceRequestsDashboard from "../../../../components/elements/ServiceRequestsDashboard";
 
 // Delete handlers (unchanged)
 const handleProviderDeletion = async (providerId, client) => {
@@ -192,11 +187,6 @@ const UserServices = ({ userId }) => {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedProviderId, setExpandedProviderId] = useState(null);
-  const [showServiceForm, setShowServiceForm] = useState(false);
-  const [showAddService, setShowAddService] = useState(false);
-  const [showJoinService, setShowJoinService] = useState(false);
-  const [existingProviderId, setExistingProviderId] = useState(null);
-  const [selectedProviderName, setSelectedProviderName] = useState(null);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
 
@@ -378,7 +368,7 @@ const UserServices = ({ userId }) => {
           {t("profile:createYourFirstService")}
         </p>
         <button
-          onClick={() => setShowServiceForm(true)}
+          onClick={() => window.location.href = "/services/add-service"}
           className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
         >
           <Plus className="w-5 h-5" />
@@ -544,33 +534,6 @@ const UserServices = ({ userId }) => {
     );
   };
 
-  const Modal = ({ isOpen, onClose, title, children }) => (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            className="bg-white rounded-xl shadow-xl w-full max-w-6xl overflow-y-auto max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-gray-100">
-              <h3 className="text-xl font-semibold">{title}</h3>
-            </div>
-            <div className="p-6 overflow-y-auto">{children}</div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -583,7 +546,7 @@ const UserServices = ({ userId }) => {
         </h2>
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           <button
-            onClick={() => setShowServiceForm(true)}
+            onClick={() => window.location.href = "/services/add-service"}
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
           >
             <Plus className="w-5 h-5" />
@@ -650,7 +613,7 @@ const UserServices = ({ userId }) => {
                           ? urlFor(provider.mainServiceRef.image).url()
                           : userFallbackImage
                       }
-                      alt={isRTL ? provider.name_ar : provider.name_en}
+                      alt={`${isRTL ? provider.name_ar : provider.name_en} - ${isRTL ? provider.mainServiceRef?.name_ar : provider.mainServiceRef?.name_en} service cover image`}
                       className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
                       width={800}
                       height={320}
@@ -702,7 +665,7 @@ const UserServices = ({ userId }) => {
                               ? urlFor(provider.userRef.image).url()
                               : userFallbackImage
                           }
-                          alt={provider.userRef?.userName}
+                          alt={`${provider.userRef?.userName || 'User'} profile picture`}
                           className="w-20 h-20 rounded-full ring-4 ring-white/20 backdrop-blur-sm"
                           width={80}
                           height={80}
@@ -778,7 +741,7 @@ const UserServices = ({ userId }) => {
                                     ? urlFor(service.image).url()
                                     : userFallbackImage
                                 }
-                                alt={isRTL ? service.name_ar : service.name_en}
+                                alt={`${isRTL ? service.name_ar : service.name_en} service thumbnail`}
                                 className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-110"
                                 width={96}
                                 height={96}
@@ -811,10 +774,8 @@ const UserServices = ({ userId }) => {
                       </div>
                     </div>
                   )}
-                  {/* Service Requests Dashboard */}
-                  <ServiceRequestsDashboard providerId={provider._id} />
                   {/* Action Buttons */}
-                  <div className={getDirectionClass("grid grid-cols-1 sm:grid-cols-3 gap-4")}>
+                  <div className={getDirectionClass("grid grid-cols-1 sm:grid-cols-2 gap-4")}>
                     <motion.button
                       whileHover={{ y: -2 }}
                       className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-blue-500 text-blue-500 rounded-xl font-medium hover:bg-blue-50 transition-colors"
@@ -824,29 +785,6 @@ const UserServices = ({ userId }) => {
                     >
                       <Edit className="w-5 h-5" />
                       {t("profile:editService")}
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ y: -2 }}
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-blue-500 text-blue-500 rounded-xl font-medium hover:bg-blue-50 transition-colors"
-                      onClick={() => {
-                        setExistingProviderId(provider._id);
-                        setSelectedProviderName(isRTL ? provider.name_ar : provider.name_en);
-                        setShowAddService(true);
-                      }}
-                    >
-                      <Plus className="w-5 h-5" />
-                      {t("profile:addService")}
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ y: -2 }}
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#b28a2f] to-[#9b7733] text-white rounded-xl font-medium hover:shadow-lg transition-shadow"
-                      onClick={() => {
-                        setExistingProviderId(provider._id);
-                        setShowJoinService(true);
-                      }}
-                    >
-                      <UserPlus className="w-5 h-5" />
-                      {t("profile:joinService")}
                     </motion.button>
                     <motion.button
                       whileHover={{ y: -2 }}
@@ -893,121 +831,6 @@ const UserServices = ({ userId }) => {
           </div>
         )}
       </div>
-      <Modal
-        isOpen={showServiceForm}
-        onClose={() => setShowServiceForm(false)}
-        title={t("profile:createNewService")}
-      >
-        <NewProviderServiceForm
-          currentUser={{ userId, userType: "provider" }}
-          onSuccess={() => {
-            setShowServiceForm(false);
-            const fetchProviders = async () => {
-              try {
-                const query = `*[_type == "provider" && userRef._ref == $userId]{
-                  _id,
-                  name_en,
-                  name_ar,
-                  status,
-                  mainServiceRef->{
-                    _id,
-                    name_en,
-                    name_ar,
-                    image,
-                    price,
-                    statusAdminApproved,
-                    serviceType
-                  },
-                  servicesRef[]->{
-                    _id,
-                    name_en,
-                    name_ar,
-                    image,
-                    price,
-                    statusAdminApproved,
-                    serviceType
-                  },
-                  userRef->{
-                    userName,
-                    image
-                  }
-                }`;
-                const params = { userId };
-                const result = await client.fetch(query, params);
-                setProviders(result);
-                setFilteredProviders(result);
-              } catch (error) {
-                console.error("Error fetching providers:", error);
-                setError(t("profile:failedLoadProviders"));
-              }
-            };
-            fetchProviders();
-          }}
-        />
-      </Modal>
-      <Modal
-        isOpen={showAddService}
-        onClose={() => setShowAddService(false)}
-        title={`${t("profile:addService")} ${selectedProviderName || t("profile:featuredService")}`}
-      >
-        <AddServiceForm
-          providerId={existingProviderId}
-          onSuccess={() => {
-            setShowAddService(false);
-            const fetchProviders = async () => {
-              try {
-                const query = `*[_type == "provider" && userRef._ref == $userId]{
-                  _id,
-                  name_en,
-                  name_ar,
-                  status,
-                  mainServiceRef->{
-                    _id,
-                    name_en,
-                    name_ar,
-                    image,
-                    price,
-                    statusAdminApproved,
-                    serviceType
-                  },
-                  servicesRef[]->{
-                    _id,
-                    name_en,
-                    name_ar,
-                    image,
-                    price,
-                    statusAdminApproved,
-                    serviceType
-                  },
-                  userRef->{
-                    userName,
-                    image
-                  }
-                }`;
-                const params = { userId };
-                const result = await client.fetch(query, params);
-                setProviders(result);
-                setFilteredProviders(result);
-              } catch (error) {
-                console.error("Error fetching providers:", error);
-                setError(t("profile:failedLoadProviders"));
-              }
-            };
-            fetchProviders();
-          }}
-        />
-      </Modal>
-      <Modal
-        isOpen={showJoinService}
-        onClose={() => setShowJoinService(false)}
-        title={t("profile:joinService")}
-      >
-        <JoinServiceForm
-          currentProviderId={existingProviderId}
-          currentUserId={userId}
-          onClose={() => setShowJoinService(false)}
-        />
-      </Modal>
     </motion.div>
   );
 };

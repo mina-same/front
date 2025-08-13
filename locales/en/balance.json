@@ -1,0 +1,42 @@
+{
+    "title": "Charge Your Balance",
+    "description": "Get coins to send epic gifts to your favorite competitors in horse competitions!",
+    "current_balance": "Current Balance",
+    "coins": "Coins",
+    "select_package": "Select Package",
+    "selected": "Selected",
+    "purchase_button": "Purchase {{coins}} Coins for {{price}} {{currency}}",
+    "secure_payment_note": "You'll be redirected to a secure payment page",
+    "how_it_works": "How It Works",
+    "step1": {
+      "title": "Choose Package",
+      "description": "Select the coin package that fits your needs"
+    },
+    "step2": {
+      "title": "Secure Payment",
+      "description": "Complete your purchase through our secure payment system"
+    },
+    "step3": {
+      "title": "Send Gifts",
+      "description": "Use your coins to send epic gifts to competitors"
+    },
+    "packages": {
+      "basic": {
+        "features": ["200 Coins", "Perfect for beginners", "Send basic gifts"]
+      },
+      "premium": {
+        "features": ["500 Coins", "Best value", "Send premium gifts", "Popular choice"]
+      },
+      "ultimate": {
+        "features": ["900 Coins", "Ultimate package", "Send legendary gifts", "Best savings"]
+      }
+    },
+    "errors": {
+      "no_package": "No package selected!",
+      "no_package_description": "Please select a package to continue.",
+      "purchase_success": "Purchase Successful! 🎉",
+      "purchase_success_description": "You've added {{coins}} coins to your balance!",
+      "purchase_failed": "Purchase Failed! ❌",
+      "purchase_failed_description": "Something went wrong. Please try again."
+    }
+  }

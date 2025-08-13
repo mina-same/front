@@ -70,3 +70,21 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Logical direction helpers for RTL/LTR */
+.rtl {
+  direction: rtl;
+}
+.ltr {
+  direction: ltr;
+}
+
+/* Minor fixes for RTL spacing where needed */
+.rtl .mr-1 { margin-right: 0 !important; margin-left: 0.25rem !important; }
+.rtl .mr-1\.5 { margin-right: 0 !important; margin-left: 0.375rem !important; }
+.rtl .mr-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+/* Mirror left margins in RTL */
+.rtl .ml-1 { margin-left: 0 !important; margin-right: 0.25rem !important; }
+.rtl .ml-1\.5 { margin-left: 0 !important; margin-right: 0.375rem !important; }
+.rtl .ml-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
+

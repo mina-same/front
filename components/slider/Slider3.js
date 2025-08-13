@@ -25,7 +25,7 @@ const Slider3 = () => {
 						width="0"
 						height="0"
 						sizes="100vw"
-						style={{ width: "auto", height: "auto" }} className="rounded" src="/assets/imgs/placeholders/mockup-1.png" alt="Monst" />
+						style={{ width: "auto", height: "auto" }} className="rounded" src="/assets/imgs/placeholders/mockup-1.png" alt="Mockup image 1" />
 				</SwiperSlide>
 				<SwiperSlide>
 
@@ -33,7 +33,7 @@ const Slider3 = () => {
 						width="0"
 						height="0"
 						sizes="100vw"
-						style={{ width: "auto", height: "auto" }} className="rounded" src="/assets/imgs/placeholders/mockup-2.png" alt="Monst" />
+						style={{ width: "auto", height: "auto" }} className="rounded" src="/assets/imgs/placeholders/mockup-2.png" alt="Mockup image 2" />
 				</SwiperSlide>
 				<SwiperSlide>
 
@@ -41,7 +41,7 @@ const Slider3 = () => {
 						width="0"
 						height="0"
 						sizes="100vw"
-						style={{ width: "auto", height: "auto" }} className="rounded" src="/assets/imgs/placeholders/mockup-3.png" alt="Monst" />
+						style={{ width: "auto", height: "auto" }} className="rounded" src="/assets/imgs/placeholders/mockup-3.png" alt="Mockup image 3" />
 				</SwiperSlide>
 			</Swiper>
 		</>

@@ -179,7 +179,7 @@ export default function BookMediaStep({ formData, setFormData, setErrors }) {
   return (
     <div className={i18n.language === "ar" ? "rtl" : "ltr"}>
       <h2 className="text-2xl font-bold text-gray-800 flex items-center mb-4">
-        <Image className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} />
+        <Image className={`text-gold ${isRTL ? "ml-2" : "mr-2"}`} size={28} alt="Media icon" />
         {t("addBook:mediaFileUpload")}
       </h2>
       <div className="p-4 bg-blue-50 rounded-xl border border-gold/20 mb-6">

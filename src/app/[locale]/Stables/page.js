@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Search, MapPin, Phone, Mail, ExternalLink, Star, ChevronDown, Heart, Share2, Grid, List } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, ExternalLink, Star, ChevronDown, Heart, Share2, Grid, List, Lock } from 'lucide-react';
 import Layout from 'components/layout/Layout';
+import Preloader from 'components/elements/Preloader';
 import { client, urlFor } from '../../../lib/sanity';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
-import { v4 as uuidv4 } from "uuid"; 
+import { v4 as uuidv4 } from "uuid";
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { Loader2 } from 'lucide-react';
 
 const HorseStablesPage = () => {
   const [stables, setStables] = useState([]);
@@ -23,6 +28,7 @@ const HorseStablesPage = () => {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
+  const [showAuthAlert, setShowAuthAlert] = useState(false);
 
   useEffect(() => {
     const fetchStables = async () => {
@@ -72,7 +78,7 @@ const HorseStablesPage = () => {
           setWishlistedStables(new Set(stableIds));
         }
       } catch (error) {
-        console.error("Auth verification failed:", error.message);
+        setShowAuthAlert(true);
       }
     };
 
@@ -187,7 +193,7 @@ const HorseStablesPage = () => {
         <div className="relative h-[70vh] overflow-hidden">
           <div className="absolute inset-0">
             <Image
-              src="https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=1920&h=1080&fit=crop"
+              src="/images/stable.jpg"
               alt="Hero"
               className="w-full h-full object-cover"
               width={1920}
@@ -292,11 +298,7 @@ const HorseStablesPage = () => {
 
           {/* Content */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...Array(6)].map((_, i) => (
-                <LoadingCard key={i} />
-              ))}
-            </div>
+            <Preloader />
           ) : error ? (
             <div className="text-center py-16">
               <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-8 max-w-md mx-auto">
@@ -467,6 +469,8 @@ const HorseStablesPage = () => {
             </div>
           )}
         </div>
+
+        {/* Auth prompt is handled globally by Layout */}
 
         <style jsx>{`
           @keyframes fade-in {

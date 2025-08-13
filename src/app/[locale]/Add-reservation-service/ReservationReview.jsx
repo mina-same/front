@@ -51,7 +51,7 @@ const ReservationReview = ({ service, formData, totalPrice }) => {
         <InfoRow label="Service Name" value={service.name_en} />
         <InfoRow label="Service Type" value={getServiceTypeLabel(service.service_type)} />
         <InfoRow label="Service Provider" value={service.provider?.name_en || "Unknown Provider"} />
-        <InfoRow label="Base Price" value={`$${service.price} per ${service.priceUnit.replace(/_/g, ' ')}`} />
+        <InfoRow label="Base Price" value={`${service.price} SAR per ${service.priceUnit.replace(/_/g, ' ')}`} />
       </Section>
       
       <Section title="Reservation Details">
@@ -145,7 +145,7 @@ const ReservationReview = ({ service, formData, totalPrice }) => {
           {formData.additionalBenefits.map((benefit, index) => (
             <div key={index} className="flex justify-between py-2">
               <span>{benefit.name_en}</span>
-              <span className="font-medium">${benefit.additional_price.toFixed(2)}</span>
+              <span className="font-medium">{benefit.additional_price.toFixed(2)} SAR</span>
             </div>
           ))}
         </Section>
@@ -154,7 +154,7 @@ const ReservationReview = ({ service, formData, totalPrice }) => {
       <Section title="Price Summary">
         <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
           <span className="text-lg font-semibold">Total Price:</span>
-          <span className="text-2xl font-bold">${totalPrice.toFixed(2)}</span>
+          <span className="text-2xl font-bold">{totalPrice.toFixed(2)} SAR</span>
         </div>
       </Section>
       

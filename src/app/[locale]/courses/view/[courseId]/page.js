@@ -105,7 +105,7 @@ function CheckIcon({ className }) {
 export default function CourseDetails() {
   const { courseId } = useParams();
   const router = useRouter();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['courseDetails', 'common', 'coursesPage']);
   const [course, setCourse] = useState(null);
   const [relatedCourses, setRelatedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -427,9 +427,12 @@ export default function CourseDetails() {
     if (navigator.share) {
       navigator
         .share({
-          title: `Course: ${course?.title || "Course"}`,
-          text: `Check out this course: ${course?.title || "Course"} by ${course?.instructor?.fullName || course?.instructor?.userName || "Unknown Instructor"
-            }`,
+          title: t("courseDetails:shareTitle", { title: course?.title || t("courseDetails:course", "Course"), defaultValue: `Course: ${course?.title || "Course"}` }),
+          text: t("courseDetails:shareText", { 
+            title: course?.title || t("courseDetails:course", "Course"), 
+            instructor: course?.instructor?.fullName || course?.instructor?.userName || t("courseDetails:unknownInstructor", "Unknown Instructor"),
+            defaultValue: `Check out this course: ${course?.title || "Course"} by ${course?.instructor?.fullName || course?.instructor?.userName || "Unknown Instructor"}`
+          }),
           url: window.location.href,
         })
         .catch((error) => console.log("Error sharing", error));
@@ -633,7 +636,7 @@ export default function CourseDetails() {
     if (!userOrder) {
       return {
         text: course?.price > 0 ? (
-          `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}`
+          `${t("courseDetails:enrollFor", "Enroll for")} ${course.price.toFixed(2)} SAR`
         ) : (
           <span className="flex items-center gap-2">
             <Download className="w-4 h-4" />
@@ -666,7 +669,7 @@ export default function CourseDetails() {
 
     return {
       text: course?.price > 0 ? (
-        `${t("courseDetails:enrollFor", "Enroll for")} $${course.price.toFixed(2)}`
+        t("courseDetails:enrollForPrice", { price: course.price.toFixed(2), defaultValue: `Enroll for ${course.price.toFixed(2)} SAR` })
       ) : (
         <span className="flex items-center gap-2">
           <Download className="w-4 h-4" />
@@ -1108,7 +1111,7 @@ export default function CourseDetails() {
                             variant="outline"
                             className="mt-1 bg-[#fef3c7] text-[#1f2937] border-[#d4af37] hover:bg-[#d4af37] hover:text-white"
                           >
-                            {course.category || t("courseDetails:uncategorized", "Uncategorized")}
+                            {course.category ? t(`coursesPage:categories.${course.category}`, course.category) : t("courseDetails:uncategorized", "Uncategorized")}
                           </Badge>
                         </div>
 
@@ -1154,7 +1157,7 @@ export default function CourseDetails() {
                           </h4>
                           <p className="text-[#1f2937] font-medium">
                             {course.price > 0
-                              ? `$${course.price?.toFixed(2) || "0.00"}`
+                              ? `${course.price?.toFixed(2) || "0.00"} SAR`
                               : t("courseDetails:free", "Free")}
                           </p>
                         </div>
@@ -1207,7 +1210,7 @@ export default function CourseDetails() {
 
                                 return (
                                   <div key={star} className="flex items-center gap-4 my-1">
-                                    <div className="w-8 text-sm text-[#1f2937]">{`${star} star`}</div>
+                                    <div className="w-8 text-sm text-[#1f2937]">{t("courseDetails:starRating", { count: star, defaultValue: `${star} star` })}</div>
                                     <Progress
                                       value={percentage}
                                       className="h-2 flex-grow bg-[#e5e7eb]"
@@ -1545,7 +1548,7 @@ export default function CourseDetails() {
                       <span className="text-[#1f2937]">{t("courseDetails:price", "Price")}:</span>
                       <span className="text-2xl font-bold text-[#b28a2f]">
                         {course.price > 0
-                          ? `$${course.price.toFixed(2)}`
+                          ? t("courseDetails:priceValue", { price: course.price.toFixed(2), defaultValue: `${course.price.toFixed(2)} SAR` })
                           : t("courseDetails:free", "Free")}
                       </span>
                     </div>

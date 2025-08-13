@@ -9,10 +9,10 @@ const Preloader = () => {
 						<Image
 							width="0"
 							height="0"
-							sizes="100vw"
+							sizes="80vw"
 							style={{ width: "auto", height: "auto" }} 
 							src="/assets/imgs/logos/taiarLogo.png" 
-							alt="Monst" 
+							alt="Logo" 
 						/>
 					</div>
 				</div>

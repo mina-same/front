@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Calendar, Clock, Check, X, ChevronRight } from "lucide-react";
+import { Calendar, Clock, Check, X } from "lucide-react";
 import Image from "next/image";
 import { urlFor } from "@/lib/sanity";
 
 const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [filterStatus, setFilterStatus] = useState("all");
   const [activeTab, setActiveTab] = useState("upcoming");
+  const locale = i18n?.language || "en";
+  const isRTL = locale === "ar";
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -58,10 +60,12 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
   });
 
   return (
-    <div className="">
+    <div className="" dir={isRTL ? "rtl" : "ltr"}>
       {/* Header - Made responsive */}
-      <h1 className="text-2xl font-semibold mb-4">{t("profile:reservations")}</h1>
-      <div className="bg-white p-10 min-h-[700px] flex flex-col jsutify-center">
+      <h1 className={`text-2xl font-semibold mb-4 ${isRTL ? "text-right" : "text-left"}`}>
+        {t("profile:reservations")}
+      </h1>
+      <div className="bg-white p-6 md:p-10 min-h-[700px] flex flex-col justify-center">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
           <h4 className="pb-4 text-lg font-semibold text-gray-900 flex items-center gap-3">
             <Calendar className="w-5 h-5 text-blue-600" />
@@ -76,9 +80,9 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
             className="w-full sm:w-auto px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">{t("profile:allStatus")}</option>
-            <option value="pending">{t("profile:pending")}</option>
-            <option value="approved">{t("profile:approved")}</option>
-            <option value="rejected">{t("profile:rejected")}</option>
+            <option value="pending">{t("profile:reservationStatus.pending")}</option>
+            <option value="approved">{t("profile:reservationStatus.approved")}</option>
+            <option value="rejected">{t("profile:reservationStatus.rejected")}</option>
           </select>
         </div>
 
@@ -115,15 +119,15 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
                 key={reservation._id}
                 className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <div className="flex flex-row    sm:flex-col items-start sm:items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   {/* User Info - Made responsive */}
-                  <div className="flex justify-end items-center gap-3 w-full sm:w-auto">
+                  <div className={`flex items-center gap-3 w-full sm:w-auto ${isRTL ? "justify-end" : "justify-start"}`}>
                     <div className="relative w-12 h-12 flex-shrink-0">
                       <Image
                         src={
                           reservation.user?.image
                             ? urlFor(reservation.user.image).url()
-                            : "/palceholder.svg"
+                            : "/placeholder.svg"
                         }
                         alt={reservation.user?.userName || "User"}
                         width={48}
@@ -139,17 +143,17 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h5 className="font-medium text-gray-900 truncate">
+                      <h5 className={`font-medium text-gray-900 truncate ${isRTL ? "text-right" : "text-left"}`}>
                         {reservation.user?.userName}
                       </h5>
                       <div className="flex flex-wrap gap-2 mt-1 text-sm text-gray-500">
                         <span className="flex items-center gap-1.5">
                           <Calendar className="w-4 h-4 flex-shrink-0" />
-                          {new Date(reservation.datetime).toLocaleDateString()}
+                          {new Date(reservation.datetime).toLocaleDateString(locale)}
                         </span>
                         <span className="flex items-center gap-1.5">
                           <Clock className="w-4 h-4 flex-shrink-0" />
-                          {new Date(reservation.datetime).toLocaleTimeString()}
+                          {new Date(reservation.datetime).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
                     </div>
@@ -182,8 +186,7 @@ const ProviderReservations = ({ reservations = [], onStatusUpdate }) => {
                           reservation.status
                         )}`}
                       >
-                        {reservation.status.charAt(0).toUpperCase() +
-                          reservation.status.slice(1)}
+                        {t(`profile:reservationStatus.${reservation.status}`)}
                       </span>
                     )}
                   </div>

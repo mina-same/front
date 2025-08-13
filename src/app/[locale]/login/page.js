@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Layout from '../../../../components/layout/Layout';
+import Preloader from 'components/elements/Preloader';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
@@ -128,9 +129,13 @@ const Login = () => {
 		setError(t('login:googleLoginFailed'));
 	};
 
-	if (loading) {
-		return <div>Loading...</div>; // Add a loading state if needed
-	}
+    if (loading) {
+        return (
+            <Layout>
+                <Preloader />
+            </Layout>
+        );
+    }
 
 	return (
 		<GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
@@ -145,7 +150,7 @@ const Login = () => {
 								style={{ width: "auto", height: "auto" }}
 								className="lg:max-w-lg mx-auto"
 								src="/assets/imgs/illustrations/horse.svg"
-								alt="Monst"
+								alt="Horse illustration"
 							/>
 						</div>
 					</div>

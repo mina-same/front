@@ -24,7 +24,7 @@
     "loading": "Loading books...",
     "error": "Failed to load books",
     "book": "Book",
-    "price": "${{value}}",
+    "price": "{{value}} SAR",
     "free": "Free",
     "author": "Author",
     "viewDetails": "View Details",

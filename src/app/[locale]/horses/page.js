@@ -1,23 +1,33 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, Heart, Filter, X, Star, ChevronDown, Trophy, Award, Medal, Shield, DollarSign, Home, Dumbbell, User } from "lucide-react";
+import { Search, Heart, Filter, X, Star, ChevronDown, Trophy, Award, Medal, Shield, DollarSign, Home, Dumbbell, User, MapPin, Share2, Grid, List, ExternalLink, Palette, ImageOff } from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Layout from "components/layout/Layout";
-import { client, urlFor } from "../../../lib/sanity";
+import Layout from "../../../../components/layout/Layout";
+import { client, urlFor } from "@/lib/sanity";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import SearchableBreedDropdown from "../../../../components/elements/SearchableBreedDropdown";
+import { v4 as uuidv4 } from "uuid";
+import Preloader from "components/elements/Preloader";
 
 const HorsePage = () => {
+  
+  
   const [horses, setHorses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [viewMode, setViewMode] = useState('grid');
+  const [wishlistedHorses, setWishlistedHorses] = useState(new Set());
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const isArabic = i18n.language === "ar";
 
   // Filter states
   const [filtersVisible, setFiltersVisible] = useState(false);
@@ -674,50 +684,112 @@ const HorsePage = () => {
   return (
     <Layout>
       <div className={`min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 ${isRTL ? "rtl" : "ltr"}`}>
-        <div className="relative h-64 bg-slate-900">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute inset-0 bg-[url('/api/placeholder/1920/400')] bg-cover bg-center opacity-40" />
+        {/* Hero Section */}
+        <div className="relative h-[70vh] overflow-hidden">
+          <div className="absolute inset-0">
+            <Image
+              src="https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=1920&h=1080&fit=crop" 
+              alt="Hero"
+              className="w-full h-full object-cover"
+              width={1920}
+              height={1080}
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
           </div>
-          <div className="relative h-full flex flex-col items-center justify-center text-white px-4">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("horsePage:title")}</h1>
-            <p className="text-lg md:text-xl text-center max-w-2xl">{t("horsePage:subtitle")}</p>
+
+          <div className="relative h-full flex flex-col justify-center px-4 max-w-7xl mx-auto">
+            <div className="text-white max-w-3xl animate-fade-in">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                {t("horsePage:title")}
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-600">
+                  {t("horsePage:subtitle")}
+                </span>
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 leading-relaxed opacity-90">
+                {t("horsePage:subtitle")}
+              </p>
+            </div>
+          </div>
+
+          {/* Floating scroll indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <ChevronDown className="w-8 h-8 text-white opacity-70" />
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 -mt-8">
-          <div className="relative mb-6">
-            <Search className={`absolute ${isRTL ? "right-3" : "left-3"} top-1/2 transform -translate-y-1/2 text-gray-400`} />
-            <input
-              type="text"
-              placeholder={t("horsePage:searchPlaceholder")}
-              className={`w-full ${isRTL ? "pr-12 pl-4" : "pl-12 pr-4"} py-3 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none shadow-sm`}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              onClick={() => setFiltersVisible(!filtersVisible)}
-              className={`absolute ${isRTL ? "left-3" : "right-3"} top-1/2 transform -translate-y-1/2 text-blue-500 flex items-center gap-1 hover:text-blue-600 transition-colors`}
-            >
-              <Filter className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("horsePage:filters")}</span>
-              {activeFilterCount > 0 && (
-                <span className="bg-blue-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-10">
+            <div className="bg-card rounded-2xl shadow-2xl p-6 mb-8">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <Search className={`absolute ${isArabic ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5`} />
+                  <input
+                    type="text"
+                    placeholder={t('horsePage:searchPlaceholder')}
+                    className={`w-full ${isArabic ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-4 rounded-xl border-2 border-input bg-background focus:border-primary focus:ring-2 focus:ring-ring/50 outline-none transition-all duration-300 text-lg`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                {/* Filters */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setFiltersVisible(!filtersVisible)}
+                    className={`px-4 py-4 rounded-xl border-2 ${filtersVisible ? 'border-primary text-primary' : 'border-input text-foreground'} bg-background hover:border-primary outline-none transition-all duration-300 flex items-center gap-2 relative ${activeFilterCount > 0 ? "pr-10" : ""}`}
+                  >
+                    <Filter className="w-5 h-5" />
+                    <span>{t("horsePage:filters")}</span>
+                    {activeFilterCount > 0 && (
+                      <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* View Toggle */}
+                  <div className="flex bg-muted rounded-xl p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-3 rounded-lg transition-all duration-300 ${viewMode === 'grid'
+                        ? 'bg-background shadow-md text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                      <Grid className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-3 rounded-lg transition-all duration-300 ${viewMode === 'list'
+                        ? 'bg-background shadow-md text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                    >
+                      <List className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Results Info */}
+            <div className="flex justify-between items-center mb-8">
+              <div className="text-gray-600">
+                {t('horsePage:showingResults', { count: filteredHorses.length, total: horses.length })}
+              </div>
+            </div>
 
           {filtersVisible && (
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6 transition-all border border-gray-100">
+            <div className="bg-card rounded-xl shadow-xl p-6 mb-8 border border-border/50">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium text-gray-800 flex items-center">
-                  <Filter className="h-5 w-5 mr-2 text-blue-500" />
+                <h2 className="text-xl font-medium text-foreground flex items-center">
+                  <Filter className="h-5 w-5 mr-2 text-primary" />
                   {t("horsePage:advancedFilters")}
                 </h2>
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-blue-500 flex items-center hover:text-blue-600 transition-colors"
+                  className="text-sm text-primary flex items-center hover:text-primary/80 transition-colors p-2 rounded-full hover:bg-muted"
                 >
                   <X className="h-4 w-4 mr-1" />
                   {t("horsePage:clearFilters")}
@@ -801,13 +873,13 @@ const HorsePage = () => {
 
                 {/* Listing Purpose */}
                 <div className="mb-4">
-                  <label className="block text-lg font-medium text-gray-700 mb-1">{t("horsePage:listingPurpose")}</label>
+                  <label className="block text-lg font-medium text-foreground mb-1">{t("horsePage:listingPurpose")}</label>
                   <div className="relative">
                     <select
                       name="listingPurpose"
                       value={filters.listingPurpose}
                       onChange={handleFilterChange}
-                      className={`w-full p-2.5 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none ${isRTL ? "" : "pr-10"}`}
+                      className={`w-full p-3 border-2 border-input rounded-xl focus:ring-2 focus:ring-ring focus:border-primary bg-background outline-none transition-all duration-300 appearance-none ${isRTL ? "" : "pr-10"}`}
                     >
                       <option value="">{t("horsePage:allPurposes")}</option>
                       {PURPOSE_OPTIONS.map((purpose) => (
@@ -816,19 +888,19 @@ const HorsePage = () => {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className={`absolute ${isRTL ? "left-3" : "right-3"} top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none h-4 w-4`} />
+                    <ChevronDown className={`absolute ${isRTL ? "left-3" : "right-3"} top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none h-4 w-4`} />
                   </div>
                 </div>
 
                 {/* Profile Level Filter */}
                 <div className="mb-4">
-                  <label className="block text-lg font-medium text-gray-700 mb-1">{t("horsePage:profileLevel") || "Profile Level"}</label>
+                  <label className="block text-lg font-medium text-foreground mb-1">{t("horsePage:profileLevel") || "Profile Level"}</label>
                   <div className="relative">
                     <select
                       name="profileLevel"
                       value={filters.profileLevel}
                       onChange={handleFilterChange}
-                      className={`w-full p-2.5 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 appearance-none ${isRTL ? "" : "pr-10"}`}
+                      className={`w-full p-3 border-2 border-input rounded-xl focus:ring-2 focus:ring-ring focus:border-primary bg-background outline-none transition-all duration-300 appearance-none ${isRTL ? "" : "pr-10"}`}
                     >
                       <option value="">{t("horsePage:allLevels") || "All Levels"}</option>
                       {PROFILE_LEVEL_OPTIONS.map((level) => (
@@ -837,18 +909,18 @@ const HorsePage = () => {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className={`absolute ${isRTL ? "left-3" : "right-3"} top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none h-4 w-4`} />
+                    <ChevronDown className={`absolute ${isRTL ? "left-3" : "right-3"} top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none h-4 w-4`} />
                   </div>
                 </div>
 
                 {/* Average Rating Slider */}
                 <div className="mb-4 col-span-1 md:col-span-2 lg:col-span-1">
-                  <label className="block text-lg font-medium text-gray-700 mb-1">
+                  <label className="block text-lg font-medium text-foreground mb-1">
                     {t("horsePage:averageRating") || "Average Rating"}: {filters.ratingRange.min} - {filters.ratingRange.max}
                   </label>
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">{t("horsePage:min") || "Min"}</span>
+                      <span className="text-xs text-muted-foreground">{t("horsePage:min") || "Min"}</span>
                       <div className="flex">
                         {renderStars(filters.ratingRange.min)}
                       </div>
@@ -860,10 +932,10 @@ const HorsePage = () => {
                       step="0.5"
                       value={filters.ratingRange.min}
                       onChange={(e) => handleRatingRangeChange("min", e.target.value)}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                     />
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">{t("horsePage:max") || "Max"}</span>
+                      <span className="text-xs text-muted-foreground">{t("horsePage:max") || "Max"}</span>
                       <div className="flex">
                         {renderStars(filters.ratingRange.max)}
                       </div>
@@ -875,7 +947,7 @@ const HorsePage = () => {
                       step="0.5"
                       value={filters.ratingRange.max}
                       onChange={(e) => handleRatingRangeChange("max", e.target.value)}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                     />
                   </div>
                 </div>
@@ -897,21 +969,18 @@ const HorsePage = () => {
 
           <div className="py-8">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                <p className="mt-4 text-gray-600">{t("horsePage:loading") || "Loading horses..."}</p>
-              </div>
+              <Preloader />
             ) : error ? (
               <div className="text-center py-12">
-                <p className="text-red-500">{error}</p>
+                <p className="text-destructive">{error}</p>
               </div>
             ) : filteredHorses.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow-sm p-8">
-                <Search className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500 text-lg">{t("horsePage:noMatchingHorses")}</p>
+              <div className="text-center py-12 bg-card rounded-lg shadow-sm p-8">
+                <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-lg">{t("horsePage:noMatchingHorses")}</p>
                 <button
                   onClick={clearFilters}
-                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                 >
                   {t("horsePage:clearAllFilters") || "Clear All Filters"}
                 </button>
@@ -919,106 +988,170 @@ const HorsePage = () => {
             ) : (
               <>
                 <div className="flex justify-between items-center mb-6">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     {t("horsePage:showingResults", { count: filteredHorses.length, total: horses.length })}
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-700">{t("horsePage:sortBy")}</label>
+                    <label className="text-sm text-foreground">{t("horsePage:sortBy")}</label>
                     <div className="relative">
-                      <select className={`p-2 border border-gray-300 rounded-md text-sm appearance-none ${isRTL ? "" : "pr-10"}`}>
+                      <select className={`p-2 border border-input rounded-md text-sm appearance-none ${isRTL ? "" : "pr-10"}`}>
                         <option value="newest">{t("horsePage:newest")}</option>
                         <option value="priceAsc">{t("horsePage:priceLowToHigh")}</option>
                         <option value="priceDesc">{t("horsePage:priceHighToLow")}</option>
                         <option value="ratingDesc">{t("horsePage:highestRated") || "Highest Rated"}</option>
                         <option value="popularity">{t("horsePage:popularity")}</option>
                       </select>
-                      <ChevronDown className={`absolute ${isRTL ? "left-3" : "right-3"} top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none h-4 w-4`} />
+                      <ChevronDown className={`absolute ${isRTL ? "left-3" : "right-3"} top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none h-4 w-4`} />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredHorses.map((horse) => {
+                <div className={`grid gap-8 ${viewMode === 'grid'
+                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                  : 'grid-cols-1'
+                  }`}>
+                  {filteredHorses.map((horse, index) => {
                     const profileTier = getProfileTier(horse.profileLevel);
+                    const isWishlisted = wishlistedHorses.has(horse._id);
                     return (
-                      <Card
+                      <div
                         key={horse._id}
-                        className="hover:shadow-lg transition-shadow duration-300 border border-gray-100"
-                        onClick={() => router.push(`/horses/${horse._id}`)}
+                        className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 ${viewMode === 'list' ? 'flex' : ''} animate-in fade-in slide-in-from-bottom-5`}
+                        style={{ animationDelay: `${index * 100}ms` }}
                       >
-                        <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-t-lg relative">
+                        {/* Image */}
+                        <div 
+                          className={`relative overflow-hidden ${viewMode === 'list' ? 'w-80 flex-shrink-0' : 'aspect-video'}`}
+                        >
                           <Image
-                            src={horse.images && horse.images[0] ? urlFor(horse.images[0]).url() : "/api/placeholder/400/300"}
+                            src={horse.images && horse.images[0] ? urlFor(horse.images[0]).url() : "/api/placeholder/800/600"}
                             alt={horse.fullName || "horse"}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            width={400}
-                            height={300}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            width={800}
+                            height={600}
                           />
-                          {/* Enhanced badges container */}
-                          <div className="absolute top-2 right-2 flex flex-col gap-2">
-                            {horse.listingPurpose && (
-                              <div
-                                className={`text-xs px-3 py-1.5 rounded-full text-white font-medium shadow-sm flex items-center gap-1 ${getPurposeDetails(horse.listingPurpose).bgColor
-                                  }`}
-                              >
-                                {getPurposeDetails(horse.listingPurpose).icon}
-                                {t(`horsePage:purpose.${horse.listingPurpose}`) || t("horsePage:notSpecified")}
-                              </div>
-                            )}
-                            {horse.profileLevel && (
-                              <div className={`text-xs px-2 py-1 rounded-full bg-gray-100 ${profileTier.color} flex items-center gap-1`}>
-                                {profileTier.icon}
-                                {profileTier.name}
-                              </div>
-                            )}
+                          
+                          {/* Overlay Actions */}
+                          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Handle wishlist toggle logic
+                                console.log('Toggle wishlist for:', horse._id);
+                              }}
+                              className={`p-2 rounded-full backdrop-blur-md transition-all duration-300 ${isWishlisted
+                                ? 'bg-destructive text-destructive-foreground'
+                                : 'bg-background/80 text-foreground hover:bg-background'
+                                }`}
+                            >
+                              {isWishlisted ? (
+                                <Heart className="h-5 w-5 fill-current" />
+                              ) : (
+                                <Heart className="h-5 w-5" />
+                              )}
+                            </button>
+                            
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Handle share logic
+                                console.log('Share horse:', horse._id);
+                              }}
+                              className="p-2 rounded-full bg-background/80 text-foreground hover:bg-background backdrop-blur-md transition-all duration-300"
+                            >
+                              <Share2 className="h-5 w-5" />
+                            </button>
                           </div>
+                          
+                          {/* Rating Badge */}
+                          {horse.averageRating && (
+                            <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1">
+                              <Star className="w-4 h-4 fill-gold text-gold" />
+                              <span className="font-semibold text-sm">{horse.averageRating}</span>
+                            </div>
+                          )}
+                          
+                          {/* Purpose Badge */}
+                          {horse.listingPurpose && (
+                            <div
+                              className={`absolute bottom-4 left-4 text-xs px-4 py-2 rounded-full text-white font-bold shadow-sm flex items-center gap-1 ${getPurposeDetails(horse.listingPurpose).bgColor}`}
+                            >
+                              {getPurposeDetails(horse.listingPurpose).icon}
+                              {t(`horsePage:purpose.${horse.listingPurpose}`) || t("horsePage:notSpecified")}
+                            </div>
+                          )}
+                          
+                          {/* Profile Level Badge */}
+                          {horse.profileLevel && (
+                            <div className={`absolute bottom-4 right-4 text-xs px-3 py-1.5 rounded-full bg-gray-100/80 backdrop-blur-sm ${profileTier.color} flex items-center gap-1`}>
+                              {profileTier.icon}
+                              {profileTier.name}
+                            </div>
+                          )}
                         </div>
-                        <CardHeader>
-                          <CardTitle className="flex justify-between items-start">
-                            <h3 className="text-xl font-semibold">{horse.fullName}</h3>
-                            <span className="text-lg font-bold text-blue-500">
+                        
+                        <div className="p-6 flex-1">
+                          <div className="flex justify-between items-start mb-3">
+                            <h3 
+                              className="text-2xl font-bold text-card-foreground group-hover:text-primary transition-colors duration-300 cursor-pointer"
+                              onClick={() => router.push(`/horses/${horse._id}`)}
+                            >
+                              {horse.fullName}
+                            </h3>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-muted-foreground mb-4">
+                            <MapPin className="w-4 h-4" />
+                            <span>{horse.location || t('horsePage:locationNotSpecified')}</span>
+                          </div>
+                          
+                          <p className="text-muted-foreground mb-6 line-clamp-3 leading-relaxed">
+                            {horse.description || t('horsePage:descriptionNotAvailable')}
+                          </p>
+                          
+                          {/* Features/Attributes */}
+                          <div className="flex flex-wrap gap-2 mb-6">
+                            <span className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm font-medium">
+                              {getBreedName(horse.breed)}
+                            </span>
+                            <span className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm font-medium">
+                              {t(`horsePage:gender.${horse.gender}`) || horse.gender}
+                            </span>
+                            <span className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm font-medium">
+                              {getColorName(horse.mainColor)}
+                            </span>
+                          </div>
+                          
+                          {/* Price */}
+                          <div className="mb-6">
+                            <span className="text-lg font-bold text-primary">
                               {horse.marketValue
                                 ? t("horsePage:marketValue", { value: horse.marketValue })
                                 : t("horsePage:marketValueNotAvailable")}
                             </span>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-4">
-                            <p className="text-gray-600">
-                              {t("horsePage:breed")}: <span className="font-medium">{getBreedName(horse.breed)}</span>
-                            </p>
-                            <p className="text-gray-600">
-                              {t("horsePage:gender")}: <span className="font-medium">{t(`horsePage:gender.${horse.gender}`) || horse.gender}</span>
-                            </p>
-                            <p className="text-gray-600">
-                              {t("horsePage:mainColor")}: <span className="font-medium">{getColorName(horse.mainColor)}</span>
-                            </p>
-                            <div className="flex items-center gap-2 text-gray-600">
-                              <Heart className="w-4 h-4 text-red-500" />
-                              <span>
-                                {horse.loveCounter || 0} {t("horsePage:likes")}
-                              </span>
-                            </div>
                           </div>
-
-                          {/* Rating display */}
-                          {horse.averageRating !== undefined && (
-                            <div className="flex items-center mb-3 text-sm">
-                              <div className="flex mr-1">
-                                {renderStars(horse.averageRating)}
-                              </div>
-                              {/* <span className="text-gray-600">
-                                ({horse.averageRating.toFixed(1)})
-                              </span> */}
-                            </div>
-                          )}
-
-                          <button className="w-full mt-2 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-50 transition-colors">
-                            {t("horsePage:viewDetails")}
-                          </button>
-                        </CardContent>
-                      </Card>
+                          
+                          {/* Action Buttons */}
+                          <div className="flex gap-3">
+                            <button 
+                              onClick={() => router.push(`/horses/${horse._id}`)}
+                              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 py-3 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105"
+                            >
+                              {t("horsePage:viewDetails")}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Handle external link logic
+                                console.log('External link for:', horse._id);
+                              }}
+                              className="p-3 border-2 border-border hover:border-primary rounded-xl transition-all duration-300 hover:bg-accent"
+                            >
+                              <ExternalLink className="w-5 h-5 text-muted-foreground hover:text-primary" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>

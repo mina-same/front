@@ -224,7 +224,8 @@ export default function StableDetailsPage() {
               serviceType,
               serviceAverageRating,
               serviceRatingCount,
-              years_of_experience
+              years_of_experience,
+              additionalBenefits[]{name_ar, name_en, additional_price}
             },
             freelancerServices[]->{
               _id,
@@ -236,7 +237,8 @@ export default function StableDetailsPage() {
               serviceType,
               serviceAverageRating,
               serviceRatingCount,
-              years_of_experience
+              years_of_experience,
+              additionalBenefits[]{name_ar, name_en, additional_price}
             }
           }`;
 
@@ -1227,10 +1229,12 @@ export default function StableDetailsPage() {
           {/* Reservation Modal */}
           <ReservationPopup
             isOpen={isReservationModalOpen}
-            onClose={() => setIsPopupOpen(false)}
+            onClose={() => setIsReservationModalOpen(false)}
             stableId={stableId}
             stableName={isRTL ? stable?.name_ar : stable?.name_en}
             userRef={currentUserId}
+            fullTimeServices={stable?.fullTimeServices || []}
+            freelancerServices={stable?.freelancerServices || []}
           />
         </div>
       </div>

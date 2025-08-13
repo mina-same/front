@@ -39,7 +39,7 @@
         "noContractors": "لم يتم العثور على مقاولين.",
         "loading": "جاري التحميل...",
         "error": "فشل تحميل المقاولين. يرجى المحاولة لاحقًا.",
-        "pricePerMonth": "{price} دولار/شهر",
+        "pricePerMonth": "{price} ريال/شهر",
         "visitWebsite": "زيارة الموقع"
     },
     "tripCoordinators": {
@@ -58,7 +58,7 @@
         "noVeterinarians": "لم يتم العثور على أطباء بيطريين.",
         "loading": "جاري التحميل...",
         "error": "فشل تحميل الأطباء البيطريين. يرجى المحاولة لاحقًا.",
-        "pricePerConsultation": "{{price}} دولار/استشارة",
+        "pricePerConsultation": "{{price}} ريال/استشارة",
         "visitWebsite": "زيارة الموقع"
     },
     "housing": {
@@ -68,7 +68,7 @@
         "noHousings": "لم يتم العثور على خدمات سكنية.",
         "loading": "جاري التحميل...",
         "error": "فشل تحميل خدمات السكن. يرجى المحاولة لاحقًا.",
-        "pricePerService": "{{price}} دولار/خدمة",
+        "pricePerService": "{{price}} ريال/خدمة",
         "visitWebsite": "زيارة الموقع"
     },
     "horseTrainer": {
@@ -78,7 +78,7 @@
         "noTrainers": "لم يتم العثور على مدربين.",
         "loading": "جاري التحميل...",
         "error": "فشل تحميل مدربي الخيول. يرجى المحاولة لاحقًا.",
-        "pricePerSession": "{{price}}$ / جلسة",
+        "pricePerSession": "{{price}} ريال / جلسة",
         "visitWebsite": "زيارة الموقع"
     },
     "horseTransport": {
@@ -88,7 +88,7 @@
         "noTransports": "لم يتم العثور على خدمات نقل.",
         "loading": "جاري التحميل...",
         "error": "فشل تحميل خدمات نقل الخيول. يرجى المحاولة لاحقًا.",
-        "pricePerMonth": "{{price}} دولار/شهر",
+        "pricePerMonth": "{{price}} ريال/شهر",
         "visitWebsite": "زيارة الموقع"
     },
     "hoofTrimmer": {
@@ -98,7 +98,7 @@
         "noTrimmers": "لم يتم العثور على قص الحوافر.",
         "loading": "جاري التحميل...",
         "error": "فشل تحميل قص الحوافر. يرجى المحاولة لاحقًا.",
-        "pricePerSession": "{{price}} دولار/جلسة",
+        "pricePerSession": "{{price}} ريال/جلسة",
         "visitWebsite": "زيارة الموقع",
         "hoofTrimmerDetails": "تفاصيل قص الحوافر:"
     },
@@ -109,7 +109,7 @@
         "noCateringServices": "لم يتم العثور على خدمات تقديم الطعام.",
         "loading": "جاري التحميل...",
         "error": "فشل تحميل خدمات تقديم الطعام للخيول. يرجى المحاولة لاحقًا.",
-        "pricePerMonth": "{{price}} دولار/شهر",
+        "pricePerMonth": "{{price}} ريال/شهر",
         "visitWebsite": "زيارة الموقع",
         "cateringOptions": "خيارات تقديم الطعام:"
     },
@@ -119,7 +119,7 @@
       "searchPlaceholder": "ابحث عن مقدمي خدمات العناية...",
       "error": "فشل في تحميل خدمات العناية. حاول مرة أخرى لاحقًا.",
       "noGroomers": "لم يتم العثور على خدمات العناية.",
-      "pricePerSession": "{price} دولار لكل {unit}",
+      "pricePerSession": "{price} ريال لكل {unit}",
       "visitWebsite": "زيارة الموقع",
       "methodsAndTools": "الأساليب والأدوات",
       "certifications": "الشهادات",
@@ -131,7 +131,7 @@
       "searchPlaceholder": "ابحث عن الحكام...",
       "error": "فشل في تحميل خدمات التحكيم. حاول مرة أخرى لاحقًا.",
       "noJudges": "لم يتم العثور على خدمات التحكيم.",
-      "pricePerSession": "{price} دولار لكل {unit}",
+      "pricePerSession": "{price} ريال لكل {unit}",
       "visitWebsite": "زيارة الموقع",
       "eventTypes": "أنواع الفعاليات",
       "judgingLevel": "مستوى التحكيم",
@@ -144,7 +144,7 @@
       "searchPlaceholder": "ابحث عن المسوقين...",
       "error": "فشل في تحميل خدمات التسويق. حاول مرة أخرى لاحقًا.",
       "noMarketers": "لم يتم العثور على خدمات التسويق.",
-      "pricePerSession": "{price} دولار لكل {unit}",
+      "pricePerSession": "{price} ريال لكل {unit}",
       "visitWebsite": "زيارة الموقع",
       "portfolioLinks": "الملف الشخصي",
       "certifications": "الشهادات",
@@ -156,7 +156,7 @@
       "searchPlaceholder": "ابحث عن المعلقين...",
       "error": "فشل في تحميل خدمات التعليق. حاول مرة أخرى لاحقًا.",
       "noCommentators": "لم يتم العثور على خدمات التعليق.",
-      "pricePerSession": "{price} دولار لكل {unit}",
+      "pricePerSession": "{price} ريال لكل {unit}",
       "visitWebsite": "زيارة الموقع",
       "portfolioLink": "الملف الشخصي",
       "certifications": "الشهادات",
@@ -168,7 +168,7 @@
       "searchPlaceholder": "ابحث عن المستشارين...",
       "error": "فشل في تحميل الخدمات الاستشارية. حاول مرة أخرى لاحقًا.",
       "noConsultants": "لم يتم العثور على خدمات استشارية.",
-      "pricePerSession": "{price} دولار لكل {unit}",
+      "pricePerSession": "{price} ريال لكل {unit}",
       "visitWebsite": "زيارة الموقع",
       "certifications": "الشهادات",
       "certified": "معتمد"

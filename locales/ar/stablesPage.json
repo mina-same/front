@@ -28,9 +28,14 @@
     },
     "stableTypes": {
         "educational": "تعليمي",
-        "competition": "منافسة",
-        "recreational": "ترفيهي",
+        "competitions": "تنافسي",
+        "events": "فعاليات",
+        "entertainment": "ترفيهي",
         "breeding": "تربية",
         "rehabilitation": "إعادة تأهيل"
-    }
+    },
+    "notLoggedInTitle": "أنت غير مسجل الدخول",
+    "notLoggedInDesc": "سجّل الدخول لحفظ المفضلة والوصول إلى جميع الميزات.",
+    "loginBtn": "تسجيل الدخول",
+    "or": "أو"
 }

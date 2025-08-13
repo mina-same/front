@@ -1,0 +1,80 @@
+{
+  "tabs": {
+    "courses": "الدورات",
+    "books": "الكتب"
+  },
+  "searchPlaceholder": "ابحث في {{tab}}...",
+  "filtersButton": "الفلاتر",
+  "sort": {
+    "by": "ترتيب حسب",
+    "newest": "الأحدث",
+    "priceLowHigh": "السعر: من الأقل إلى الأعلى",
+    "priceHighLow": "السعر: من الأعلى إلى الأقل",
+    "highestRated": "الأعلى تقييماً"
+  },
+  "header": {
+    "title": "مكتبة {{tab}} للفروسية",
+    "subtitleCourses": "اكتشف دورات يقودها خبراء لتعزيز معرفتك ومهاراتك في الفروسية",
+    "subtitleBooks": "استكشف مجموعتنا من الكتب والموارد المتخصصة في الفروسية"
+  },
+  "filtersTitle": "تصفية {{tab}}",
+  "clearAll": "مسح الكل",
+  "applyFilters": "تطبيق الفلاتر",
+  "filters": {
+    "category": "الفئة",
+    "allCategories": "كل الفئات",
+    "language": "اللغة",
+    "allLanguages": "كل اللغات",
+    "level": "المستوى",
+    "allLevels": "كل المستويات",
+    "priceRange": "نطاق السعر",
+    "min": "الحد الأدنى",
+    "max": "الحد الأعلى"
+  },
+  "authRequired": {
+    "message": "يجب تسجيل الدخول لإدارة قائمة المفضلة.",
+    "loginLink": "سجّل الدخول من هنا"
+  },
+  "books": {
+    "badge": "كتاب",
+    "noItemsTitle": "لا توجد كتب",
+    "noItemsSubtitle": "جرّب تعديل بحثك أو معايير التصفية",
+    "unknownAuthor": "مؤلف غير معروف",
+    "languageFallback": "الإنجليزية",
+    "viewCta": "عرض الكتاب",
+    "wishlistTitle": "إضافة إلى المفضلة",
+    "errors": {
+      "invalid": "كتاب غير صالح. حاول مرة أخرى.",
+      "notFound": "الكتاب غير موجود في المفضلة.",
+      "updateFailed": "فشل تحديث المفضلة. حاول مرة أخرى."
+    },
+    "success": {
+      "added": "تمت الإضافة إلى المفضلة",
+      "removed": "تمت الإزالة من المفضلة"
+    }
+  },
+  "courses": {
+    "noItemsTitle": "لا توجد دورات",
+    "noItemsSubtitle": "جرّب تعديل بحثك أو معايير التصفية",
+    "durationFallback": "ذاتية السرعة",
+    "unknownInstructor": "مدرب غير معروف",
+    "viewCta": "عرض الدورة",
+    "wishlistTitle": "إضافة إلى المفضلة",
+    "errors": {
+      "invalid": "دورة غير صالحة. حاول مرة أخرى.",
+      "notFound": "الدورة غير موجودة في المفضلة.",
+      "updateFailed": "فشل تحديث المفضلة. حاول مرة أخرى."
+    },
+    "success": {
+      "added": "تمت الإضافة إلى المفضلة",
+      "removed": "تمت الإزالة من المفضلة"
+    },
+    "levels": {
+      "beginner": "مبتدئ",
+      "intermediate": "متوسط",
+      "advanced": "متقدم"
+    }
+  }
+}
+
+

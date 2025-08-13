@@ -1,0 +1,108 @@
+{
+  "hero": {
+    "title": "🏆 New Battle Arena",
+    "subtitle": "Set up your epic horse competition"
+  },
+  "form": {
+    "competitionNames": {
+      "title": "Competition Names",
+      "arabic": "Competition Name (Arabic) *",
+      "arabicPlaceholder": "اسم المسابقة",
+      "english": "Competition Name (English) *",
+      "englishPlaceholder": "Competition Name"
+    },
+    "location": {
+      "title": "Location & Address",
+      "mapsLink": "Google Maps Location Link",
+      "mapsPlaceholder": "https://maps.google.com/...",
+      "address": "Competition Address *",
+      "addressPlaceholder": "Enter the full address of the competition venue...",
+      "country": "Country *",
+      "selectCountry": "Select Country",
+      "governorate": "Governorate *",
+      "selectGovernorate": "Select Governorate",
+      "city": "City *",
+      "selectCity": "Select City"
+    },
+    "streaming": {
+      "title": "Live Streaming",
+      "link": "Live Streaming Link",
+      "placeholder": "YouTube, Twitch, or other streaming platform link..."
+    },
+    "about": {
+      "title": "About Competition",
+      "placeholder": "Describe your competition, rules, prizes, or any special details..."
+    },
+    "dateTime": {
+      "title": "Date & Time",
+      "date": "Competition Date *",
+      "time": "Competition Time *"
+    },
+    "horseInfo": {
+      "title": "🐴 Your Horse Information",
+      "name": "Horse Name *",
+      "namePlaceholder": "Enter your horse's name",
+      "surpriseName": "Surprise Horse Name",
+      "surpriseNamePlaceholder": "Enter your backup horse's name (optional)",
+      "surpriseNameDesc": "Optional backup horse that can be switched in before the competition starts",
+      "image": "Competition Image",
+      "uploadText": "Click to upload competition image"
+    },
+    "submit": "Create Competition & Setup Invites"
+  },
+  "invitations": {
+    "title": "🎯 Battle Arena Created!",
+    "subtitle": "Now invite someone to compete against you",
+    "competitionSummary": "Competition Summary",
+    "userSearch": {
+      "title": "Search for a specific user:",
+      "placeholder": "Enter username, email, or full name...",
+      "searching": "Searching..."
+    },
+    "selectedUsers": "Selected Users",
+    "sendInvitations": "Send Invitations",
+    "or": "OR",
+    "inviteLink": {
+      "title": "Share invite link:",
+      "generate": "🔗 Generate & Copy Invite Link",
+      "description": "Anyone with this link can join your competition"
+    },
+    "returnToDashboard": "Return to Dashboard"
+  },
+  "validation": {
+    "missingFields": "Missing Information! ⚠️",
+    "missingFieldsDesc": "Please fill in all required fields.",
+    "loginRequired": "Login Required! 🔐",
+    "loginRequiredDesc": "Please log in to create a competition.",
+    "authRequired": "Authentication Required! 🔐",
+    "authRequiredDesc": "Please log in to create competitions.",
+    "authError": "Authentication Error! ❌",
+    "authErrorDesc": "Please log in to continue."
+  },
+  "success": {
+    "imageUploaded": "Image uploaded! 📸",
+    "imageUploadedDesc": "Your competition image has been uploaded successfully.",
+    "competitionCreated": "Competition Created! 🏆",
+    "competitionCreatedDesc": "Your battle arena is ready. Time to invite competitors!",
+    "invitationsSent": "Invitations Sent! 📨",
+    "invitationsSentDesc": "Successfully sent {{count}} invitation(s)!",
+    "inviteLinkCreated": "🎉 Invite Link Created & Copied!",
+    "inviteLinkCreatedDesc": "Open invitation created successfully! Link copied to clipboard."
+  },
+  "errors": {
+    "general": "Error! ❌",
+    "createFailed": "Failed to create competition. Please try again.",
+    "searchFailed": "Search Error! ❌",
+    "searchFailedDesc": "Failed to search users. Please try again.",
+    "invitationFailed": "Failed to send invitations: {{error}}",
+    "openInvitationFailed": "Failed to create open invitation: {{error}}"
+  },
+  "loading": {
+    "creating": "Creating Competition...",
+    "inviting": "Sending...",
+    "generating": "Generating..."
+  },
+  "navigation": {
+    "back": "Back"
+  }
+}

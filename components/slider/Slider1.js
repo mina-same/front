@@ -94,9 +94,9 @@ const Slider1 = () => {
     {
       _id: "11",
       serviceType: "hoof_trimmer",
-      name: { en: "Hoof Trimmer", ar: "مقلم الأظافر" },
+      name: { en: "Hoof Trimmer", ar: "العنايه بالحوافر -البيطار" },
       image: { asset: { url: "/assets/imgs/placeholders/slider-11.png" } },
-      description: { en: "Professional hoof care.", ar: "رعاية أظافر محترفة." },
+      description: { en: "Professional hoof care.", ar: "رعاية بحوافر خيلك." },
       route: "hoofTrimmer",
     },
     {

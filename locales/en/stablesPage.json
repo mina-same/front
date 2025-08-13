@@ -32,5 +32,9 @@
       "recreational": "Recreational",
       "breeding": "Breeding",
       "rehabilitation": "Rehabilitation"
-    }
+    },
+    "notLoggedInTitle": "You are not logged in",
+    "notLoggedInDesc": "Log in to save favorites and access all features.",
+    "loginBtn": "Log In",
+    "or": "or"
   }

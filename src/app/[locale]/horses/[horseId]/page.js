@@ -2033,7 +2033,7 @@ const HorseProfilePage = () => {
         return <div className="flex">{stars}</div>;
     };
 
-    if (loading) return <Layout><div className="min-h-screen flex items-center justify-center"><p>{t('horseDetails:loadingProfile')}</p></div></Layout>;
+    if (loading) return <Layout><Preloader /></Layout>;
     if (!horseData) return <Layout><div className="min-h-screen flex items-center justify-center"><p>{t('horseDetails:horseNotFound')}</p></div></Layout>;
 
     return (
@@ -2332,7 +2332,7 @@ const HorseProfilePage = () => {
                                                 {horseData.listingPurpose === 'sale' && horseData.marketValue && (
                                                     <div className="bg-blue-50 p-4 rounded-lg">
                                                         <h3 className="font-semibold text-blue-800">{t('horseDetails:marketValue')}</h3>
-                                                        <p className="text-2xl font-bold text-blue-900">${horseData.marketValue.toLocaleString()}</p>
+                                                       <p className="text-2xl font-bold text-blue-900">{horseData.marketValue.toLocaleString()} SAR</p>
                                                     </div>
                                                 )}
                                                 {horseData.listingPurpose === 'rent' && (
@@ -2709,7 +2709,7 @@ const HorseProfilePage = () => {
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-700 font-medium">{t('horseDetails:price')}:</span>
                                         <div className="flex flex-col items-end">
-                                            <span className="text-2xl font-bold text-blue-600">${horseData.marketValue?.toLocaleString() || t('horseDetails:contactForPrice')}</span>
+                                           <span className="text-2xl font-bold text-blue-600">{horseData.marketValue?.toLocaleString() || t('horseDetails:contactForPrice')} {horseData.marketValue ? 'SAR' : ''}</span>
                                             {!horseData.marketValue && (
                                                 <span className="text-sm text-blue-500 mt-1">{t('horseDetails:contactForPrice')}</span>
                                             )}
@@ -2733,7 +2733,7 @@ const HorseProfilePage = () => {
                                     <div className="bg-blue-50 p-4 rounded-lg mb-4">
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-700">{t('horseDetails:price')}:</span>
-                                            <span className="text-xl font-bold text-blue-600">${horseData.marketValue?.toLocaleString() || t('horseDetails:contactForPrice')}</span>
+                                           <span className="text-xl font-bold text-blue-600">{horseData.marketValue?.toLocaleString() || t('horseDetails:contactForPrice')} {horseData.marketValue ? 'SAR' : ''}</span>
                                         </div>
                                     </div>
                                     <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg">{t('horseDetails:contactSeller')}</button>

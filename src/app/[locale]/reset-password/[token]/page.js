@@ -81,7 +81,7 @@ export default function ResetPasswordClient() {
               style={{ width: 'auto', height: 'auto' }}
               className="lg:max-w-lg mx-auto"
               src="/assets/imgs/illustrations/forgot-password.svg"
-              alt="Monst"
+              alt="Reset password illustration"
             />
           </div>
         </div>

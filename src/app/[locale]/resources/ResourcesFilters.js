@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
+import { useTranslation } from "react-i18next";
 
 const CATEGORY_OPTIONS = [
   { value: "equine_anatomy_physiology", label: "Equine Anatomy & Physiology" },
@@ -35,26 +36,28 @@ const LANGUAGE_OPTIONS = [
 
 export default function ResourcesFilters({ resourceType }) {
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const { t, i18n } = useTranslation("resourcesPage");
+  const isRTL = i18n.dir() === "rtl";
 
   return (
     <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-100">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-medium">Filter {resourceType}</h2>
+        <h2 className="text-lg font-medium">{t("filtersTitle", { tab: t(`tabs.${resourceType}`) })}</h2>
         <Button variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
           <X className="h-4 w-4 mr-1" />
-          Clear all
+          {t("clearAll")}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {/* Category filter */}
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">{t("filters.category")}</Label>
           <select
             id="category"
             className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
           >
-            <option value="">All Categories</option>
+            <option value="">{t("filters.allCategories")}</option>
             {CATEGORY_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -65,12 +68,12 @@ export default function ResourcesFilters({ resourceType }) {
 
         {/* Language filter */}
         <div className="space-y-2">
-          <Label htmlFor="language">Language</Label>
+          <Label htmlFor="language">{t("filters.language")}</Label>
           <select
             id="language"
             className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
           >
-            <option value="">All Languages</option>
+            <option value="">{t("filters.allLanguages")}</option>
             {LANGUAGE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -82,12 +85,12 @@ export default function ResourcesFilters({ resourceType }) {
         {/* Level filter - only for courses */}
         {resourceType === "courses" && (
           <div className="space-y-2">
-            <Label htmlFor="level">Level</Label>
+            <Label htmlFor="level">{t("filters.level")}</Label>
             <select
               id="level"
               className="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-[#d4af37]"
             >
-              <option value="">All Levels</option>
+              <option value="">{t("filters.allLevels")}</option>
               {LEVEL_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                 {option.label}
@@ -99,18 +102,18 @@ export default function ResourcesFilters({ resourceType }) {
 
         {/* Price Range */}
         <div className="space-y-2">
-          <Label>Price Range</Label>
-          <div className="flex items-center space-x-2">
+          <Label>{t("filters.priceRange")}</Label>
+          <div className={`flex items-center ${isRTL ? "space-x-reverse space-x-2" : "space-x-2"}`}>
             <Input
               type="number"
-              placeholder="Min"
+              placeholder={t("filters.min")}
               value={priceRange.min}
               onChange={(e) => setPriceRange((prev) => ({ ...prev, min: e.target.value }))}
             />
             <span>-</span>
             <Input
               type="number"
-              placeholder="Max"
+              placeholder={t("filters.max")}
               value={priceRange.max}
               onChange={(e) => setPriceRange((prev) => ({ ...prev, max: e.target.value }))}
             />
@@ -119,7 +122,7 @@ export default function ResourcesFilters({ resourceType }) {
       </div>
 
       <div className="flex justify-end mt-6">
-        <Button className="bg-[#d4af37] hover:bg-[#b8972e] text-white">Apply Filters</Button>
+        <Button className="bg-[#d4af37] hover:bg-[#b8972e] text-white">{t("applyFilters")}</Button>
       </div>
     </div>
   );

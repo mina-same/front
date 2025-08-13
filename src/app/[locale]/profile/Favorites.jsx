@@ -11,11 +11,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { client, urlFor } from "@/lib/sanity";
 import PropTypes from "prop-types";
+import Preloader from "components/elements/Preloader";
 import { v4 as uuidv4 } from "uuid";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 const FavoritesPage = ({ userId }) => {
   const router = useRouter();
+  const { t, i18n } = useTranslation("profile");
+  const isRTL = i18n.dir() === "rtl";
   const [favorites, setFavorites] = useState([]);
   const [filter, setFilter] = useState("all"); // Default to "all"
   const [loading, setLoading] = useState(true);
@@ -26,7 +30,7 @@ const FavoritesPage = ({ userId }) => {
 
   const fetchFavorites = useCallback(async () => {
     if (!userId) {
-      console.error("No userId provided");
+      console.error(t("noUserId"));
       setFavorites([]);
       setLoading(false);
       return;
@@ -188,11 +192,12 @@ const FavoritesPage = ({ userId }) => {
 
   const renderItemCard = (item) => {
     const itemType = item.type; // From Sanity query
+    const isArabic = i18n.language === "ar";
     const title =
       itemType === "product"
-        ? item.name_en || item.name_ar
-        : item.title || item.fullName || item.name_en || item.name_ar;
-    const price = item.price || item.marketValue || "N/A";
+        ? (isArabic ? item.name_ar || item.name_en : item.name_en || item.name_ar)
+        : item.title || item.fullName || (isArabic ? item.name_ar || item.name_en : item.name_en || item.name_ar);
+    const price = item.price || item.marketValue || t("priceNotAvailable");
     const isSale = item.isSale || false;
     const originalPrice = item.originalPrice;
     const currentImageIndex = currentImages[item._id] || 0;
@@ -212,24 +217,23 @@ const FavoritesPage = ({ userId }) => {
       <div
         key={`${item._id}-${item.type}`}
         className="h-full flex flex-col"
-        style={{ minHeight: "400px", maxWidth: "300px" }}
+        style={{ minHeight: "400px" }}
       >
         {/* Card container with fixed height */}
         <div className="group relative bg-gray-100 rounded-xl overflow-hidden flex-1 flex flex-col">
-          {/* Badges positioned at top */}
           <div className="absolute top-3 left-3 z-20 flex flex-col gap-1">
             <span
               className="badge text-xs px-2 py-1 rounded"
               style={badgeStyles[itemType]}
             >
-              {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+              {t(itemType + "s")}
             </span>
             {isSale && (
               <span
                 className="badge text-xs px-2 py-1 rounded"
                 style={{ backgroundColor: "#FEF2F2", color: "#EF4444" }}
               >
-                Sale
+                {t("sale")}
               </span>
             )}
           </div>
@@ -239,6 +243,7 @@ const FavoritesPage = ({ userId }) => {
             className="btn absolute top-3 right-3 p-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-gray-100"
             onClick={() => handleWishlistToggle(item._id, itemType)}
             disabled={wishlistLoading[item._id]}
+            aria-label={t("toggleWishlist")}
           >
             <Heart
               className={`h-4 w-4 ${wishlistLoading[item._id] ? "text-gray-400" : "text-red-500"}`}
@@ -258,7 +263,7 @@ const FavoritesPage = ({ userId }) => {
                 src={image}
                 width={200}
                 height={200}
-                alt={title || "title image"}
+                alt={title || t("imageAlt")}
                 style={{ objectFit: "contain" }}
               />
             </div>
@@ -267,20 +272,22 @@ const FavoritesPage = ({ userId }) => {
             {item.images?.length > 1 && (
               <>
                 <button
-                  className="absolute top-1/2 -translate-y-1/2 left-2 p-1 bg-white hover:bg-gray-100 rounded-full transition-opacity opacity-0 group-hover:opacity-100"
+                  className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? "right-2" : "left-2"} p-1 bg-white hover:bg-gray-100 rounded-full transition-opacity opacity-0 group-hover:opacity-100`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleImageChange(item._id, "prev");
                   }}
+                  aria-label={t("previousImage")}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                  className="absolute top-1/2 -translate-y-1/2 right-2 p-1 bg-white hover:bg-gray-100 rounded-full transition-opacity opacity-0 group-hover:opacity-100"
+                  className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? "left-2" : "right-2"} p-1 bg-white hover:bg-gray-100 rounded-full transition-opacity opacity-0 group-hover:opacity-100`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleImageChange(item._id, "next");
                   }}
+                  aria-label={t("nextImage")}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -303,7 +310,7 @@ const FavoritesPage = ({ userId }) => {
                   router.push(`/[locale]/${itemType}s/${item._id}`);
                 }}
                 className="hover:text-blue-600 line-clamp-2"
-                title={title} // Show full title on hover
+                title={title}
               >
                 {title}
               </a>
@@ -364,9 +371,9 @@ const FavoritesPage = ({ userId }) => {
         <div className="w-full lg:w-9/12 pt-4 pb-2 sm:pb-4">
           <div className="flex items-center mb-4 justify-between">
             <h1 className="text-2xl font-medium mb-0">
-              Favorites{" "}
+              {t("favoritesTitle")} {" "}
               <span className="text-sm font-normal text-gray-500">
-                ({favorites.length} items)
+                ({favorites.length} {t("items")})
               </span>
             </h1>
             <div className="flex gap-2">
@@ -375,19 +382,19 @@ const FavoritesPage = ({ userId }) => {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               >
-                <option value="all">All</option>
-                <option value="products">Products</option>
-                <option value="books">Books</option>
-                <option value="courses">Courses</option>
-                <option value="horses">Horses</option>
-                <option value="services">Services</option>
+                <option value="all">{t("all")}</option>
+                <option value="products">{t("products")}</option>
+                <option value="books">{t("books")}</option>
+                <option value="courses">{t("courses")}</option>
+                <option value="horses">{t("horses")}</option>
+                <option value="services">{t("services")}</option>
               </select>
               <button
                 className="ml-auto flex items-center text-red-500 border border-red-500 hover:bg-red-50 px-3 py-1 rounded-xl text-sm"
                 type="button"
                 onClick={async () => {
                   try {
-                    if (!userId) throw new Error("No userId provided");
+                    if (!userId) throw new Error(t("noUserId"));
                     const wishlistFields = [
                       "wishlistProducts",
                       "wishlistBooks",
@@ -408,13 +415,13 @@ const FavoritesPage = ({ userId }) => {
                 }}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Clear all
+                {t("clearAll")}
               </button>
             </div>
           </div>
 
           {loading ? (
-            <div>Loading...</div>
+            <Preloader />
           ) : favorites.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -422,16 +429,16 @@ const FavoritesPage = ({ userId }) => {
               className="text-center py-16 px-4 bg-gray-100 rounded-xl shadow-sm"
             >
               <h3 className="text-2xl font-bold text-gray-900">
-                No {filter === "all" ? "favorites" : filter} found
+                {t("noFavoritesFound", { filter: t(filter) })}
               </h3>
               <p className="text-gray-500">
-                Add some {filter === "all" ? "items" : filter} to your wishlist!
+                {t("addToWishlist", { filter: t(filter) })}
               </p>
             </motion.div>
           ) : (
             <div className="bg-white rounded-xl shadow-sm border-0 py-1 p-2 md:p-3">
               <div className="p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {favorites.map((item) => renderItemCard(item))}
                 </div>
               </div>

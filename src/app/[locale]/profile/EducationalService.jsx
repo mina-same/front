@@ -34,6 +34,7 @@ const EducationalServices = ({ userId }) => {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
+  const locale = i18n.language;
 
   useEffect(() => {
     const fetchEducationalServices = async () => {
@@ -192,7 +193,7 @@ const EducationalServices = ({ userId }) => {
         if (itemType === "course") {
           setCourses(courses.filter((course) => course._id !== itemId));
         } else {
-          setBooks(books.filter((book) => course._id !== itemId));
+          setBooks(books.filter((book) => book._id !== itemId));
         }
         setFilteredItems(filteredItems.filter((item) => item._id !== itemId));
       } catch (error) {
@@ -220,17 +221,21 @@ const EducationalServices = ({ userId }) => {
         <p className="text-gray-600 text-lg">
           {t("profile:noEducationalServicesYet")}
         </p>
-        <div className="flex gap-4">
+        <div className={getDirectionClass("flex gap-4")}>
           <button
-            onClick={() => (window.location.href = "/books/add-book")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            onClick={() => (window.location.href = `/${locale}/books/add-book`)}
+            className={getDirectionClass(
+              "inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            )}
           >
             <Plus className="w-5 h-5" />
             {t("profile:addBook")}
           </button>
           <button
-            onClick={() => (window.location.href = "/courses/add-course")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            onClick={() => (window.location.href = `/${locale}/courses/add-course`)}
+            className={getDirectionClass(
+              "inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            )}
           >
             <Plus className="w-5 h-5" />
             {t("profile:addCourse")}
@@ -370,9 +375,11 @@ const EducationalServices = ({ userId }) => {
     };
     return (
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium border ${
-          statusStyles[status] || "bg-gray-100 border-gray-300"
-        }`}
+        className={getDirectionClass(
+          `px-3 py-1 rounded-full text-sm font-medium border ${
+            statusStyles[status] || "bg-gray-100 border-gray-300"
+          }`
+        )}
       >
         {t(`profile:orderStatus.${status}`)}
       </span>
@@ -387,9 +394,11 @@ const EducationalServices = ({ userId }) => {
     };
     return (
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium border ${
-          statusStyles[status] || "bg-gray-100 border-gray-300"
-        }`}
+        className={getDirectionClass(
+          `px-3 py-1 rounded-full text-sm font-medium border ${
+            statusStyles[status] || "bg-gray-100 border-gray-300"
+          }`
+        )}
       >
         {t(`profile:paymentStatus.${status}`)}
       </span>
@@ -420,44 +429,46 @@ const EducationalServices = ({ userId }) => {
 
     return (
       <div className="mt-6 space-y-6">
-        <h4 className="font-semibold text-xl border-b border-gray-200 pb-3">
+        <h4 className={getDirectionClass("font-semibold text-xl border-b border-gray-200 pb-3")}>
           {t("profile:orderHistory")}
         </h4>
         <div className="space-y-4">
           {orders.map((order) => (
             <div
               key={order._id}
-              className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              className={getDirectionClass(
+                "bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              )}
             >
-              <div className="flex flex-col md:flex-row justify-between gap-6">
+              <div className={getDirectionClass("flex flex-col md:flex-row justify-between gap-6")}>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
+                  <div className={getDirectionClass("flex items-center gap-3")}>
                     <Users className="w-5 h-5 text-gray-500" />
                     <span className="text-base font-medium">
                       {order.user?.userName || t("profile:unknownUser")}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className={getDirectionClass("flex items-center gap-3")}>
                     <Calendar className="w-5 h-5 text-gray-500" />
                     <span className="text-sm">
                       {t("profile:orderDate")}: {formatDate(order.orderDate)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className={getDirectionClass("flex items-center gap-3")}>
                     <DollarSign className="w-5 h-5 text-gray-500" />
                     <span className="text-sm">
                       {t("profile:price")}: {order.price}{" "}
                       {t("profile:currency")}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2">
+                  <div className={getDirectionClass("flex flex-wrap items-center gap-4")}>
+                    <div className={getDirectionClass("flex items-center gap-2")}>
                       <span className="text-sm font-medium">
                         {t("profile:status")}:
                       </span>
                       {renderOrderStatusBadge(order.status)}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className={getDirectionClass("flex items-center gap-2")}>
                       <span className="text-sm font-medium">
                         {t("profile:payment")}:
                       </span>
@@ -471,7 +482,9 @@ const EducationalServices = ({ userId }) => {
                       onClick={() =>
                         handleOrderStatusChange(order._id, "completed")
                       }
-                      className="px-5 py-2 bg-blue-100 text-blue-800 rounded-xl hover:bg-blue-200 transition-all flex items-center justify-center gap-2 font-medium"
+                      className={getDirectionClass(
+                        "px-5 py-2 bg-blue-100 text-blue-800 rounded-xl hover:bg-blue-200 transition-all flex items-center justify-center gap-2 font-medium"
+                      )}
                     >
                       <CheckCircle className="w-5 h-5" />
                       {t("profile:markAsCompleted")}
@@ -489,31 +502,49 @@ const EducationalServices = ({ userId }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-8"
+      className={getDirectionClass("container mx-auto px-4 py-8 font-sans")}
+      dir={isRTL ? "rtl" : "ltr"}
+      style={isRTL ? { fontFamily: "'Noto Sans Arabic', sans-serif" } : {}}
     >
-      <div className="flex flex-row items-start md:items-center justify-between mb-5 gap-6">
+      <div
+        className={getDirectionClass(
+          `flex flex-col md:flex-row ${isRTL ? "md:" : ""} md:items-start md:justify-between mb-5 gap-6`
+        )}
+      >
         <h2 className="text-3xl font-extrabold text-gray-900">
           {t("profile:educationalServices")}
         </h2>
-        <div className="flex flex-row sm:flex-row gap-4 w-full md:w-auto">
+        <div
+          className={getDirectionClass(
+            `flex flex-col sm:flex-row ${isRTL ? "sm:" : ""} gap-4 w-full md:w-auto`
+          )}
+        >
           <button
-            onClick={() => (window.location.href = "/books/add-book")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            onClick={() => (window.location.href = `/${locale}/books/add-book`)}
+            className={getDirectionClass(
+              "inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            )}
           >
             <Plus className="w-5 h-5" />
             {t("profile:addBook")}
           </button>
           <button
-            onClick={() => (window.location.href = "/courses/add-course")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            onClick={() => (window.location.href = `/${locale}/courses/add-course`)}
+            className={getDirectionClass(
+              "inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-800 to-black text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            )}
           >
             <Plus className="w-5 h-5" />
             {t("profile:addCourse")}
           </button>
         </div>
       </div>
-      <div className="flex flex-row justify-end gap-4 pb-4">
-        <div className="relative flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-2">
+      <div
+        className={getDirectionClass(
+          `flex flex-row ${isRTL ? "" : ""} justify-end gap-4 pb-4`
+        )}
+      >
+        <div className={getDirectionClass("relative flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-2")}>
           <Filter className="w-5 h-5 text-gray-600" />
           <select
             value={categoryFilter}
@@ -559,8 +590,12 @@ const EducationalServices = ({ userId }) => {
                 )}
               >
                 <div className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                    <div className="flex items-start gap-6">
+                  <div className={getDirectionClass("flex flex-col md:flex-row md:items-start justify-between gap-6")}>
+                      <div
+                        className={getDirectionClass(
+                          `flex items-start gap-6 ${isRTL ? "md:" : ""}`
+                        )}
+                      >
                       <div className="group relative bg-gray-100 rounded-2xl p-4">
                         <div className="relative">
                           <a className="block" href="#">
@@ -581,30 +616,32 @@ const EducationalServices = ({ userId }) => {
                         </div>
                       </div>
                       <div className="space-y-4">
-                        <h3 className="text-xl font-semibold flex items-center gap-3">
+                        <h3 className={getDirectionClass("text-xl font-semibold flex items-center gap-3")}>
                           {item.title}
                           <span
-                            className={`px-3 py-1 text-sm rounded-full font-medium ${
-                              item.type === "course"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
+                            className={getDirectionClass(
+                              `px-3 py-1 text-sm rounded-full font-medium ${
+                                item.type === "course"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-green-100 text-green-800"
+                              }`
+                            )}
                           >
                             {t(`profile:${item.type}`)}
                           </span>
                         </h3>
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
+                        <div className={getDirectionClass("flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600")}>
+                          <div className={getDirectionClass("flex items-center gap-2")}>
                             <Tag className="w-5 h-5 text-gray-500" />
                             {t(`profile:category.${item.category || "other"}`)}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className={getDirectionClass("flex items-center gap-2")}>
                             <DollarSign className="w-5 h-5 text-gray-500" />
                             {item.price
                               ? `${item.price} ${t("profile:currency")}`
                               : t("profile:free")}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className={getDirectionClass("flex items-center gap-2")}>
                             <Book className="w-5 h-5 text-gray-500" />
                             {t("profile:rating")}:{" "}
                             {item.averageRating?.toFixed(1) || 0} (
@@ -612,11 +649,11 @@ const EducationalServices = ({ userId }) => {
                           </div>
                           {item.type === "course" && (
                             <>
-                              <div className="flex items-center gap-2">
+                              <div className={getDirectionClass("flex items-center gap-2")}>
                                 <Clock className="w-5 h-5 text-gray-500" />
                                 {t("profile:duration")}: {item.duration}
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className={getDirectionClass("flex items-center gap-2")}>
                                 <Users className="w-5 h-5 text-gray-500" />
                                 {t("profile:level")}:{" "}
                                 {t(`profile:${item.level}`)}
@@ -624,14 +661,16 @@ const EducationalServices = ({ userId }) => {
                             </>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-3 items-center">
+                        <div className={getDirectionClass("flex flex-wrap gap-3 items-center")}>
                           <button
                             onClick={() =>
-                              (window.location.href = `/${
+                              (window.location.href = `/${locale}/${
                                 item.type === "book" ? "books" : "courses"
                               }/edit/${item._id}`)
                             }
-                            className="px-5 py-2 bg-blue-100 text-blue-800 rounded-xl hover:bg-blue-200 transition-all flex items-center gap-2 font-medium"
+                            className={getDirectionClass(
+                              "px-5 py-2 bg-blue-100 text-blue-800 rounded-xl hover:bg-blue-200 transition-all flex items-center gap-2 font-medium"
+                            )}
                           >
                             <Edit className="w-5 h-5" />
                             {t("profile:editService")}
@@ -640,7 +679,9 @@ const EducationalServices = ({ userId }) => {
                             onClick={() =>
                               toggleItemExpansion(item._id, item.type)
                             }
-                            className="px-5 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2 font-medium"
+                            className={getDirectionClass(
+                              "px-5 py-2 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2 font-medium"
+                            )}
                           >
                             {expandedItemId === item._id ? (
                               <>
@@ -657,9 +698,12 @@ const EducationalServices = ({ userId }) => {
                           </button>
                           <button
                             onClick={() => handleDeleteItem(item._id, item.type)}
-                            className="px-5 py-2 bg-red-100 text-red-800 rounded-xl hover:bg-red-200 transition-all flex items-center gap-2 font-medium"
+                            className={getDirectionClass(
+                              "px-5 py-2 bg-red-100 text-red-800 rounded-xl hover:bg-red-200 transition-all flex items-center gap-2 font-medium"
+                            )}
                           >
                             <Trash2 className="w-5 h-5" />
+                            {t("profile:delete_label")}
                           </button>
                         </div>
                       </div>

@@ -26,7 +26,7 @@
     "loading": "جارٍ تحميل الدورات...",
     "error": "فشل في تحميل الدورات",
     "course": "دورة",
-    "price": "${{value}}",
+    "price": "{{value}} ر.س",
     "free": "مجاني",
     "duration": "المدة",
     "instructor": "المدرب",

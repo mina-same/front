@@ -48,7 +48,7 @@
         "noVeterinarians": "No veterinarians found.",
         "loading": "Loading...",
         "error": "Failed to load veterinarians. Please try again later.",
-        "pricePerConsultation": "${price}/consultation",
+        "pricePerConsultation": "{{price}} SAR/consultation",
         "visitWebsite": "Visit Website"
     },
     "housing": {
@@ -58,7 +58,7 @@
         "noHousings": "No housing services found.",
         "loading": "Loading...",
         "error": "Failed to load housing services. Please try again later.",
-        "pricePerService": "${price}/service",
+        "pricePerService": "{{price}} SAR/service",
         "visitWebsite": "Visit Website"
     },
     "horseTrainer": {
@@ -68,7 +68,7 @@
         "noTrainers": "No trainers found.",
         "loading": "Loading...",
         "error": "Failed to load horse trainers. Please try again later.",
-        "pricePerSession": "{{price}}$/session",
+        "pricePerSession": "{{price}} SAR/session",
         "visitWebsite": "Visit Website"
     },
     "horseTransport": {
@@ -78,7 +78,7 @@
         "noTransports": "No transport services found.",
         "loading": "Loading...",
         "error": "Failed to load horse transport services. Please try again later.",
-        "pricePerMonth": "${{price}}/month",
+        "pricePerMonth": "{{price}} SAR/month",
         "visitWebsite": "Visit Website"
     },
     "hoofTrimmer": {
@@ -88,7 +88,7 @@
         "noTrimmers": "No trimmers found.",
         "loading": "Loading...",
         "error": "Failed to load hoof trimmers. Please try again later.",
-        "pricePerSession": "${{price}}/session",
+        "pricePerSession": "{{price}} SAR/session",
         "visitWebsite": "Visit Website",
         "hoofTrimmerDetails": "Hoof Trimmer Details:"
     },
@@ -99,7 +99,7 @@
         "noContractors": "No contractors found.",
         "loading": "Loading...",
         "error": "Failed to load contractors. Please try again later.",
-        "pricePerMonth": "${price}/month",
+        "pricePerMonth": "{{price}} SAR/month",
         "visitWebsite": "Visit Website"
     },
     "horseCatering": {
@@ -109,7 +109,7 @@
         "noCateringServices": "No catering services found.",
         "loading": "Loading...",
         "error": "Failed to load horse catering services. Please try again later.",
-        "pricePerMonth": "${price}/month",
+        "pricePerMonth": "{{price}} SAR/month",
         "visitWebsite": "Visit Website",
         "cateringOptions": "Catering Options:"
     },
@@ -119,7 +119,7 @@
         "searchPlaceholder": "Search for groomers...",
         "error": "Failed to load grooming services. Please try again later.",
         "noGroomers": "No grooming services found.",
-        "pricePerSession": "${price} per {unit}",
+        "pricePerSession": "{{price}} SAR per {unit}",
         "visitWebsite": "Visit Website",
         "methodsAndTools": "Methods & Tools",
         "certifications": "Certifications",
@@ -131,7 +131,7 @@
         "searchPlaceholder": "Search for judges...",
         "error": "Failed to load judging services. Please try again later.",
         "noJudges": "No judging services found.",
-        "pricePerSession": "${price} per {unit}",
+        "pricePerSession": "{{price}} SAR per {unit}",
         "visitWebsite": "Visit Website",
         "eventTypes": "Event Types",
         "judgingLevel": "Judging Level",
@@ -144,7 +144,7 @@
         "searchPlaceholder": "Search for marketers...",
         "error": "Failed to load marketing services. Please try again later.",
         "noMarketers": "No marketing services found.",
-        "pricePerSession": "${price} per {unit}",
+        "pricePerSession": "{{price}} SAR per {unit}",
         "visitWebsite": "Visit Website",
         "portfolioLinks": "Portfolio",
         "certifications": "Certifications",
@@ -156,7 +156,7 @@
         "searchPlaceholder": "Search for commentators...",
         "error": "Failed to load commentary services. Please try again later.",
         "noCommentators": "No commentary services found.",
-        "pricePerSession": "${price} per {unit}",
+        "pricePerSession": "{{price}} SAR per {unit}",
         "visitWebsite": "Visit Website",
         "portfolioLink": "Portfolio",
         "certifications": "Certifications",
@@ -168,7 +168,7 @@
         "searchPlaceholder": "Search for consultants...",
         "error": "Failed to load consulting services. Please try again later.",
         "noConsultants": "No consulting services found.",
-        "pricePerSession": "${price} per {unit}",
+        "pricePerSession": "{{price}} SAR per {unit}",
         "visitWebsite": "Visit Website",
         "certifications": "Certifications",
         "certified": "Certified"

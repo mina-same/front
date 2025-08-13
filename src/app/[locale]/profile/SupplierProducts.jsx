@@ -208,7 +208,7 @@ const SupplierProducts = ({ userId }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={getDirectionClass(
-        "text-center py-16 px-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow公有-lg h-full min-h-[700px] flex justify-center items-center"
+        "text-center py-16 px-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-lg h-full min-h-[700px] flex justify-center items-center"
       )}
     >
       <div className="max-w-md mx-auto space-y-6 flex flex-col justify-center items-center text-center">
@@ -438,7 +438,7 @@ const SupplierProducts = ({ userId }) => {
       animate={{ opacity: 1 }}
       className="container mx-auto px-4 py-8"
     >
-      <div className="flex flex-row items-start md:items-center justify-between mb-5 gap-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-6" dir={isRTL ? 'rtl' : 'ltr'}>
         <h2 className="text-3xl font-extrabold text-gray-900">
           {t("profile:productManagement")}
         </h2>
@@ -452,8 +452,8 @@ const SupplierProducts = ({ userId }) => {
           </button>
         </div>
       </div>
-      <div className="flex flex-row justify-end gap-4 pb-4">
-        <div className="relative flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-2">
+      <div className="flex flex-wrap items-center justify-end gap-4 pb-4" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="relative flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-2 w-full sm:w-auto">
           <Filter className="w-5 h-5 text-gray-600" />
           <select
             value={categoryFilter}
@@ -467,7 +467,7 @@ const SupplierProducts = ({ userId }) => {
             ))}
           </select>
         </div>
-        <div className="relative flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-2">
+        <div className="relative flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-2 w-full sm:w-auto">
           <Box className="w-5 h-5 text-gray-600" />
           <select
             value={statusFilter}

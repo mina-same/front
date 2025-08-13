@@ -86,7 +86,11 @@
     "boarding": "إيواء",
     "training": "تدريب",
     "breeding": "تربية",
-    "racing": "سباق"
+    "racing": "سباق",
+    "events": "فعاليات",
+    "competitions": "تنافسي",
+    "entertainment": "ترفيهي",
+    "educational": "تعليمي"
   },
   "priceUnits": {
     "per_day": "يوميًا",

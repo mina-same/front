@@ -6,7 +6,7 @@ import {
   MapPin, Phone, Mail, Calendar, Clock, Award, Users, Heart, Share2, Star, Shield, ChevronLeft, ChevronRight,
   CheckCircle, AlertTriangle, X, Link2, Instagram, Facebook, Youtube, Twitter, Linkedin, TikTok
 } from 'lucide-react';
-import { FaPinterest } from "react-icons/fa";
+import { FaPinterest, FaInstagram, FaFacebook, FaYoutube, FaLinkedin, FaTwitter, FaTiktok } from "react-icons/fa";
 import { client, urlFor } from '../../../../lib/sanity';
 import Layout from 'components/layout/Layout';
 import Image from 'next/image';
@@ -108,13 +108,13 @@ const ImageGalleryModal = ({ selectedIndex, images, onClose, onNext, onPrev }) =
 const SocialMediaIcon = ({ linkType, url }) => {
   const icons = {
     website: <Link2 size={20} />,
-    instagram: <Instagram size={20} />,
-    facebook: <Facebook size={20} />,
-    youtube: <Youtube size={20} />,
-    x: <Twitter size={20} />,
-    linkedin: <Linkedin size={20} />,
+    instagram: <FaInstagram size={20} />,
+    facebook: <FaFacebook size={20} />,
+    youtube: <FaYoutube size={20} />,
+    x: <FaTwitter size={20} />,
+    linkedin: <FaLinkedin size={20} />,
     pinterest: <FaPinterest size={20} />,
-    tiktok: <TikTok size={20} />,
+    tiktok: <FaTiktok size={20} />,
   };
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary transition-colors">

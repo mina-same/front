@@ -12,52 +12,22 @@ import { Button } from "../../../../../components/ui/button";
 import { client } from "../../../../../lib/sanity";
 import Link from "next/link";
 import Image from 'next/image';
+import { useTranslation } from "react-i18next";
+import { useParams } from "next/navigation";
+import Layout from "../../../../../../components/layout/Layout";
 
-
-const mockBooks = [
-];
-
-const CATEGORY_TITLES = {
-  equine_anatomy_physiology: "Equine Anatomy and Physiology",
-  equine_nutrition: "Equine Nutrition",
-  stable_management: "Stable Management",
-  horse_care_grooming: "Horse Care and Grooming",
-  riding_instruction: "Riding Instruction (English and Western)",
-  equine_health_first_aid: "Equine Health and First Aid",
-  equine_reproduction_breeding: "Equine Reproduction and Breeding",
-  horse_training_behavior: "Horse Training and Behavior",
-  equine_business_management: "Equine Business Management",
-  equine_law_ethics: "Equine Law and Ethics",
-  horse_show_management_judging: "Horse Show Management and Judging",
-  equine_assisted_services: "Equine-Assisted Services",
-  equine_competition_disciplines: "Equine Competition Disciplines",
-  equine_recreation_tourism: "Equine Recreation and Tourism",
-  equine_rescue_rehabilitation: "Equine Rescue and Rehabilitation",
-  equine_sports_medicine: "Equine Sports Medicine",
-  equine_facility_design_management: "Equine Facility Design and Management",
-  equine_marketing_promotion: "Equine Marketing and Promotion",
-  equine_photography_videography: "Equine Photography and Videography",
-  equine_journalism_writing: "Equine Journalism and Writing",
-  equine_history_culture: "Equine History and Culture",
-  equine_environmental_stewardship: "Equine Environmental Stewardship",
-  equine_technology_innovation: "Equine Technology and Innovation",
-  equine_entrepreneurship: "Equine Entrepreneurship",
-  equine_dentistry: "Equine Dentistry",
-  equine_podiatry: "Equine Podiatry",
-  english_riding: "English Riding",
-  western_riding: "Western Riding",
-  jumping_hunter: "Jumping and Hunter",
-  other: "Other",
-};
-
-export default function BooksList({ viewMode, searchQuery, category, router }) {
-  const [books, setBooks] = useState(mockBooks);
+export default function CoursesCategoryPage() {
+  const { category, locale } = useParams();
+  const { t } = useTranslation(['bookDetails', 'coursesPage']);
+  const [viewMode, setViewMode] = useState("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSanityBooks = async () => {
+    const fetchSanityCourses = async () => {
       try {
-        const query = `*[_type == "book"] {
+        const query = `*[_type == "course" && category == "${category}"] {
           _id,
           title,
           description,
@@ -67,9 +37,10 @@ export default function BooksList({ viewMode, searchQuery, category, router }) {
           language,
           category,
           accessLink,
-          file,
+          level,
+          duration,
           ratings,
-          author->{_id, fullName},
+          instructor->{_id, fullName},
           "images": images[]{
             "_key": _key,
             "asset": {
@@ -79,11 +50,11 @@ export default function BooksList({ viewMode, searchQuery, category, router }) {
           }
         }`;
 
-        const sanityBooks = await client.fetch(query);
+        const sanityCourses = await client.fetch(query);
 
-        const processedSanityBooks = sanityBooks.map((book) => {
+        const processedSanityCourses = sanityCourses.map((course) => {
           const processedImages =
-            book.images?.map((img) => ({
+            course.images?.map((img) => ({
               asset: {
                 _ref: img.asset?._ref,
                 url: img.asset?.url || "/placeholder.svg",
@@ -91,7 +62,7 @@ export default function BooksList({ viewMode, searchQuery, category, router }) {
             })) || [];
 
           return {
-            ...book,
+            ...course,
             images:
               processedImages.length > 0
                 ? processedImages
@@ -99,8 +70,8 @@ export default function BooksList({ viewMode, searchQuery, category, router }) {
           };
         });
 
-        console.log("Fetched books from Sanity:", processedSanityBooks);
-        setBooks([...mockBooks, ...processedSanityBooks]);
+        console.log("Fetched courses from Sanity:", processedSanityCourses);
+        setCourses(processedSanityCourses);
       } catch (error) {
         console.error("Error fetching Sanity books:", error);
       } finally {
@@ -108,13 +79,12 @@ export default function BooksList({ viewMode, searchQuery, category, router }) {
       }
     };
 
-    fetchSanityBooks();
-  }, []);
+    fetchSanityCourses();
+  }, [category]);
 
-  const filteredBooks = books.filter(
-    (book) =>
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (!category || book.category === category)
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const renderStars = (rating) => {
@@ -132,123 +102,227 @@ export default function BooksList({ viewMode, searchQuery, category, router }) {
     return <div className="flex">{stars}</div>;
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4af37]"></div>
-      </div>
-    );
-  }
-
-  if (filteredBooks.length === 0) {
-    return (
-      <div className="text-center py-16">
-        <Book className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
-          No books found
-        </h3>
-        <p className="text-gray-500">
-          Try adjusting your search or filter criteria
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div
-      className={`${
-        viewMode === "grid"
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          : "space-y-6"
-      }`}
-    >
-      {filteredBooks.map((book) => (
-        <Card
-          key={book._id}
-          className={`overflow-hidden transition-all hover:shadow-lg ${
-            viewMode === "list" ? "flex flex-col md:flex-row" : ""
-          }`}
-        >
-          <div
-            className={`${
-              viewMode === "list"
-                ? "w-full md:w-1/3 h-48 md:h-auto relative"
-                : "aspect-[3/4] overflow-hidden relative"
-            }`}
-          >
-            <Image
-              fill
-              src={book.images?.[0]?.asset?.url || "/placeholder.svg"}
-              alt={book.title}
-              className="w-full h-full object-cover"
+    <Layout locale={locale}>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="relative">
+          <div className="bg-[#d4af37] h-64">
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-overlay"
+              style={{
+                backgroundImage:
+                  "url('https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80')",
+              }}
             />
-            <div className="absolute top-2 right-2 bg-[#d4af37] text-white text-xs px-2 py-1 rounded">
-              Book
+            <div className="container mx-auto px-4 h-full flex flex-col justify-center items-center text-center text-white pt-8">
+              <Book className="w-12 h-12 mb-4" />
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{t(`bookDetails:categories.${category}`, category)}</h1>
+              <p className="text-lg md:text-xl max-w-2xl text-[#f5e6b8]">
+                {t('coursesPage:subtitle')}
+              </p>
+            </div>
+            <div
+              className="absolute bottom-0 left-0 right-0 h-16 bg-gray-50"
+              style={{
+                clipPath: "polygon(0 100%, 100% 100%, 100% 0, 0 100%)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="container mx-auto px-4 py-8 -mt-8 relative z-10">
+          {/* Search and View Controls */}
+          <div className="bg-white rounded-xl shadow-md p-4 mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="w-full md:w-2/3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder={t('coursesPage:searchPlaceholder')}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-transparent"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <div className="absolute left-3 top-2.5 text-gray-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-md ${viewMode === "grid" ? "bg-white shadow-sm" : ""}`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-md ${viewMode === "list" ? "bg-white shadow-sm" : ""}`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div
-            className={`flex flex-col ${viewMode === "list" ? "md:w-2/3" : ""}`}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-lg line-clamp-2">
-                    {book.title}
-                  </h3>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <div className="flex items-center space-x-1">
-                      {renderStars(book.averageRating || 0)}
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      ({book.ratingCount || 0})
-                    </span>
-                  </div>
-                </div>
-                <div className="text-lg font-bold text-[#d4af37]">
-                  ${book.price || 0}
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="pb-2">
-              <p className="text-gray-600 text-sm line-clamp-2 mb-4">
-                {book.description}
+          {/* Courses List */}
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#d4af37]"></div>
+            </div>
+          ) : filteredCourses.length === 0 ? (
+            <div className="text-center py-16">
+              <Book className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                {t('coursesPage:noMatchingCourses')}
+              </h3>
+              <p className="text-gray-500">
+                {t('coursesPage:tryAdjustingSearch')}
               </p>
+            </div>
+          )
 
-              <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-                <div className="flex items-center">
-                  <User className="w-4 h-4 mr-1" />
-                  {book.author?.fullName || "Unknown Author"}
-                </div>
-                <div className="flex items-center">
-                  <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">
-                    {book.language || "English"}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <span
-                    className="text-xs px-2 py-0.5 bg-[#d4af37] text-white rounded-full cursor-pointer hover:bg-[#b8972e]"
-                    onClick={() =>
-                      router.push(`/books/category/${book.category}`)
-                    }
+          : (
+            <div
+              className={`${
+                viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "space-y-6"
+                }`}
+            >
+              {filteredCourses.map((course) => (
+                <Card
+                  key={course._id}
+                  className={`overflow-hidden transition-all hover:shadow-lg ${
+                    viewMode === "list" ? "flex flex-col md:flex-row" : ""
+                  }`}
+                >
+                  <div
+                    className={`${
+                      viewMode === "list"
+                      ? "w-full md:w-1/3 h-48 md:h-auto relative"
+                      : "aspect-[3/4] overflow-hidden relative"
+                      }`}
                   >
-                    {CATEGORY_TITLES[book.category] || book.category}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
+                    <Image
+                      fill
+                      src={course.images?.[0]?.asset?.url || "/placeholder.svg"}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-2 right-2 bg-[#d4af37] text-white text-xs px-2 py-1 rounded">
+                      {t('coursesPage:course')}
+                    </div>
+                  </div>
 
-            <CardFooter className="pt-2 mt-auto">
-              <Link href={`/books/view/${book._id}`} className="w-full">
-                <Button className="w-full" variant="outline">
-                  View Book
-                </Button>
-              </Link>
-            </CardFooter>
-          </div>
-        </Card>
-      ))}
-    </div>
+                  <div
+                    className={`flex flex-col ${viewMode === "list" ? "md:w-2/3" : ""}`}
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold text-lg line-clamp-2">
+                            {course.title}
+                          </h3>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <div className="flex items-center space-x-1">
+                              {renderStars(course.averageRating || 0)}
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              ({course.ratingCount || 0})
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-lg font-bold text-[#d4af37]">
+                          {course.price ? t('coursesPage:price', { value: course.price }) : t('coursesPage:free')}
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="pb-2">
+                      <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                        {course.description}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 mr-1" />
+                          {course.instructor?.fullName || t('coursesPage:unknownInstructor')}
+                        </div>
+                        {course.duration && (
+                          <div className="flex items-center">
+                            <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">
+                              {t('coursesPage:duration')}: {course.duration}
+                            </span>
+                          </div>
+                        )}
+                        {course.level && (
+                          <div className="flex items-center">
+                            <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">
+                              {t(`coursesPage:courseDetails.levels.${course.level}`, course.level)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+
+                    <CardFooter className="pt-2 mt-auto">
+                      <Link href={`/courses/view/${course._id}`} className="w-full">
+                        <Button className="w-full" variant="outline">
+                          {t('coursesPage:viewDetails')}
+                        </Button>
+                      </Link>
+                    </CardFooter>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Layout>
   );
 }

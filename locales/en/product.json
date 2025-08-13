@@ -1,0 +1,83 @@
+{
+  "productCard": {
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "viewDetails": "View Details",
+    "wishlist": "Add to Wishlist",
+    "removeWishlist": "Remove from Wishlist",
+    "loginRequired": "You must be logged in to manage your wishlist.",
+    "loginHere": "Log in here",
+    "outOfStock": "Out of Stock",
+    "inStock": "In Stock",
+    "sale": "Sale",
+    "new": "New",
+    "rental": "Rental",
+    "forSale": "For Sale",
+    "startingAt": "Starting at",
+    "perUnit": "per"
+  },
+  "productFilter": {
+    "filters": "Filters",
+    "search": "Search products...",
+    "categories": {
+      "all": "All Categories",
+      "feed_nutrition": "Feed and Nutrition",
+      "tack_equipment": "Tack and Equipment",
+      "apparel_accessories": "Apparel and Accessories",
+      "health_wellness": "Health and Wellness",
+      "barn_stable": "Barn and Stable Supplies",
+      "riding_competition": "Riding and Competition",
+      "other": "Other"
+    },
+    "listingType": {
+      "all": "All Listings",
+      "sell": "For Sale",
+      "rent": "For Rent"
+    },
+    "price": "Price Range",
+    "rating": {
+      "any": "Any Rating",
+      "4plus": "4+ Stars",
+      "3plus": "3+ Stars",
+      "2plus": "2+ Stars",
+      "1plus": "1+ Star"
+    },
+    "availability": {
+      "inStock": "In Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "activeFilters": "Active Filters",
+    "clearAll": "Clear All",
+    "apply": "Apply Filters",
+    "reset": "Reset"
+  },
+  "productsList": {
+    "noProductsFound": "No Products Found",
+    "noProductsMatchSearch": "We couldn't find any products matching",
+    "noProductsMatchFilter": "No products match your current filter criteria.",
+    "tryExploring": "Try exploring other categories or adding a new product!",
+    "clearFilters": "Clear Filters",
+    "browseAll": "Browse All Products"
+  },
+  "rentalDatePopup": {
+    "title": "Select Rental Period",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "startDateTime": "Start Date & Time",
+    "endDateTime": "End Date & Time",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "errors": {
+      "required": "Both start and end dates are required.",
+      "futureDate": "Start date must be in the future.",
+      "startBeforeEnd": "Start date must be before end date.",
+      "minDuration": {
+        "hour": "Rental duration must be at least 1 hour.",
+        "day": "Rental duration must be at least 1 day.",
+        "week": "Rental duration must be at least 1 week.",
+        "month": "Rental duration must be at least 1 month.",
+        "year": "Rental duration must be at least 1 year."
+      }
+    }
+  }
+}

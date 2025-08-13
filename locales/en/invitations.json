@@ -1,0 +1,48 @@
+{
+  "title": "Competition Invitation",
+  "subtitle": "You've been invited to join a horse competition!",
+  "notFoundTitle": "Invitation Not Found",
+  "backToCompetitions": "Back to Competitions",
+  "dateAt": "at",
+  "organizedBy": "Organized by {{name}}",
+  "status": {
+    "active": "Active",
+    "draft": "Draft"
+  },
+  "ended": "This competition has already ended",
+  "alreadyResponded": "You have already {{status}} this invitation",
+  "responded": {
+    "accepted": "accepted",
+    "declined": "declined"
+  },
+  "loginToRespond": "Please log in to accept or decline this invitation",
+  "horseSelection": {
+    "title": "Your Competition Horses",
+    "description": "Provide both horses for the competition. Your main horse will be used by default, but you can change this later before the competition starts.",
+    "mainHorse": "Main Competition Horse",
+    "mainHorsePlaceholder": "Enter your main horse's name",
+    "backupHorse": "Backup Horse",
+    "backupHorsePlaceholder": "Enter your backup horse's name",
+    "backupHorseNote": "You can change which horse to use before the competition starts"
+  },
+  "accept": "Accept Invitation",
+  "decline": "Decline",
+  "loginCta": "Log In to Respond",
+  "toasts": {
+    "mainHorseRequiredTitle": "Main Horse Required! 🐴",
+    "mainHorseRequiredDesc": "Please enter your main competition horse's name.",
+    "loginRequiredTitle": "Login Required! 🔐",
+    "loginRequiredDescAccept": "Please log in to accept this invitation.",
+    "loginRequiredDescDecline": "Please log in to decline this invitation.",
+    "acceptedTitle": "Invitation Accepted! 🎉",
+    "acceptedDesc": "You've successfully joined the competition!",
+    "acceptErrorTitle": "Error! ❌",
+    "acceptErrorDesc": "Failed to accept invitation. Please try again.",
+    "declinedTitle": "Invitation Declined",
+    "declinedDesc": "You've declined the invitation.",
+    "declineErrorTitle": "Error! ❌",
+    "declineErrorDesc": "Failed to decline invitation. Please try again."
+  }
+}
+
+

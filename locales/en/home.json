@@ -1,10 +1,10 @@
 {
     "hero": {
-        "mainTitle": "Passionate about Horses",
-        "subtitlePart1": "Dedicated to Your ",
-        "subtitlePart2": "Equestrian Journey",
+        "mainTitle": "🏇✨ Yartoli",
+        "subtitlePart1": "Where the World of Equestrianism is",
+        "subtitlePart2": "at Your Fingertips",
         "description": "We are ",
-        "companyName": "Tairia Horses",
+        "companyName": "Yartoli Horses",
         "partnerText": "your trusted partner in ",
         "services": [
             "Horse Rentals",
@@ -32,6 +32,18 @@
         "researchWork": {
             "count": "300",
             "title": "Research Work"
+        },
+        "horses": {
+            "title": "Horses"
+        },
+        "services": {
+            "title": "Services"
+        },
+        "products": {
+            "title": "Products"
+        },
+        "educationalServices": {
+            "title": "Educational Services"
         }
     },
     "features": {
@@ -54,9 +66,9 @@
     },
     "welcome": {
         "title": "Welcome to",
-        "companyName": "Taiara Horses",
+        "companyName": "Yartoli Horses",
         "subtitle": "Your gateway to the world of equestrianism",
-        "description": "Join us in a supportive environment where riders and their horses connect, grow, and thrive. From training to competitions, we aim to enrich your equestrian experience with resources, knowledge, and opportunities tailored to your needs."
+        "description": "Have you ever imagined having everything related to horses and equestrianism in one place? The 'Yartoli' website is your comprehensive gateway to the world of equestrianism in all its details - where possibilities know no bounds!"
     },
     "howWeWork": {
         "items": {
@@ -75,14 +87,14 @@
         }
     },
     "empowering": {
-        "title": "Empowering",
-        "companyName": "Taiara Horses",
-        "subtitle": "Equestrian Connections",
-        "description": "Discover a supportive platform where riders and horses thrive, offering resources for training, care, and skill development."
+        "title": "Experience",
+        "companyName": "Yartoli",
+        "subtitle": "A Complete Equestrian World",
+        "description": "At \"Yartoli,\" we don't just provide services... we create a complete world. From the finest technical details to the largest projects, from beginners to professionals, and from basic services to specialized solutions. Discover for yourself why \"Yartoli\" has become the top destination for everyone passionate about the equestrian world."
     },
     "newsletter": {
         "title": "Stay Connected with",
-        "companyName": "Homeland Horses",
+        "companyName": "Yartoli Horses",
         "subtitle": "Join Our Newsletter",
         "description": "Receive the latest equestrian insights, tips, and special offers straight to your inbox.",
         "placeholder": "Type your email",

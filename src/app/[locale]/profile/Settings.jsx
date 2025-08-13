@@ -10,14 +10,21 @@ import {
   Trash,
   Info,
   AlertTriangle,
+  Camera,
+  Upload,
 } from "lucide-react";
 import { client } from "@/lib/sanity";
 import { urlFor } from "@/lib/sanity";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 export default function SettingsPage({ userData }) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
+  const isRTL = locale === 'ar';
+  
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -39,17 +46,16 @@ export default function SettingsPage({ userData }) {
   const [userInfo, setUserInfo] = useState({
     userName: userData?.userName || "",
     fullName: userData?.fullName || "",
-    email: userData?.email || "",
     phoneNumber: userData?.phoneNumber || "",
-    country: "", // Will be set after fetching countries
+    country: "",
     gender: userData?.kind || "",
     communication: {
       email: true,
       phone: !!userData?.phoneNumber,
     },
     addressDetails: userData?.addressDetails || "",
-    city: "", // Will be set after fetching cities
-    governorate: "", // Will be set after fetching governorates
+    city: "",
+    governorate: "",
   });
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
@@ -82,28 +88,19 @@ export default function SettingsPage({ userData }) {
           (g) => g.name_en === userData?.governorate?.name_en
         )?._id || "";
 
-        // Update userInfo with matched _id values
         setUserInfo((prev) => ({
           ...prev,
           country: countryId,
           city: cityId,
           governorate: governorateId,
         }));
-
-        // Debugging: Log fetched data and matched IDs
-        console.log("Fetched countries:", countryData);
-        console.log("Fetched cities:", cityData);
-        console.log("Fetched governorates:", governorateData);
-        console.log("Matched country ID:", countryId);
-        console.log("Matched city ID:", cityId);
-        console.log("Matched governorate ID:", governorateId);
       } catch (error) {
         console.error("Error fetching references:", error);
-        toast.error("Failed to load location data. Please try again.");
+        toast.error(t("profile:settings.validation.error.locationDataFailed"));
       }
     };
     fetchReferences();
-  }, [userData]);
+  }, [userData, t]);
 
   const toggleAllNotifications = () => {
     const allEnabled = Object.values(notifications).every(
@@ -145,59 +142,51 @@ export default function SettingsPage({ userData }) {
   // Validate user input before saving
   const validateUserInfo = () => {
     if (!userInfo.userName.trim()) {
-      toast.error("Username is required.");
+      toast.error(t("profile:settings.validation.usernameRequired"));
       return false;
     }
     if (!userInfo.fullName.trim()) {
-      toast.error("Full Name is required.");
-      return false;
-    }
-    if (!userInfo.email.trim()) {
-      toast.error("Email is required.");
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userInfo.email)) {
-      toast.error("Please enter a valid email address.");
+      toast.error(t("profile:settings.validation.fullNameRequired"));
       return false;
     }
     if (!userInfo.phoneNumber.trim()) {
-      toast.error("Phone Number is required.");
+      toast.error(t("profile:settings.validation.phoneRequired"));
       return false;
     }
     if (!userInfo.gender) {
-      toast.error("Please select a gender.");
+      toast.error(t("profile:settings.validation.genderRequired"));
       return false;
     }
     if (!["male", "female"].includes(userInfo.gender)) {
-      toast.error("Please select a valid gender (Male or Female).");
+      toast.error(t("profile:settings.validation.validGender"));
       return false;
     }
     if (!userInfo.addressDetails.trim()) {
-      toast.error("Address Details are required.");
+      toast.error(t("profile:settings.validation.addressRequired"));
       return false;
     }
     if (!userInfo.country) {
-      toast.error("Please select a country.");
+      toast.error(t("profile:settings.validation.countryRequired"));
       return false;
     }
     if (!countries.find((c) => c._id === userInfo.country)) {
-      toast.error("Selected country is invalid.");
+      toast.error(t("profile:settings.validation.countryRequired"));
       return false;
     }
     if (!userInfo.city) {
-      toast.error("Please select a city.");
+      toast.error(t("profile:settings.validation.cityRequired"));
       return false;
     }
     if (!cities.find((c) => c._id === userInfo.city)) {
-      toast.error("Selected city is invalid.");
+      toast.error(t("profile:settings.validation.cityRequired"));
       return false;
     }
     if (!userInfo.governorate) {
-      toast.error("Please select a governorate.");
+      toast.error(t("profile:settings.validation.governorateRequired"));
       return false;
     }
     if (!governorates.find((g) => g._id === userInfo.governorate)) {
-      toast.error("Selected governorate is invalid.");
+      toast.error(t("profile:settings.validation.governorateRequired"));
       return false;
     }
     return true;
@@ -212,7 +201,6 @@ export default function SettingsPage({ userData }) {
       const updatedData = {
         userName: userInfo.userName.trim(),
         fullName: userInfo.fullName.trim(),
-        email: userInfo.email,
         phoneNumber: userInfo.phoneNumber,
         kind: userInfo.gender,
         addressDetails: userInfo.addressDetails,
@@ -226,12 +214,12 @@ export default function SettingsPage({ userData }) {
       };
 
       await client.patch(userData._id).set(updatedData).commit();
-      toast.success("Profile updated successfully!");
-      router.refresh(); // Refresh to update userData in Profile.jsx
+      toast.success(t("profile:settings.validation.success.profileUpdated"));
+      router.refresh();
     } catch (error) {
       console.error("Error updating user info:", error);
       toast.error(
-        error.message || "Failed to update profile. Please try again."
+        error.message || t("profile:settings.validation.error.failedUpdate")
       );
     } finally {
       setIsLoading(false);
@@ -243,10 +231,10 @@ export default function SettingsPage({ userData }) {
     setIsLoading(true);
     try {
       await client.patch(userData._id).set({ notifications }).commit();
-      toast.success("Notification preferences updated!");
+      toast.success(t("profile:settings.validation.success.notificationsUpdated"));
     } catch (error) {
       console.error("Error updating notifications:", error);
-      toast.error("Failed to update notifications.");
+      toast.error(t("profile:settings.validation.error.failedNotifications"));
     } finally {
       setIsLoading(false);
     }
@@ -255,11 +243,11 @@ export default function SettingsPage({ userData }) {
   // Handle password change
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("New password and confirmation do not match.");
+      toast.error(t("profile:settings.validation.passwordMismatch"));
       return;
     }
     if (passwordData.newPassword.length < 8) {
-      toast.error("New password must be at least 8 characters long.");
+      toast.error(t("profile:settings.validation.passwordLength"));
       return;
     }
     setIsLoading(true);
@@ -275,9 +263,9 @@ export default function SettingsPage({ userData }) {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Failed to change password.");
+        throw new Error(data.error || t("profile:settings.validation.error.failedPassword"));
       }
-      toast.success("Password changed successfully!");
+      toast.success(t("profile:settings.validation.success.passwordChanged"));
       setPasswordData({
         currentPassword: "",
         newPassword: "",
@@ -302,7 +290,7 @@ export default function SettingsPage({ userData }) {
         credentials: "include",
       });
       if (!response.ok) {
-        throw new Error("Failed to delete account.");
+        throw new Error(t("profile:settings.validation.error.failedDelete"));
       }
       toast.success("Account deletion requested. Check your email to confirm.");
       router.push("/login");
@@ -318,7 +306,7 @@ export default function SettingsPage({ userData }) {
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file || !["image/png", "image/jpeg"].includes(file.type)) {
-      toast.error("Please upload a PNG or JPG image.");
+      toast.error(t("profile:settings.validation.imageType"));
       return;
     }
     setIsLoading(true);
@@ -333,32 +321,41 @@ export default function SettingsPage({ userData }) {
           },
         })
         .commit();
-      toast.success("Profile picture updated!");
+      toast.success(t("profile:settings.validation.success.profilePictureUpdated"));
       router.refresh();
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast.error("Failed to update profile picture.");
+      toast.error(t("profile:settings.validation.error.failedImage"));
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Helper function to get localized name
+  const getLocalizedName = (item) => {
+    if (!item) return "";
+    return locale === 'ar' ? item.name_ar : item.name_en;
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
-      <h1 className="text-2xl font-semibold mb-6 pt-6">Settings</h1>
+    <div className={`w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 ${isRTL ? 'rtl' : 'ltr'}`}>
+      <h1 className={`text-3xl font-bold mb-8 pt-6 text-gray-900 ${isRTL ? 'text-right' : 'text-left'}`}>
+        {t("profile:settings.title")}
+      </h1>
 
       {/* Basic Info Section */}
-      <section className="bg-white rounded-xl shadow mb-6 p-6">
-        <div className="flex items-center mb-6">
-          <User className="text-blue-600 mr-2" size={24} />
-          <h2 className="text-xl font-medium">Basic info</h2>
+      <section className="bg-white rounded-2xl shadow-lg mb-8 p-6 sm:p-8">
+        <div className={`flex items-center mb-8 ${isRTL ? '' : 'flex-row'}`}>
+          <User className={`text-blue-600 ${isRTL ? 'ml-2' : 'mr-2'}`} size={28} />
+          <h2 className="text-2xl font-semibold text-gray-900">{t("profile:settings.basicInfo.title")}</h2>
         </div>
 
-        <div className="flex items-center mb-8">
+        {/* Profile Picture Section */}
+        <div className={`flex flex-col lg:flex-row items-start lg:items-center mb-8 gap-6 ${isRTL ? 'lg:' : ''}`}>
           {/* Profile Picture Container */}
           <div className="relative group">
             <div
-              className="w-24 h-24 rounded-full bg-gray-100 bg-cover bg-center shadow-lg ring-4 ring-[#8c6b23]/40 transition-transform duration-300 group-hover:scale-105"
+              className="w-32 h-32 rounded-full bg-gray-100 bg-cover bg-center shadow-xl ring-4 ring-blue-200/50 transition-all duration-300 group-hover:scale-105 group-hover:ring-blue-300/70"
               style={{
                 backgroundImage: userData?.image
                   ? `url(${urlFor(userData.image).url()})`
@@ -373,47 +370,46 @@ export default function SettingsPage({ userData }) {
                 onChange={handleImageUpload}
               />
               {/* Overlay for Upload Prompt */}
-              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <span className="text-white text-xs font-medium flex items-center gap-1">
-                  <Eye size={16} className="inline" />
-                  Upload
-                </span>
+              <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="text-white text-center">
+                  <Camera size={24} className="mx-auto mb-2" />
+                  <span className="text-sm font-medium">{t("profile:settings.basicInfo.changePhoto")}</span>
+                </div>
               </div>
             </div>
-            {/* Animated Badge for Visual Flair */}
-            <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
-              <span className="text-white text-xs">✨</span>
+            {/* Upload Badge */}
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
+              <Upload size={16} className="text-white" />
             </div>
           </div>
 
           {/* Text Description */}
-          <div className="ml-6">
-            <h3 className="text-lg font-bold text-gray-800">Profile Picture</h3>
-            <p className="text-sm text-gray-600 mt-1 max-w-xs">
-              Upload a PNG or JPG image (max 1000px x 1000px) to personalize
-              your profile.
+          <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">{t("profile:settings.basicInfo.profilePicture")}</h3>
+            <p className="text-gray-600 mb-4 max-w-md leading-relaxed">
+              {t("profile:settings.basicInfo.profilePictureDescription")}
             </p>
             <button
-              className="mt-2 text-blue-600 text-sm font-medium hover:underline focus:outline-none"
-              onClick={() =>
-                document.querySelector('input[type="file"]').click()
-              }
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+              onClick={() => document.querySelector('input[type="file"]').click()}
             >
-              Change Photo
+              <Camera size={16} />
+              {t("profile:settings.basicInfo.changePhoto")}
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+        {/* Form Fields */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="sm:col-span-2 lg:col-span-1">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
               htmlFor="userName"
             >
-              Username
+              {t("profile:settings.basicInfo.username")}
             </label>
             <input
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               type="text"
               id="userName"
               value={userInfo.userName}
@@ -421,15 +417,15 @@ export default function SettingsPage({ userData }) {
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
               htmlFor="fullName"
             >
-              Full Name
+              {t("profile:settings.basicInfo.fullName")}
             </label>
             <input
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               type="text"
               id="fullName"
               value={userInfo.fullName}
@@ -437,34 +433,34 @@ export default function SettingsPage({ userData }) {
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
-              htmlFor="email"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              Email address
+              {t("profile:settings.basicInfo.emailAddress")}
             </label>
-            <input
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              type="email"
-              id="email"
-              value={userInfo.email}
-              onChange={(e) => handleUserInfoChange("email", e.target.value)}
-            />
+            <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700">
+              {userData?.email || t("profile:settings.basicInfo.noEmailProvided")}
+            </div>
+            <p className={`text-xs text-gray-500 mt-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+              {t("profile:settings.basicInfo.emailReadOnly")}
+            </p>
           </div>
 
-          <div>
+
+
+          <div className="sm:col-span-2 lg:col-span-1">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
               htmlFor="phoneNumber"
             >
-              Phone
+              {t("profile:settings.basicInfo.phone")}
             </label>
             <input
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               type="tel"
               id="phoneNumber"
-              placeholder="+1 ___ ___ __"
+              placeholder={t("profile:settings.basicInfo.phonePlaceholder")}
               value={userInfo.phoneNumber}
               onChange={(e) =>
                 handleUserInfoChange("phoneNumber", e.target.value)
@@ -472,63 +468,63 @@ export default function SettingsPage({ userData }) {
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
               htmlFor="country"
             >
-              Country
+              {t("profile:settings.basicInfo.country")}
             </label>
             <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               id="country"
               value={userInfo.country}
               onChange={(e) => handleUserInfoChange("country", e.target.value)}
             >
               <option value="" disabled>
-                Select country
+                {t("profile:settings.basicInfo.selectCountry")}
               </option>
               {countries.map((country) => (
                 <option key={country._id} value={country._id}>
-                  {country.name_en}
+                  {getLocalizedName(country)}
                 </option>
               ))}
             </select>
           </div>
 
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
               htmlFor="city"
             >
-              City
+              {t("profile:settings.basicInfo.city")}
             </label>
             <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               id="city"
               value={userInfo.city}
               onChange={(e) => handleUserInfoChange("city", e.target.value)}
             >
               <option value="" disabled>
-                Select city
+                {t("profile:settings.basicInfo.selectCity")}
               </option>
               {cities.map((city) => (
                 <option key={city._id} value={city._id}>
-                  {city.name_en}
+                  {getLocalizedName(city)}
                 </option>
               ))}
             </select>
           </div>
 
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
               htmlFor="governorate"
             >
-              Governorate
+              {t("profile:settings.basicInfo.governorate")}
             </label>
             <select
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               id="governorate"
               value={userInfo.governorate}
               onChange={(e) =>
@@ -536,25 +532,25 @@ export default function SettingsPage({ userData }) {
               }
             >
               <option value="" disabled>
-                Select governorate
+                {t("profile:settings.basicInfo.selectGovernorate")}
               </option>
               {governorates.map((gov) => (
                 <option key={gov._id} value={gov._id}>
-                  {gov.name_en}
+                  {getLocalizedName(gov)}
                 </option>
               ))}
             </select>
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}
               htmlFor="addressDetails"
             >
-              Address Details
+              {t("profile:settings.basicInfo.addressDetails")}
             </label>
             <input
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               type="text"
               id="addressDetails"
               value={userInfo.addressDetails}
@@ -564,100 +560,115 @@ export default function SettingsPage({ userData }) {
             />
           </div>
 
-          <div className="col-span-1 sm:col-span-2 flex items-center mt-2">
-            <div className="text-gray-700 mr-4">Gender:</div>
-            <div className="flex items-center mr-4">
-              <input
-                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                type="radio"
-                id="male"
-                name="gender"
-                value="male"
-                checked={userInfo.gender === "male"}
-                onChange={() => handleUserInfoChange("gender", "male")}
-              />
-              <label className="ml-2 text-sm text-gray-700" htmlFor="male">
-                Male
-              </label>
-            </div>
-            <div className="flex items-center mr-4">
-              <input
-                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                type="radio"
-                id="female"
-                name="gender"
-                value="female"
-                checked={userInfo.gender === "female"}
-                onChange={() => handleUserInfoChange("gender", "female")}
-              />
-              <label className="ml-2 text-sm text-gray-700" htmlFor="female">
-                Female
-              </label>
+          {/* Gender Selection */}
+          <div className="sm:col-span-2">
+            <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 ${isRTL ? 'sm:' : ''}`}>
+              <span className={`text-sm font-semibold text-gray-700 whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                {t("profile:settings.basicInfo.gender")}:
+              </span>
+              <div className={`flex items-center gap-6 ${isRTL ? '' : ''}`}>
+                <div className="flex items-center">
+                  <input
+                    className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    type="radio"
+                    id="male"
+                    name="gender"
+                    value="male"
+                    checked={userInfo.gender === "male"}
+                    onChange={() => handleUserInfoChange("gender", "male")}
+                  />
+                  <label className={`ml-2 text-sm font-medium text-gray-700 ${isRTL ? 'mr-2 ml-0' : ''}`} htmlFor="male">
+                    {t("profile:settings.basicInfo.male")}
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    type="radio"
+                    id="female"
+                    name="gender"
+                    value="female"
+                    checked={userInfo.gender === "female"}
+                    onChange={() => handleUserInfoChange("gender", "female")}
+                  />
+                  <label className={`ml-2 text-sm font-medium text-gray-700 ${isRTL ? 'mr-2 ml-0' : ''}`} htmlFor="female">
+                    {t("profile:settings.basicInfo.female")}
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="col-span-1 sm:col-span-2 flex items-center">
-            <div className="text-gray-700 mr-4">Communication:</div>
-            <div className="flex items-center mr-4">
-              <input
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                type="checkbox"
-                id="c-email"
-                checked={userInfo.communication.email}
-                onChange={() => handleCommunicationChange("email")}
-              />
-              <label className="ml-2 text-sm text-gray-700" htmlFor="c-email">
-                Email
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                type="checkbox"
-                id="c-phone"
-                checked={userInfo.communication.phone}
-                onChange={() => handleCommunicationChange("phone")}
-              />
-              <label className="ml-2 text-sm text-gray-700" htmlFor="c-phone">
-                Phone
-              </label>
+          {/* Communication Preferences */}
+          <div className="sm:col-span-2">
+            <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 ${isRTL ? 'sm:' : ''}`}>
+              <span className={`text-sm font-semibold text-gray-700 whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                {t("profile:settings.basicInfo.communication")}:
+              </span>
+              <div className={`flex items-center gap-6 ${isRTL ? '' : ''}`}>
+                <div className="flex items-center">
+                  <input
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    type="checkbox"
+                    id="c-email"
+                    checked={userInfo.communication.email}
+                    onChange={() => handleCommunicationChange("email")}
+                  />
+                  <label className={`ml-2 text-sm font-medium text-gray-700 ${isRTL ? 'mr-2 ml-0' : ''}`} htmlFor="c-email">
+                    {t("profile:settings.basicInfo.email")}
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    type="checkbox"
+                    id="c-phone"
+                    checked={userInfo.communication.phone}
+                    onChange={() => handleCommunicationChange("phone")}
+                  />
+                  <label className={`ml-2 text-sm font-medium text-gray-700 ${isRTL ? 'mr-2 ml-0' : ''}`} htmlFor="c-phone">
+                    {t("profile:settings.basicInfo.phoneComm")}
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end mt-6">
+        {/* Action Buttons */}
+        <div className={`flex flex-col sm:flex-row gap-4 mt-8 ${isRTL ? 'sm:' : ''}`}>
           <button
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 mr-3"
+            className="flex-1 sm:flex-none px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
             onClick={() => router.push("/profile?tab=overview")}
             disabled={isLoading}
           >
-            Cancel
+            {t("profile:settings.basicInfo.cancel")}
           </button>
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSaveUserInfo}
             disabled={isLoading}
           >
-            {isLoading ? "Saving..." : "Save changes"}
+            {isLoading ? t("profile:settings.basicInfo.saving") : t("profile:settings.basicInfo.saveChanges")}
           </button>
         </div>
       </section>
 
       {/* Password Change Section */}
-      {/* <section className="bg-white rounded-xl shadow mb-6 p-6">
-        <div className="flex items-center mb-6">
-          <Lock className="text-blue-600 mr-2" size={24} />
-          <h2 className="text-xl font-medium">Password change</h2>
+      <section className="bg-white rounded-2xl shadow-lg mb-8 p-6 sm:p-8">
+        <div className={`flex items-center mb-8 ${isRTL ? '' : 'flex-row'}`}>
+          <Lock className={`text-blue-600 ${isRTL ? 'ml-2' : 'mr-2'}`} size={28} />
+          <h2 className="text-2xl font-semibold text-gray-900">{t("profile:settings.passwordChange.title")}</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="current-pass">
-              Current password
+            <label className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`} htmlFor="current-pass">
+              {t("profile:settings.passwordChange.currentPassword")}
             </label>
             <div className="relative">
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12"
                 type={showCurrentPassword ? "text" : "password"}
                 id="current-pass"
                 value={passwordData.currentPassword}
@@ -667,7 +678,7 @@ export default function SettingsPage({ userData }) {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center`}
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               >
                 {showCurrentPassword ? (
@@ -678,19 +689,20 @@ export default function SettingsPage({ userData }) {
               </button>
             </div>
           </div>
-          <div className="flex items-center">
-            <a href="/forgot-password" className="text-sm font-semibold text-blue-600 hover:text-blue-800">
-              Forgot password?
-            </a>
+          
+          <div className="flex items-end">
+            <Link href="/forgot-password" className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-200">
+              {t("profile:settings.passwordChange.forgotPassword")}
+            </Link>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="new-pass">
-              New password
+            <label className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`} htmlFor="new-pass">
+              {t("profile:settings.passwordChange.newPassword")}
             </label>
             <div className="relative">
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12"
                 type={showNewPassword ? "text" : "password"}
                 id="new-pass"
                 value={passwordData.newPassword}
@@ -700,7 +712,7 @@ export default function SettingsPage({ userData }) {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center`}
                 onClick={() => setShowNewPassword(!showNewPassword)}
               >
                 {showNewPassword ? (
@@ -713,12 +725,12 @@ export default function SettingsPage({ userData }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="confirm-pass">
-              Confirm new password
+            <label className={`block text-sm font-semibold text-gray-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`} htmlFor="confirm-pass">
+              {t("profile:settings.passwordChange.confirmPassword")}
             </label>
             <div className="relative">
               <input
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12"
                 type={showConfirmPassword ? "text" : "password"}
                 id="confirm-pass"
                 value={passwordData.confirmPassword}
@@ -728,7 +740,7 @@ export default function SettingsPage({ userData }) {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center`}
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? (
@@ -741,237 +753,170 @@ export default function SettingsPage({ userData }) {
           </div>
         </div>
 
-        <div className="rounded-xl bg-[#ecf2fa] border-l-4 border-[#9fbfe5] p-4 my-6 flex items-start">
-          <Info className="text-[#3972b6] mr-3 flex-shrink-0" size={24} />
-          <p className="text-sm text-[#3972b6]">
-            Password must be minimum 8 characters long - the more, the better.
+        <div className="rounded-xl bg-blue-50 border-l-4 border-blue-400 p-4 my-6 flex items-start">
+          <Info className={`text-blue-600 ${isRTL ? 'ml-3' : 'mr-3'} flex-shrink-0`} size={24} />
+          <p className="text-sm text-blue-700 leading-relaxed">
+            {t("profile:settings.passwordChange.passwordInfo")}
           </p>
         </div>
 
-        <div className="flex justify-end">
+        <div className={`flex flex-col sm:flex-row gap-4 ${isRTL ? 'sm:' : ''}`}>
           <button
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 mr-3"
+            className="flex-1 sm:flex-none px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
             onClick={() => router.push("/profile?tab=overview")}
             disabled={isLoading}
           >
-            Cancel
+            {t("profile:settings.passwordChange.cancel")}
           </button>
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handlePasswordChange}
             disabled={isLoading}
           >
-            {isLoading ? "Saving..." : "Save changes"}
+            {isLoading ? t("profile:settings.passwordChange.saving") : t("profile:settings.passwordChange.saveChanges")}
           </button>
         </div>
-      </section> */}
+      </section>
 
       {/* Notifications Section */}
-      {/* <section className="bg-white rounded-xl shadow mb-6 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Bell className="text-blue-600 mr-2" size={24} />
-            <h2 className="text-xl font-medium">Notifications</h2>
+      <section className="bg-white rounded-2xl shadow-lg mb-8 p-6 sm:p-8">
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 ${isRTL ? 'sm:' : ''}`}>
+          <div className={`flex items-center ${isRTL ? '' : 'flex-row'}`}>
+            <Bell className={`text-blue-600 ${isRTL ? 'ml-2' : 'mr-2'}`} size={28} />
+            <h2 className="text-2xl font-semibold text-gray-900">{t("profile:settings.notifications.title")}</h2>
           </div>
           <button
-            className="px-3 py-1 text-sm border border-gray-300 rounded-xl hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="px-4 py-2 text-sm border border-gray-300 rounded-xl hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
             onClick={toggleAllNotifications}
             disabled={isLoading}
           >
-            Toggle all
+            {t("profile:settings.notifications.toggleAll")}
           </button>
         </div>
 
         <div className="space-y-6">
-          <div className="flex items-start">
-            <div className="flex items-center h-5 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                id="product-sold"
-                checked={notifications.productSold}
-                onChange={() => handleNotificationChange("productSold")}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="ml-3">
-              <label
-                htmlFor="product-sold"
-                className="font-medium text-gray-700"
-              >
-                Product sold notifications
-              </label>
-              <p className="text-sm text-gray-500">
-                Send an email when someone purchased one of my products
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start">
-            <div className="flex items-center h-5 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                id="product-update"
-                checked={notifications.productUpdate}
-                onChange={() => handleNotificationChange("productUpdate")}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="ml-3">
-              <label
-                htmlFor="product-update"
-                className="font-medium text-gray-700"
-              >
-                Product update notifications
-              </label>
-              <p className="text-sm text-gray-500">
-                Send an email when a product I've purchased is updated
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start">
-            <div className="flex items-center h-5 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                id="product-comment"
-                checked={notifications.productComment}
-                onChange={() => handleNotificationChange("productComment")}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="ml-3">
-              <label
-                htmlFor="product-comment"
-                className="font-medium text-gray-700"
-              >
-                Product comment notifications
-              </label>
-              <p className="text-sm text-gray-500">
-                Send an email when someone comments on one of my products
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start">
-            <div className="flex items-center h-5 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                id="product-review"
-                checked={notifications.productReview}
-                onChange={() => handleNotificationChange("productReview")}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="ml-3">
-              <label
-                htmlFor="product-review"
-                className="font-medium text-gray-700"
-              >
-                Product review notifications
-              </label>
-              <p className="text-sm text-gray-500">
-                Send an email when someone leaves a review with his/her rating
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start">
-            <div className="flex items-center h-5 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                id="daily-summary"
-                checked={notifications.dailySummary}
-                disabled
-              />
-            </div>
-            <div className="ml-3">
-              <div className="flex items-center">
-                <label
-                  htmlFor="daily-summary"
-                  className="font-medium text-gray-500"
-                >
-                  Daily summary emails
-                </label>
-                <span className="ml-2 px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded-xl">
-                  Only for premium
-                </span>
+          {[
+            {
+              key: "productSold",
+              title: t("profile:settings.notifications.productSold"),
+              description: t("profile:settings.notifications.productSoldDescription"),
+            },
+            {
+              key: "productUpdate",
+              title: t("profile:settings.notifications.productUpdate"),
+              description: t("profile:settings.notifications.productUpdateDescription"),
+            },
+            {
+              key: "productComment",
+              title: t("profile:settings.notifications.productComment"),
+              description: t("profile:settings.notifications.productCommentDescription"),
+            },
+            {
+              key: "productReview",
+              title: t("profile:settings.notifications.productReview"),
+              description: t("profile:settings.notifications.productReviewDescription"),
+            },
+            {
+              key: "dailySummary",
+              title: t("profile:settings.notifications.dailySummary"),
+              description: t("profile:settings.notifications.dailySummaryDescription"),
+              disabled: true,
+            },
+          ].map((item) => (
+            <div key={item.key} className={`flex items-start ${isRTL ? '' : 'flex-row'}`}>
+              <div className="flex items-center h-5 mt-1">
+                <input
+                  type="checkbox"
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  id={item.key}
+                  checked={notifications[item.key]}
+                  onChange={() => handleNotificationChange(item.key)}
+                  disabled={isLoading || item.disabled}
+                />
               </div>
-              <p className="text-sm text-gray-500">
-                Send a daily summary of all activities on your account
-              </p>
+              <div className={`${isRTL ? 'mr-3 text-right' : 'ml-3 text-left'}`}>
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor={item.key}
+                    className={`font-semibold ${item.disabled ? 'text-gray-500' : 'text-gray-700'}`}
+                  >
+                    {item.title}
+                  </label>
+                  {item.disabled && (
+                    <span className="px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-xl">
+                      {t("profile:settings.notifications.premiumOnly")}
+                    </span>
+                  )}
+                </div>
+                <p className={`text-sm ${item.disabled ? 'text-gray-400' : 'text-gray-500'} mt-1 leading-relaxed`}>
+                  {item.description}
+                </p>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
 
-        <div className="flex justify-end mt-6">
+        <div className={`flex flex-col sm:flex-row gap-4 mt-8 ${isRTL ? 'sm:' : ''}`}>
           <button
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 mr-3"
+            className="flex-1 sm:flex-none px-6 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 font-medium"
             onClick={() => router.push("/profile?tab=overview")}
             disabled={isLoading}
           >
-            Cancel
+            {t("profile:settings.notifications.cancel")}
           </button>
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 sm:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSaveNotifications}
             disabled={isLoading}
           >
-            {isLoading ? "Saving..." : "Save changes"}
+            {isLoading ? t("profile:settings.notifications.saving") : t("profile:settings.notifications.saveChanges")}
           </button>
         </div>
-      </section> */}
+      </section>
 
       {/* Delete Account Section */}
-      <section className="bg-white rounded-xl shadow mb-6 p-6">
-        <div className="flex items-center mb-6">
-          <Trash className="text-blue-600 mr-2" size={24} />
-          <h2 className="text-xl font-medium">Delete account</h2>
+      <section className="bg-white rounded-2xl shadow-lg mb-8 p-6 sm:p-8">
+        <div className={`flex items-center mb-8 ${isRTL ? '' : 'flex-row'}`}>
+          <Trash className={`text-red-600 ${isRTL ? 'ml-2' : 'mr-2'}`} size={28} />
+          <h2 className="text-2xl font-semibold text-gray-900">{t("profile:settings.deleteAccount.title")}</h2>
         </div>
 
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 flex items-start">
           <AlertTriangle
-            className="text-yellow-500 mr-3 flex-shrink-0"
+            className={`text-yellow-500 ${isRTL ? 'ml-3' : 'mr-3'} flex-shrink-0`}
             size={24}
           />
-          <p className="text-sm text-yellow-700">
-            When you delete your account, your public profile will be
-            deactivated immediately. If you change your mind before the 14 days
-            are up, sign in with your email and password, and we&apos;ll send a link
-            to reactivate account.{" "}
+          <p className="text-sm text-yellow-700 leading-relaxed">
+            {t("profile:settings.deleteAccount.warning")}{" "}
             <Link
               href="/support"
-              className="font-semibold text-yellow-700 underline"
+              className="font-semibold text-yellow-700 underline hover:text-yellow-800 transition-colors duration-200"
             >
-wwwwwwww              Learn more
+              {t("profile:settings.deleteAccount.learnMore")}
             </Link>
           </p>
         </div>
 
-        <div className="flex items-center mb-6">
+        <div className={`flex items-center mb-6 ${isRTL ? '' : 'flex-row'}`}>
           <input
             id="confirm-delete"
             type="checkbox"
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
             checked={deleteConfirmed}
             onChange={() => setDeleteConfirmed(!deleteConfirmed)}
             disabled={isLoading}
           />
           <label
             htmlFor="confirm-delete"
-            className="ml-2 text-sm font-medium text-gray-900"
+            className={`text-sm font-medium text-gray-900 ${isRTL ? 'mr-2' : 'ml-2'}`}
           >
-            Yes, I want to delete my account
+            {t("profile:settings.deleteAccount.confirmDelete")}
           </label>
         </div>
 
-        <div className="flex justify-end">
+        <div className={`flex justify-end ${isRTL ? 'justify-start' : ''}`}>
           <button
-            className={`flex items-center px-4 py-2 bg-red-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 ${
+            className={`flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200 font-medium ${
               !deleteConfirmed
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-red-700"
@@ -979,8 +924,8 @@ wwwwwwww              Learn more
             disabled={!deleteConfirmed || isLoading}
             onClick={handleDeleteAccount}
           >
-            <Trash size={16} className="mr-2" />
-            {isLoading ? "Deleting..." : "Delete account"}
+            <Trash size={18} />
+            {isLoading ? t("profile:settings.deleteAccount.deleting") : t("profile:settings.deleteAccount.deleteAccount")}
           </button>
         </div>
       </section>

@@ -1,0 +1,63 @@
+{
+  "hero": {
+    "badge": "Epic Horse Battles Await",
+    "title": "Battle Arena",
+    "subtitle": "Experience the ultimate horse competition platform where legends are born, champions rise, and dreams come alive",
+    "ctaCreate": "Enter the Arena",
+    "ctaWatch": "Watch Demo"
+  },
+  "stats": {
+    "activeBattles": "Active Battles",
+    "joinNow": "Join the action now",
+    "yourPoints": "Your Points",
+    "ready": "Ready to compete",
+    "totalRewards": "Total Rewards",
+    "available": "Available to win"
+  },
+  "sections": {
+    "allCompetitions": "All Competitions",
+    "sub": "Your battles and others you can join",
+    "mine": "Your Created Competitions"
+  },
+  "filters": {
+    "title": "Filters",
+    "clear": "Clear All",
+    "status": {
+      "all": "All",
+      "live": "Live",
+      "upcoming": "Upcoming",
+      "ended": "Ended"
+    },
+    "country": "Country",
+    "allCountries": "All Countries",
+    "governorate": "Governorate",
+    "allGovernorates": "All Governorates",
+    "city": "City",
+    "allCities": "All Cities"
+  },
+  "card": {
+    "competition": "Competition",
+    "ready": "Ready for action",
+    "goToLocation": "Go to Location",
+    "organizedBy": "Organized by {{name}}",
+    "liveNow": "Live now",
+    "watch": "Watch & Send Gifts",
+    "view": "View Battle & Send Gifts",
+    "edit": "Edit"
+  },
+  "status": {
+    "live": "🔴 LIVE",
+    "soon": "⏰ SOON",
+    "ended": "🏁 ENDED"
+  },
+  "empty": {
+    "title": "No Competitions",
+    "desc": "Be the first to create an epic horse battle!",
+    "cta": "Create First Battle"
+  },
+  "loading": {
+    "competitions": "Loading competitions..."
+  }
+}
+
+

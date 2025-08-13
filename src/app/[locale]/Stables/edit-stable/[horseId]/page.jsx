@@ -549,9 +549,7 @@ const StableEdit = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-lg font-medium text-gray-600">{t('addStable:loading')}</div>
-        </div>
+        <Preloader />
       </Layout>
     );
   }
