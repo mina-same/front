@@ -1,0 +1,82 @@
+{
+  "breadcrumb": {
+    "home": "Home",
+    "products": "Products",
+    "productDetails": "Product Details"
+  },
+  "productDetails": {
+    "forRent": "For Rent",
+    "forSale": "For Sale",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock",
+    "freeShipping": "Free shipping on orders over 50 SAR",
+    "pricePerUnit": "Price per",
+    "contactSupplier": "Contact supplier:",
+    "maxPerOrder": "Max {{max}} per order",
+    "addToCart": "Add to Cart",
+    "addToRentalCart": "Add to Rental Cart",
+    "productAdded": "Product Added",
+    "shareProduct": "Share this product:"
+  },
+  "features": {
+    "freeShipping": "Free Shipping",
+    "onOrdersOver": "On orders over 50 SAR",
+    "warranty": "Warranty",
+    "returns": "30-Day Returns",
+    "hassleFreeReturns": "Hassle-free returns",
+    "premiumQuality": "Premium Quality",
+    "certifiedMaterials": "Certified materials",
+    "standardWarranty": "Standard warranty"
+  },
+  "tabs": {
+    "details": "Product Details",
+    "specs": "Specifications",
+    "reviews": "Reviews ({{count}})",
+    "shipping": "Shipping & Returns",
+    "productDetails": "Product Details",
+    "specifications": "Specifications",
+    "shippingReturns": "Shipping & Returns",
+    "productSpecifications": "Product Specifications"
+  },
+  "reviews": {
+    "basedOn": "Based on {{count}} reviews",
+    "verifiedPurchase": "Verified Purchase",
+    "noReviews": "No reviews yet. Be the first to review this product!",
+    "writeReview": "Write a Review",
+    "rating": "Rating",
+    "comment": "Share your experience with this product...",
+    "submit": "Submit Review",
+    "submitting": "Submitting..."
+  },
+  "shipping": {
+    "shippingInfo": "Shipping Information",
+    "shippingInformation": "Shipping Information",
+    "freeStandardShipping": "Free Standard Shipping",
+    "standardShippingDetails": "On orders over 50 SAR • 5-7 business days",
+    "expressShipping": "Express Shipping",
+    "expressShippingDetails": "$9.99 • 2-3 business days",
+    "nextDayDelivery": "Next Day Delivery",
+    "nextDayDeliveryDetails": "$19.99 • Order by 2 PM",
+    "returnsExchanges": "Returns & Exchanges",
+    "thirtyDayReturns": "30-Day Returns",
+    "returnsDetails": "Easy returns within 30 days of purchase",
+    "freeExchanges": "Free Exchanges",
+    "exchangesDetails": "Wrong size? Exchange for free",
+    "qualityGuarantee": "Quality Guarantee",
+    "guaranteeDetails": "100% satisfaction guaranteed"
+  },
+  "relatedProducts": {
+    "title": "Related Products",
+    "discover": "Discover more products in {{category}}"
+  },
+  "categories": {
+    "title": "Shop by Category",
+    "feed_nutrition": "Feed and Nutrition",
+    "tack_equipment": "Tack and Equipment",
+    "apparel_accessories": "Apparel and Accessories",
+    "health_wellness": "Health and Wellness",
+    "barn_stable": "Barn and Stable Supplies",
+    "riding_competition": "Riding and Competition",
+    "other": "Other"
+  }
+}

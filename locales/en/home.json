@@ -1,10 +1,10 @@
 {
     "hero": {
-        "mainTitle": "🏇✨ Yartoli",
+        "mainTitle": "🏇✨ cantrot",
         "subtitlePart1": "Where the World of Equestrianism is",
         "subtitlePart2": "at Your Fingertips",
         "description": "We are ",
-        "companyName": "Yartoli Horses",
+        "companyName": "cantrot Horses",
         "partnerText": "your trusted partner in ",
         "services": [
             "Horse Rentals",
@@ -66,9 +66,9 @@
     },
     "welcome": {
         "title": "Welcome to",
-        "companyName": "Yartoli Horses",
+        "companyName": "cantrot Horses",
         "subtitle": "Your gateway to the world of equestrianism",
-        "description": "Have you ever imagined having everything related to horses and equestrianism in one place? The 'Yartoli' website is your comprehensive gateway to the world of equestrianism in all its details - where possibilities know no bounds!"
+        "description": "Have you ever imagined having everything related to horses and equestrianism in one place? The 'cantrot' website is your comprehensive gateway to the world of equestrianism in all its details - where possibilities know no bounds!"
     },
     "howWeWork": {
         "items": {
@@ -88,13 +88,13 @@
     },
     "empowering": {
         "title": "Experience",
-        "companyName": "Yartoli",
+        "companyName": "cantrot",
         "subtitle": "A Complete Equestrian World",
-        "description": "At \"Yartoli,\" we don't just provide services... we create a complete world. From the finest technical details to the largest projects, from beginners to professionals, and from basic services to specialized solutions. Discover for yourself why \"Yartoli\" has become the top destination for everyone passionate about the equestrian world."
+        "description": "At \"cantrot,\" we don't just provide services... we create a complete world. From the finest technical details to the largest projects, from beginners to professionals, and from basic services to specialized solutions. Discover for yourself why \"cantrot\" has become the top destination for everyone passionate about the equestrian world."
     },
     "newsletter": {
         "title": "Stay Connected with",
-        "companyName": "Yartoli Horses",
+        "companyName": "cantrot Horses",
         "subtitle": "Join Our Newsletter",
         "description": "Receive the latest equestrian insights, tips, and special offers straight to your inbox.",
         "placeholder": "Type your email",

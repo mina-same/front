@@ -1,0 +1,49 @@
+/* Custom CSS for RTL support */
+
+/* Position the '+' character on the left for Arabic language */
+li.menu-item-has-children .menu-expand.rtl-plus {
+  left: 0;
+  right: auto;
+  text-align: left;
+  position: absolute;
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Keep the '+' character on the right for English language */
+li.menu-item-has-children .menu-expand.ltr-plus {
+  right: 0;
+  left: auto;
+  text-align: right;
+  position: absolute;
+  padding-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Adjust the menu item padding for RTL */
+.rtl li.menu-item-has-children {
+  padding-left: 20px;
+  padding-right: 0;
+  position: relative;
+}
+
+/* Adjust the menu item padding for LTR */
+.ltr li.menu-item-has-children {
+  padding-right: 20px;
+  padding-left: 0;
+  position: relative;
+}
+
+/* Ensure the menu expand has proper spacing */
+li.menu-item-has-children .menu-expand {
+  width: 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}

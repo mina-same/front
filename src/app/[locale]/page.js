@@ -3,7 +3,7 @@ import { client } from '../../../src/lib/sanity';
 import HomeClient from '@/components/HomeClient';
 
 export default async function Home({ params }) {
-  const { locale } = params;
+  const locale = params?.locale || params.locale;
 
   // Fetch data from Sanity
   const query = groq`{

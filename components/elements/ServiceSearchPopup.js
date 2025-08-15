@@ -75,7 +75,9 @@ const ServiceSearchPopup = ({ onClose }) => {
           name_en match "*${searchQuery}*" ||
           name_ar match "*${searchQuery}*" ||
           about_en match "*${searchQuery}*" ||
-          providerRef->name_en match "*${searchQuery}*"
+          stableRef->name_en match "*${searchQuery}*" ||
+          userRef->fullName match "*${searchQuery}*" ||
+          userRef->userName match "*${searchQuery}*"
         )`;
       }
 
@@ -91,15 +93,18 @@ const ServiceSearchPopup = ({ onClose }) => {
         rating,
         totalReviews,
         location,
-        providerRef->{
+        serviceManagementType,
+        stableRef->{
           _id,
           name_en,
           name_ar,
-          userRef->{
-            _id,
-            userName,
-            image
-          }
+          image
+        },
+        userRef->{
+          _id,
+          fullName,
+          userName,
+          image
         }
       }`;
 
@@ -333,7 +338,11 @@ const ServiceSearchPopup = ({ onClose }) => {
                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <User className="w-4 h-4" />
-                        <span>{service.providerRef?.name_en}</span>
+                        <span>
+                          {service.serviceManagementType === 'fulltime' 
+                            ? service.stableRef?.name_en 
+                            : service.userRef?.fullName || service.userRef?.userName}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         {serviceTypeIcons[service.serviceType]}

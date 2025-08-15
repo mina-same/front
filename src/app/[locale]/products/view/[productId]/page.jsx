@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import {
   Heart,
   Share2,
@@ -40,6 +41,12 @@ const categoryNames = {
   barn_stable: "Barn and Stable Supplies",
   riding_competition: "Riding and Competition",
   other: "Other",
+};
+
+// Function to get translated category name
+const getTranslatedCategory = (category, t, isRTL) => {
+  if (!category) return "";
+  return t(`productView:categories.${category}`);
 };
 
 const rentalUnitNames = {
@@ -234,7 +241,7 @@ const ProductCard = React.memo(({ product, index }) => {
             </span>
           )}
           <span className="bg-gradient-to-r from-[#d4af37] to-yellow-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-            {categoryNames[product.category]}
+            {getTranslatedCategory(product.category, t, isRTL)}
           </span>
         </div>
         <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
@@ -293,12 +300,12 @@ const ProductCard = React.memo(({ product, index }) => {
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-100">
           <div className="flex items-baseline gap-3 mb-2">
             <span className="text-3xl font-bold text-red-600">
-              {product.price} SAR
+              {product.price} {isRTL ? 'ر.س' : 'SAR'}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
               <>
                 <span className="text-xl text-gray-500 line-through">
-                  {product.originalPrice} SAR
+                  {product.originalPrice} {isRTL ? 'ر.س' : 'SAR'}
                 </span>
                 <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm font-semibold">
                   {Math.round(
@@ -312,25 +319,26 @@ const ProductCard = React.memo(({ product, index }) => {
             )}
           </div>
           <p className="text-sm text-gray-600">
-            {product.originalPrice && product.originalPrice > product.price
-              ? `Save ${product.originalPrice - product.price} SAR • `
-              : ""}
-            Free shipping on orders over 50 SAR
-            {product.listingType === "rent" && product.rentalDurationUnit && (
-              <> • Price per {rentalUnitNames[product.rentalDurationUnit]}</>
-            )}
-          </p>
+                  {product.originalPrice &&
+                  product.originalPrice > product.price
+                    ? `${isRTL ? 'وفر' : 'Save'} ${product.originalPrice - product.price} ${isRTL ? 'ر.س' : 'SAR'} • `
+                    : ""}
+                  {t('productView:productDetails.freeShipping')}
+                  {product.listingType === "rent" && product.rentalDurationUnit && (
+                    <> • {t('productView:productDetails.pricePerUnit')} {isRTL ? rentalUnitNames[product.rentalDurationUnit] : rentalUnitNames[product.rentalDurationUnit]}</>
+                  )}
+                </p>
           {product.supplier?.name && (
-            <p className="text-sm text-gray-600 mt-2">
-              Contact supplier:{" "}
-              <a
-                href={`tel:${product.supplier.phone}`}
-                className="text-[#d4af37] hover:underline"
-              >
-                {product.supplier.userName}
-              </a>
-            </p>
-          )}
+                <p className="text-sm text-gray-600 mt-2">
+                  {t('productView:productDetails.contactSupplier')}{" "}
+                  <a
+                    href={`tel:${product.supplier.phone}`}
+                    className="text-[#d4af37] hover:underline"
+                  >
+                    {product.supplier.userName}
+                  </a>
+                </p>
+              )}
         </div>
       </div>
     </div>
@@ -363,6 +371,9 @@ ProductCard.displayName = "ProductCard";
 const CombinedProductPage = () => {
   const { productId } = useParams();
   const router = useRouter();
+  const { t, i18n } = useTranslation(['productView', 'product']);
+  const isRTL = i18n.language === 'ar';
+  
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -932,6 +943,10 @@ const CombinedProductPage = () => {
     product?.name_en.length > 30
       ? product.name_en.slice(0, 30) + "..."
       : product?.name_en;
+  const summarizedNameAr =
+    product?.name_ar.length > 25
+      ? product.name_ar.slice(0, 25) + "..."
+      : product?.name_ar;
   const summarizedDescription =
     product?.description_en.length > 100
       ? product.description_en.slice(0, 100) + "..."
@@ -971,29 +986,29 @@ const CombinedProductPage = () => {
       <div className="min-h-screen">
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className={`flex items-center gap-2 text-sm text-gray-600 ${isRTL ? '' : ''}`}>
             <a href="/" className="hover:text-[#d4af37] cursor-pointer">
-              Home
+              {t('productView:breadcrumb.home')}
             </a>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
             <a href="/products" className="hover:text-[#d4af37] cursor-pointer">
-              Products
+              {t('productView:breadcrumb.products')}
             </a>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
             <a
               href={`/products?category=${product.category}`}
               className="hover:text-[#d4af37] cursor-pointer"
             >
-              {categoryNames[product.category]}
+              {getTranslatedCategory(product.category, t, isRTL)}
             </a>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-[#d4af37] font-medium">{summarizedName}</span>
+            <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            <span className="text-[#d4af37] font-medium">{isRTL ? product?.name_ar : summarizedName}</span>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           {/* Main Product Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className={`grid grid-cols-1 lg:grid-cols-5 gap-8 ${isRTL ? 'dir-rtl' : ''}`}>
             {/* Product Images - Sticky */}
             <div className="lg:col-span-2 sticky top-[80px] self-start">
               <div className="space-y-4">
@@ -1046,23 +1061,23 @@ const CombinedProductPage = () => {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="bg-[#d4af37]/20 text-[#d4af37] px-2 py-1 rounded-full text-xs font-semibold">
-                    {product.listingType === "rent" ? "For Rent" : "For Sale"}
+                    {product.listingType === "rent" ? t('productView:productDetails.forRent') : t('productView:productDetails.forSale')}
                   </span>
                   <span className="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs font-semibold">
-                    {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                    {product.stock > 0 ? t('productView:productDetails.inStock') : t('productView:productDetails.outOfStock')}
                   </span>
                 </div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {product.name_en}
+                  {isRTL ? product.name_ar : product.name_en}
                 </h1>
                 <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  {summarizedDescription}
+                  {isRTL ? product.description_ar : summarizedDescription}
                 </p>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center gap-2">
                     {renderStars(product.averageRating, "w-5 h-5")}
                     <span className="text-gray-600 text-sm">
-                      ({product.ratings.length} reviews)
+                      ({product.ratings.length} {t('productView:reviews.basedOn', {count: product.ratings.length})})
                     </span>
                   </div>
                 </div>
@@ -1071,13 +1086,13 @@ const CombinedProductPage = () => {
               <div className="bg-gradient-to-r from-[#d4af37]/10 to-yellow-50 p-4 rounded-xl border border-[#d4af37]/20">
                 <div className="flex items-baseline gap-3 mb-2">
                   <span className="text-3xl font-bold text-gray-900">
-                    {product.price} SAR
+                    {product.price} {isRTL ? 'ر.س' : 'SAR'}
                   </span>
                   {product.originalPrice &&
                     product.originalPrice > product.price && (
                       <>
                         <span className="text-xl text-gray-500 line-through">
-                          {product.originalPrice} SAR
+                          {product.originalPrice} {isRTL ? 'ر.س' : 'SAR'}
                         </span>
                         <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm font-semibold">
                           {Math.round(
@@ -1093,9 +1108,9 @@ const CombinedProductPage = () => {
                 <p className="text-sm text-gray-600">
                   {product.originalPrice &&
                   product.originalPrice > product.price
-                    ? `Save ${product.originalPrice - product.price} SAR • `
+                    ? `${isRTL ? 'وفر' : 'Save'} ${product.originalPrice - product.price} ${isRTL ? 'ر.س' : 'SAR'} • `
                     : ""}
-                  Free shipping on orders over 50 SAR
+                  {isRTL ? t('productView:productDetails.freeShipping') : 'Free shipping on orders over 50 SAR'}
                   {product.listingType === "rent" &&
                     product.rentalDurationUnit && (
                       <>
@@ -1138,7 +1153,7 @@ const CombinedProductPage = () => {
                     </button>
                   </div>
                   <span className="text-sm text-gray-600">
-                    Max {product.stock || 10} per order
+                    {t('productView:productDetails.maxPerOrder', { max: product.stock || 10 })}
                   </span>
                 </div>
 
@@ -1154,10 +1169,10 @@ const CombinedProductPage = () => {
                       <ShoppingCart className="w-5 h-5" />
                     )}
                     {isAdded
-                      ? "Product Added"
+                      ? t('productView:productDetails.productAdded')
                       : product.listingType === "rent"
-                      ? "Add to Rental Cart"
-                      : "Add to Cart"}
+                      ? t('productView:productDetails.addToRentalCart')
+                      : t('productView:productDetails.addToCart')}
                   </button>
                   <button
                     onClick={handleWishlistToggle}
@@ -1189,24 +1204,24 @@ const CombinedProductPage = () => {
                 {[
                   {
                     icon: <Truck className="w-5 h-5" />,
-                    title: "Free Shipping",
-                    desc: "On orders over 50 SAR",
+                    title: t('productView:features.freeShipping'),
+                    desc: t('productView:features.onOrdersOver'),
                   },
                   {
                     icon: <Shield className="w-5 h-5" />,
-                    title: "Warranty",
+                    title: t('productView:features.warranty'),
                     desc:
-                      product.specifications.warranty || "Standard warranty",
+                      product.specifications.warranty || t('productView:features.standardWarranty'),
                   },
                   {
                     icon: <RotateCcw className="w-5 h-5" />,
-                    title: "30-Day Returns",
-                    desc: "Hassle-free returns",
+                    title: t('productView:features.returns'),
+                    desc: t('productView:features.hassleFreeReturns'),
                   },
                   {
                     icon: <Award className="w-5 h-5" />,
-                    title: "Premium Quality",
-                    desc: "Certified materials",
+                    title: t('productView:features.premiumQuality'),
+                    desc: t('productView:features.certifiedMaterials'),
                   },
                 ].map((feature, index) => (
                   <div
@@ -1228,7 +1243,7 @@ const CombinedProductPage = () => {
 
               <div className="border-t pt-4">
                 <p className="text-sm text-gray-600 mb-3">
-                  Share this product:
+                  {t('productView:productDetails.shareProduct')}:
                 </p>
                 <div className="flex gap-2">
                   {[Facebook, Twitter, Instagram, MessageCircle].map(
@@ -1251,7 +1266,7 @@ const CombinedProductPage = () => {
             {/* Shop by Category */}
             <div className="bg-gray-50 rounded-xl p-4 sm:p-6 lg:w-full lg:col-span-2">
               <h3 className="text-lg sm:text-xl font-semibold mb-5 sm:mb-6 text-gray-900">
-                Shop by Category
+                {t('productView:categories.title')}
               </h3>
               <div className="space-y-1">
                 {Object.keys(categoryNames).map((key, index) => (
@@ -1261,7 +1276,7 @@ const CombinedProductPage = () => {
                       className="flex items-center justify-between rounded-lg hover:bg-[#d4af37]/10 cursor-pointer transition-colors p-2"
                     >
                       <span className="font-medium text-gray-900 text-sm sm:text-base">
-                        {categoryNames[key]}
+                        {getTranslatedCategory(key, t, isRTL)}
                       </span>
                       <ChevronDown className="w-4 h-4 text-gray-500 group-hover:text-[#d4af37]" />
                     </a>
@@ -1275,13 +1290,13 @@ const CombinedProductPage = () => {
               <div className="border-b border-gray-200">
                 <div className="flex overflow-x-auto">
                   {[
-                    { key: "details", label: "Product Details" },
-                    { key: "specs", label: "Specifications" },
+                    { key: "details", label: t('productView:tabs.productDetails') },
+                    { key: "specs", label: t('productView:tabs.specifications') },
                     {
                       key: "reviews",
-                      label: `Reviews (${product.ratings.length})`,
+                      label: t('productView:tabs.reviews', { count: product.ratings.length }),
                     },
-                    { key: "shipping", label: "Shipping & Returns" },
+                    { key: "shipping", label: t('productView:tabs.shippingReturns') },
                   ].map((tab) => (
                     <button
                       key={tab.key}
@@ -1302,7 +1317,7 @@ const CombinedProductPage = () => {
                 {activeTab === "details" && (
                   <div className="prose max-w-none">
                     <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-6">
-                      {product.description_en}
+                      {isRTL ? product.description_ar : product.description_en}
                     </p>
                   </div>
                 )}
@@ -1311,7 +1326,7 @@ const CombinedProductPage = () => {
                   <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
                     <div>
                       <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-gray-900">
-                        Product Specifications
+                        {t('productView:tabs.productSpecifications')}
                       </h3>
                       <div className="space-y-4">
                         {product.specifications &&
@@ -1351,7 +1366,7 @@ const CombinedProductPage = () => {
                               )}
                             </div>
                             <div className="text-gray-600 text-sm sm:text-base">
-                              Based on {product.ratings.length} reviews
+                              {t('productView:reviews.basedOn', { count: product.ratings.length })}
                             </div>
                           </div>
                           <div className="mt-4 sm:mt-6 space-y-2">
@@ -1497,35 +1512,35 @@ const CombinedProductPage = () => {
                   <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
                     <div>
                       <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-gray-900">
-                        Shipping Information
+                        {t('productView:shipping.shippingInformation')}
                       </h3>
                       <div className="space-y-4">
                         <div className="flex items-start gap-3">
                           <Truck className="w-5 h-5 text-blue-600 mt-1" />
                           <div>
                             <h4 className="font-semibold">
-                              Free Standard Shipping
+                              {t('productView:shipping.freeStandardShipping')}
                             </h4>
                             <p className="text-gray-600 text-sm">
-                              On orders over 50 SAR • 5-7 business days
+                              {t('productView:shipping.standardShippingDetails')}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
                           <Truck className="w-5 h-5 text-purple-600 mt-1" />
                           <div>
-                            <h4 className="font-semibold">Express Shipping</h4>
+                            <h4 className="font-semibold">{t('productView:shipping.expressShipping')}</h4>
                             <p className="text-gray-600 text-sm">
-                              $9.99 • 2-3 business days
+                              {t('productView:shipping.expressShippingDetails')}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
                           <Truck className="w-5 h-5 text-green-600 mt-1" />
                           <div>
-                            <h4 className="font-semibold">Next Day Delivery</h4>
+                            <h4 className="font-semibold">{t('productView:shipping.nextDayDelivery')}</h4>
                             <p className="text-gray-600 text-sm">
-                              $19.99 • Order by 2 PM
+                              {t('productView:shipping.nextDayDeliveryDetails')}
                             </p>
                           </div>
                         </div>
@@ -1533,33 +1548,33 @@ const CombinedProductPage = () => {
                     </div>
                     <div>
                       <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-gray-900">
-                        Returns & Exchanges
+                        {t('productView:shipping.returnsExchanges')}
                       </h3>
                       <div className="space-y-4">
                         <div className="flex items-start gap-3">
                           <RotateCcw className="w-5 h-5 text-blue-600 mt-1" />
                           <div>
-                            <h4 className="font-semibold">30-Day Returns</h4>
+                            <h4 className="font-semibold">{t('productView:shipping.thirtyDayReturns')}</h4>
                             <p className="text-gray-600 text-sm">
-                              Easy returns within 30 days of purchase
+                              {t('productView:shipping.returnsDetails')}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
                           <Shield className="w-5 h-5 text-green-600 mt-1" />
                           <div>
-                            <h4 className="font-semibold">Free Exchanges</h4>
+                            <h4 className="font-semibold">{t('productView:shipping.freeExchanges')}</h4>
                             <p className="text-gray-600 text-sm">
-                              Wrong size? Exchange for free
+                              {t('productView:shipping.exchangesDetails')}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">
                           <Award className="w-5 h-5 text-purple-600 mt-1" />
                           <div>
-                            <h4 className="font-semibold">Quality Guarantee</h4>
+                            <h4 className="font-semibold">{t('productView:shipping.qualityGuarantee')}</h4>
                             <p className="text-gray-600 text-sm">
-                              100% satisfaction guaranteed
+                              {t('productView:shipping.guaranteeDetails')}
                             </p>
                           </div>
                         </div>
@@ -1582,10 +1597,10 @@ const CombinedProductPage = () => {
               <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-5">
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    Related Products
+                    {t('productView:relatedProducts.title')}
                   </h2>
                   <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                    Discover more products in {categoryNames[product.category]}
+                    {t('productView:relatedProducts.discover', { category: getTranslatedCategory(product.category, t, isRTL) })}
                   </p>
                   <div className="w-24 h-1 bg-gradient-to-r from-[#d4af37] to-yellow-600 mx-auto mt-6 rounded-full"></div>
                 </div>

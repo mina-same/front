@@ -291,6 +291,30 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
                 </li>
                 <li>
                   <Link
+                    href="/horse_grooming"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:horse_grooming")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/digital_library_services"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:digital_library_services")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/horse_course_provider"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:horse_course_provider")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/horseTransport"
                     className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
                   >
@@ -342,6 +366,46 @@ const MobileMenu = ({ hiddenClass, handleRemove }) => {
                     className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
                   >
                     {t("header:horseCatering")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/consulting_services"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:consulting_services")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/photography_services"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:photography_services")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/event_judging"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:event_judging")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/event_commentary"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:event_commentary")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/marketing_promotion"
+                    className="block p-3 text-sm text-blueGray-500 hover:bg-blue-50 hover:text-blue-500"
+                  >
+                    {t("header:marketing_promotion")}
                   </Link>
                 </li>
               </ul>

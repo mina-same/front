@@ -84,10 +84,43 @@ const PublicServices = () => {
                             {/* Horse Transport Services */}
                             <Link href="/horseTransport">
                                 <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
-                                    <Image width={100} height={20}   src="/assets/imgs/placeholders/horseTransport.png" alt="Horse Transport" className="w-full h-48 object-cover" />
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/horseTransport.png" alt="Horse Transport" className="w-full h-48 object-cover" />
                                     <div className="p-6">
                                         <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:transportTitle')}</h3>
                                         <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:transportDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Horse Grooming */}
+                            <Link href="/horseGrooming">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-12.png" alt="Horse Grooming" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:groomingTitle')}</h3>
+                                        <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:groomingDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Digital Library Services */}
+                            <Link href="/resources">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-14.png" alt="Digital Library" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:libraryTitle')}</h3>
+                                        <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:libraryDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Horse Course Provider */}
+                            <Link href="/resources">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-13.png" alt="Horse Courses" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicServices:courseProviderTitle')}</h3>
+                                        <p className="text-gray-600 mb-4 min-h-80px">{t('publicServices:courseProviderDescription')}</p>
                                     </div>
                                 </div>
                             </Link>

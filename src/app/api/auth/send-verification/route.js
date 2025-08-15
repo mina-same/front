@@ -53,7 +53,7 @@ export async function POST(req) {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Taiara Horses - Verification Code</title>
+        <title>cantrot Horses - Verification Code</title>
         <style>
           body {
             font-family: 'Arial', sans-serif;
@@ -123,11 +123,11 @@ export async function POST(req) {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Taiara Horses</h1>
+            <h1>cantrot Horses</h1>
           </div>
           <div class="content">
             <h2>Verify Your Email Address</h2>
-            <p>Thank you for choosing Taiara Horses. To complete your registration, please use the verification code below:</p>
+            <p>Thank you for choosing cantrot Horses. To complete your registration, please use the verification code below:</p>
             <div class="verification-code">${code}</div>
             <p>This code is valid for <span class="highlight">15 minutes</span> and can only be used once.</p>
             <p>If you didn't request this code, please disregard this email.</p>
@@ -136,7 +136,7 @@ export async function POST(req) {
             </div>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Taiara Horses. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} cantrot Horses. All rights reserved.</p>
             <p>This is an automated message, please do not reply to this email.</p>
           </div>
         </div>
@@ -146,12 +146,12 @@ export async function POST(req) {
 
     const mailOptions = {
       from: {
-        name: 'Taiara Horses',
+        name: 'cantrot Horses',
         address: process.env.VERVECTION_USER
       },
       to: email,
-      subject: 'Taiara Horses - Your Verification Code',
-      text: `Your Taiara Horses verification code is: ${code}\n\nThis code is valid for 15 minutes.\n\nIf you didn't request this code, please disregard this email.`,
+      subject: 'cantrot Horses - Your Verification Code',
+      text: `Your cantrot Horses verification code is: ${code}\n\nThis code is valid for 15 minutes.\n\nIf you didn't request this code, please disregard this email.`,
       html: htmlEmail
     };
 

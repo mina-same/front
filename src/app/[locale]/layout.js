@@ -2,6 +2,7 @@ import "swiper/css";
 import "../../../public/assets/css/tailwind.css";
 import "../../../public/assets/css/tailwind-built.css";
 import "../../../public/assets/css/animate.min.css";
+import "../../../public/assets/css/custom.css";
 
 // Translations
 import initTranslations from "../../i18n";
@@ -26,12 +27,12 @@ const montserrat = Montserrat({
 
 
 export const metadata = {
-	title: "Taiara Horses",
+	title: "cantrot Horses",
 	description: "The Best place for horses and horses owners",
 };
 
 export default async function RootLayout({ children, params }) {
-	const locale = params?.locale;
+	const locale = params?.locale || params.locale;
 	if (!locale) return null;
 	const { resources } = await initTranslations(locale, [
 		"home",
@@ -71,7 +72,8 @@ export default async function RootLayout({ children, params }) {
 		"bookDetails",
 		"courseDetails",
 		"product",
-		"productsPage"
+		"productsPage",
+		"productView"
 	]);
 
 	return (

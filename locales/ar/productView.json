@@ -1,0 +1,82 @@
+{
+  "breadcrumb": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "productDetails": "تفاصيل المنتج"
+  },
+  "productDetails": {
+    "forRent": "للإيجار",
+    "forSale": "للبيع",
+    "inStock": "متوفر",
+    "outOfStock": "غير متوفر",
+    "freeShipping": "شحن مجاني للطلبات التي تزيد عن 50 ر.س",
+    "pricePerUnit": "السعر لكل",
+    "contactSupplier": "تواصل مع المورد:",
+    "maxPerOrder": "الحد الأقصى {{max}} لكل طلب",
+    "addToCart": "أضف إلى السلة",
+    "addToRentalCart": "أضف إلى سلة الإيجار",
+    "productAdded": "تمت إضافة المنتج",
+    "shareProduct": "شارك هذا المنتج:"
+  },
+  "features": {
+    "freeShipping": "شحن مجاني",
+    "onOrdersOver": "للطلبات التي تزيد عن 50 ر.س",
+    "warranty": "الضمان",
+    "returns": "إرجاع خلال 30 يوم",
+    "hassleFreeReturns": "إرجاع بدون متاعب",
+    "premiumQuality": "جودة ممتازة",
+    "certifiedMaterials": "مواد معتمدة",
+    "standardWarranty": "ضمان قياسي"
+  },
+  "tabs": {
+    "details": "تفاصيل المنتج",
+    "specs": "المواصفات",
+    "reviews": "التقييمات ({{count}})",
+    "shipping": "الشحن والإرجاع",
+    "productDetails": "تفاصيل المنتج",
+    "specifications": "المواصفات",
+    "shippingReturns": "الشحن والإرجاع",
+    "productSpecifications": "مواصفات المنتج"
+  },
+  "reviews": {
+    "basedOn": "بناءً على {{count}} تقييم",
+    "verifiedPurchase": "شراء موثق",
+    "noReviews": "لا توجد تقييمات حتى الآن. كن أول من يقيم هذا المنتج!",
+    "writeReview": "اكتب تقييماً",
+    "rating": "التقييم",
+    "comment": "شارك تجربتك مع هذا المنتج...",
+    "submit": "إرسال التقييم",
+    "submitting": "جاري الإرسال..."
+  },
+  "shipping": {
+    "shippingInfo": "معلومات الشحن",
+    "shippingInformation": "معلومات الشحن",
+    "freeStandardShipping": "شحن قياسي مجاني",
+    "standardShippingDetails": "للطلبات التي تزيد عن 50 ر.س • 5-7 أيام عمل",
+    "expressShipping": "شحن سريع",
+    "expressShippingDetails": "9.99$ • 2-3 أيام عمل",
+    "nextDayDelivery": "توصيل في اليوم التالي",
+    "nextDayDeliveryDetails": "19.99$ • اطلب قبل الساعة 2 مساءً",
+    "returnsExchanges": "الإرجاع والاستبدال",
+    "thirtyDayReturns": "إرجاع خلال 30 يوم",
+    "returnsDetails": "إرجاع سهل خلال 30 يوم من الشراء",
+    "freeExchanges": "استبدال مجاني",
+    "exchangesDetails": "مقاس خاطئ؟ استبدل مجاناً",
+    "qualityGuarantee": "ضمان الجودة",
+    "guaranteeDetails": "رضا 100% مضمون"
+  },
+  "relatedProducts": {
+    "title": "منتجات ذات صلة",
+    "discover": "اكتشف المزيد من المنتجات في {{category}}"
+  },
+  "categories": {
+    "title": "تسوق حسب الفئة",
+    "feed_nutrition": "التغذية والعلف",
+    "tack_equipment": "معدات الخيل",
+    "apparel_accessories": "الملابس والإكسسوارات",
+    "health_wellness": "الصحة والعافية",
+    "barn_stable": "مستلزمات الإسطبل",
+    "riding_competition": "ركوب الخيل والمسابقات",
+    "other": "أخرى"
+  }
+}

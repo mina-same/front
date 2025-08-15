@@ -66,7 +66,7 @@ const ImageGalleryModal = ({ selectedIndex, images, onClose, onNext, onPrev }) =
         exit={{ opacity: 0.5, scale: 0.95 }}
         transition={{ duration: 0.3 }}
         src={images[selectedIndex]}
-        alt="Gallery image"
+        alt={`Gallery image ${selectedIndex + 1}`}
         className="w-full h-auto max-h-[80vh] object-contain"
       />
       <button
@@ -130,13 +130,14 @@ export default function ServiceDetailsPage() {
   const { serviceId } = params;
 
   const [service, setService] = useState(null);
-  const [provider, setProvider] = useState(null);
+  const [serviceProvider, setServiceProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [alert, setAlert] = useState({ isVisible: false, message: '', type: 'error' });
@@ -151,12 +152,27 @@ export default function ServiceDetailsPage() {
           city->{name_ar, name_en},
           country->{name_ar, name_en},
           government->{name_ar, name_en},
-          providerRef->{
+          stableRef->{
             _id,
             name_ar,
             name_en,
-            image,
-            servicesRef[]->{
+            image{asset->{_id, url}},
+            "servicesRef": *[_type == "services" && stableRef._ref == ^._id && statusAdminApproved == true]{
+              _id,
+              name_ar,
+              name_en,
+              image,
+              serviceType,
+              price,
+              statusAdminApproved
+            }
+          },
+          userRef->{
+            _id,
+            userName,
+            fullName,
+            image{asset->{_id, url}},
+            "servicesRef": *[_type == "services" && userRef._ref == ^._id && statusAdminApproved == true]{
               _id,
               name_ar,
               name_en,
@@ -188,8 +204,17 @@ export default function ServiceDetailsPage() {
         }`;
 
         const serviceData = await client.fetch(serviceQuery, { serviceId });
+        console.log('Service data:', serviceData);
+        
+        // Determine if this is a stable or user service
+        const providerData = serviceData.serviceManagementType === 'fulltime' ? 
+          serviceData.stableRef : serviceData.userRef;
+          
+        console.log('Provider data:', providerData);
+        console.log('Provider image:', providerData?.image);
+        
         setService(serviceData);
-        setProvider(serviceData.providerRef);
+        setServiceProvider(providerData);
       } catch (err) {
         setError(err);
       } finally {
@@ -370,11 +395,11 @@ export default function ServiceDetailsPage() {
               {service.horseStabelDetails?.stableDescription && (
                 <div className="flex items-start">
                   <div className="mt-1 mr-3 text-primary">
-                    <Clock size={20} />
+                    <Info size={20} />
                   </div>
                   <div>
                     <p className="font-medium">{t('serviceDetails:stableDescription')}</p>
-                    <p className="text-gray-600">{service.horseStabelDetails.stableDescription}</p>
+                    <p className="text-gray-600">{isRTL ? service.horseStabelDetails.stableDescription_ar || service.horseStabelDetails.stableDescription : service.horseStabelDetails.stableDescription}</p>
                   </div>
                 </div>
               )}
@@ -585,7 +610,7 @@ export default function ServiceDetailsPage() {
                   </div>
                   <div>
                     <p className="font-medium">{t('serviceDetails:methodsAndTools')}</p>
-                    <p className="text-gray-600">{service.hoofTrimmerDetails.methodsAndTools}</p>
+                    <p className="text-gray-600">{isRTL ? service.hoofTrimmerDetails.methodsAndTools_ar || service.hoofTrimmerDetails.methodsAndTools : service.hoofTrimmerDetails.methodsAndTools}</p>
                   </div>
                 </div>
               )}
@@ -621,7 +646,7 @@ export default function ServiceDetailsPage() {
                   </div>
                   <div>
                     <p className="font-medium">{t('serviceDetails:methodsAndTools')}</p>
-                    <p className="text-gray-600">{service.horseGroomingDetails.methodsAndTools}</p>
+                    <p className="text-gray-600">{isRTL ? service.horseGroomingDetails.methodsAndTools_ar || service.horseGroomingDetails.methodsAndTools : service.horseGroomingDetails.methodsAndTools}</p>
                   </div>
                 </div>
               )}
@@ -823,7 +848,7 @@ export default function ServiceDetailsPage() {
                   </div>
                   <div>
                     <p className="font-medium">{t('serviceDetails:termsAndPolicies')}</p>
-                    <p className="text-gray-600">{service.transportDetails.termsAndPolicies}</p>
+                    <p className="text-gray-600">{isRTL ? service.transportDetails.termsAndPolicies_ar || service.transportDetails.termsAndPolicies : service.transportDetails.termsAndPolicies}</p>
                   </div>
                 </div>
               )}
@@ -936,8 +961,8 @@ export default function ServiceDetailsPage() {
   };
 
   const AdditionalServices = () => {
-    if (!provider?.servicesRef?.length) return null;
-    const additionalServices = provider.servicesRef.filter(s => s._id !== serviceId && s.statusAdminApproved === true);
+    if (!serviceProvider?.servicesRef?.length) return null;
+    const additionalServices = serviceProvider.servicesRef.filter(s => s._id !== serviceId && s.statusAdminApproved === true);
     if (!additionalServices.length) return null;
 
     return (
@@ -959,7 +984,7 @@ export default function ServiceDetailsPage() {
                 <div className="relative h-48 w-full">
                   <Image
                     src={service.image ? urlFor(service.image).url() : "/placeholder.jpg"}
-                    alt={isRTL ? service.name_ar : service.name_en}
+                    alt={"service iamge"}
                     layout="fill"
                     width={0}
                     height={0}
@@ -974,7 +999,7 @@ export default function ServiceDetailsPage() {
                       {service.price} {t('serviceDetails:currency')}
                     </span>
                     <span className="text-sm text-gray-500">
-                      {t(`serviceTypes.${service.serviceType}`)}
+                      {t(`serviceTypes:${service.serviceType}`)}
                     </span>
                   </div>
                 </div>
@@ -1001,7 +1026,7 @@ export default function ServiceDetailsPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70"></div>
           <Image
             src={images[0] || '/placeholder.jpg'}
-            alt={isRTL ? service.name_ar : service.name_en}
+            alt={"service image"}
             className="w-full h-full object-cover"
             width={0}
             height={0}
@@ -1033,7 +1058,7 @@ export default function ServiceDetailsPage() {
                       {service.serviceAverageRating || 4.8} <span className="text-sm ml-1">({t('serviceDetails:reviews', { count: service.serviceRatingCount || 256 })})</span>
                     </span>
                     <span className="py-1 px-3 bg-primary/80 rounded-full text-sm font-medium">
-                      {t(`serviceTypes.${service.serviceType}`)}
+                      {t(`serviceTypes:${service.serviceType}`)}
                     </span>
                   </motion.div>
                 </div>
@@ -1120,7 +1145,7 @@ export default function ServiceDetailsPage() {
                           : 'text-gray-500 hover:text-gray-800'
                           }`}
                       >
-                        {t(tab)}
+                        {t(`serviceDetails:${tab}`)}
                       </button>
                     ))}
                   </div>
@@ -1213,7 +1238,7 @@ export default function ServiceDetailsPage() {
                               {t('serviceDetails:addressDetails')}
                             </h3>
                             <div className="ml-7 text-gray-700">
-                              <p className="text-gray-600">{service.address_details}</p>
+                              <p className="text-gray-600">{isRTL ? service.address_details_ar || service.address_details : service.address_details}</p>
                               {service.address_link && (
                                 <a href={service.address_link} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                                   {t('serviceDetails:viewOnMap')}
@@ -1229,19 +1254,19 @@ export default function ServiceDetailsPage() {
                               {service.tripCoordinator.levelOfHardship && (
                                 <div className="text-gray-700">
                                   <span className="font-medium">{t('serviceDetails:difficultyLevel')}: </span>
-                                  {service.tripCoordinator.levelOfHardship}
+                                  {isRTL ? service.tripCoordinator.levelOfHardship_ar || service.tripCoordinator.levelOfHardship : service.tripCoordinator.levelOfHardship}
                                 </div>
                               )}
                               {service.tripCoordinator.containsAidBag && (
                                 <div className="text-gray-700">
                                   <span className="font-medium">{t('serviceDetails:firstAid')}: </span>
-                                  {t('yes')}
+                                  {t('serviceDetails:yes')}
                                 </div>
                               )}
                               {service.tripCoordinator.safetyAndEquipment && (
                                 <div className="text-gray-700">
                                   <span className="font-medium">{t('serviceDetails:safetyAndEquipment')}: </span>
-                                  {service.tripCoordinator.safetyAndEquipment}
+                                  {isRTL ? service.tripCoordinator.safetyAndEquipment_ar || service.tripCoordinator.safetyAndEquipment : service.tripCoordinator.safetyAndEquipment}
                                 </div>
                               )}
                             </div>
@@ -1294,7 +1319,7 @@ export default function ServiceDetailsPage() {
                             onClick={() => setIsReservationModalOpen(true)}
                             className="w-full mt-4 bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
                           >
-                            {t('bookNow')}
+                            {t('serviceDetails:bookNow')}
                           </button>
                         </div>
                       </div>
@@ -1339,20 +1364,26 @@ export default function ServiceDetailsPage() {
                 transition={{ delay: 0.2 }}
                 className="bg-white rounded-xl shadow-md p-6 sticky top-56"
               >
-                <h3 className="font-bold text-lg mb-4">{t('serviceDetails:contactProvider')}</h3>
+                <h3 className="font-bold text-lg mb-4">{t('serviceDetails:contactService')}</h3>
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 overflow-hidden">
                     <Image
-                      width={0}
-                      height={0}
-                      src={provider?.image ? urlFor(provider.image).url() : "/placeholder.jpg"}
-                      alt={isRTL ? provider?.name_ar : provider?.name_en}
+                      width={48}
+                      height={48}
+                      src={serviceProvider?.image?.asset?.url || "/images/placeholder.svg"}
+                      alt={service.serviceManagementType === 'fulltime' ? 
+                        (isRTL ? serviceProvider?.name_ar : serviceProvider?.name_en) : 
+                        (serviceProvider?.fullName || serviceProvider?.userName)}
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
                   </div>
                   <div>
-                    <p className="font-medium">{isRTL ? provider?.name_ar : provider?.name_en}</p>
+                    <p className="font-medium">
+                      {service.serviceManagementType === 'fulltime' ? 
+                        (isRTL ? serviceProvider?.name_ar : serviceProvider?.name_en) : 
+                        (serviceProvider?.fullName || serviceProvider?.userName)}
+                    </p>
                     <p className="text-sm text-gray-500 flex items-center">
                       <Star size={14} className="mr-1 text-yellow-400" /> {service.serviceAverageRating || 5.0} ({t('serviceDetails:ratedBy')} {service.serviceRatingCount || 128} {t('serviceDetails:users')})
                     </p>
@@ -1362,16 +1393,74 @@ export default function ServiceDetailsPage() {
                   onClick={() => setIsReservationModalOpen(true)}
                   className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg mb-3 transition-all duration-300 transform hover:scale-105"
                 >
-                  {t('bookNow')}
+                  {t('serviceDetails:bookNow')}
                 </button>
                 <button
+                  onClick={() => setIsContactModalOpen(true)}
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-lg transition-all duration-300 transform hover:scale-105"
                 >
-                  {t('contactProvider')}
+                  {t('serviceDetails:contactService')}
                 </button>
               </motion.div>
             </div>
           </div>
+
+          {/* Contact Modal */}
+          {isContactModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-lg">{t('serviceTypes:contactInfo')}</h3>
+                  <button
+                    onClick={() => setIsContactModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  {service.servicePhone && (
+                    <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                      <Phone className="mr-3 text-primary" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-500">{t('serviceDetails:phone')}</p>
+                        <a href={`tel:${service.servicePhone}`} className="font-medium text-primary hover:underline">
+                          {service.servicePhone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {service.serviceEmail && (
+                    <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                      <Mail className="mr-3 text-primary" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-500">{t('serviceDetails:email')}</p>
+                        <a href={`mailto:${service.serviceEmail}`} className="font-medium text-primary hover:underline">
+                          {service.serviceEmail}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {service.links?.length > 0 && (
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-500 mb-2">{t('serviceDetails:socialMedia')}</p>
+                      <div className="flex gap-3">
+                        {service.links.map((link, index) => (
+                          <SocialMediaIcon key={index} linkType={link.linkType} url={link.url} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setIsContactModalOpen(false)}
+                  className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg mt-4 transition-all duration-300"
+                >
+                  {t('serviceDetails:close')}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Reservation Modal */}
           <ReservationPopup
@@ -1379,7 +1468,8 @@ export default function ServiceDetailsPage() {
             onClose={() => setIsReservationModalOpen(false)}
             serviceId={serviceId}
             serviceName={isRTL ? service.name_ar : service.name_en}
-            providerRef={service.providerRef?._id}
+            providerRef={service.serviceManagementType === 'fulltime' ? service.stableRef?._id : service.userRef?._id}
+            providerType={service.serviceManagementType === 'fulltime' ? 'stable' : 'user'}
           />
         </div>
       </div>

@@ -69,6 +69,61 @@ const PublicMarket = () => {
                                     </div>
                                 </div>
                             </Link>
+
+                            {/* Consulting Services */}
+                            <Link href="/consultingServices">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-18.png" alt="Consulting Services" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:consultingTitle')}</h3>
+                                        <p className="text-gray-600 mb-4">{t('publicMarket:consultingDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Photography Services */}
+                            <Link href="/photographyServices">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-19.png" alt="Photography Services" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:photographyTitle')}</h3>
+                                        <p className="text-gray-600 mb-4">{t('publicMarket:photographyDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Event Judging */}
+                            <Link href="/eventJudging">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-15.png" alt="Event Judging" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:judgingTitle')}</h3>
+                                        <p className="text-gray-600 mb-4">{t('publicMarket:judgingDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Event Commentary */}
+                            <Link href="/eventCommentary">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-17.png" alt="Event Commentary" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:commentaryTitle')}</h3>
+                                        <p className="text-gray-600 mb-4">{t('publicMarket:commentaryDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
+
+                            {/* Marketing & Promotion */}
+                            <Link href="/marketingPromotion">
+                                <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-xl cursor-pointer">
+                                    <Image width={100} height={20} src="/assets/imgs/placeholders/slider-16.png" alt="Marketing & Promotion" className="w-full h-48 object-cover" />
+                                    <div className="p-6">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('publicMarket:marketingTitle')}</h3>
+                                        <p className="text-gray-600 mb-4">{t('publicMarket:marketingDescription')}</p>
+                                    </div>
+                                </div>
+                            </Link>
                         </div>
                     </div>
                 </section>

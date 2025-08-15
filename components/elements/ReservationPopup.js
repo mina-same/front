@@ -14,9 +14,10 @@ function urlFor(source) {
 const ReservationPopup = ({
   isOpen = false,
   onClose,
-  stableId,
-  stableName,
-  userRef,
+  serviceId,
+  serviceName,
+  providerRef,
+  providerType = 'stable', // 'stable' or 'user'
   fullTimeServices = [],
   freelancerServices = [],
 }) => {
@@ -56,20 +57,22 @@ const ReservationPopup = ({
 
   // Fetch user horses, stable details, and combine services
   useEffect(() => {
-    if (!isOpen || !userRef) return;
+    if (!isOpen || !providerRef) return;
 
     const fetchInitialData = async () => {
       setIsFetchingHorses(true);
       try {
-        // Fetch horses
-        const horsesQuery = `*[_type == "horse" && owner._ref == $userId]{_id, fullName}`;
-        const horsesData = await client.fetch(horsesQuery, { userId: userRef });
-        setUserHorses(horsesData || []);
+        // Fetch horses if provider is a user
+        if (providerType === 'user') {
+          const horsesQuery = `*[_type == "horse" && owner._ref == $userId]{_id, fullName}`;
+          const horsesData = await client.fetch(horsesQuery, { userId: providerRef });
+          setUserHorses(horsesData || []);
+        }
 
-        // Fetch stable boarding details
-        if (stableId) {
+        // Fetch stable boarding details if provider is a stable
+        if (providerType === 'stable') {
           const stableQuery = `*[_type == "stables" && _id == $stableId][0]{boardingDetails}`;
-          const stableData = await client.fetch(stableQuery, { stableId });
+          const stableData = await client.fetch(stableQuery, { stableId: providerRef });
           setStableBoardingDetails(stableData?.boardingDetails || null);
         }
       } catch (err) {
@@ -82,7 +85,7 @@ const ReservationPopup = ({
 
     fetchInitialData();
     setAllServices([...fullTimeServices, ...freelancerServices]);
-  }, [isOpen, userRef, stableId, fullTimeServices, freelancerServices, t]);
+  }, [isOpen, providerRef, providerType, fullTimeServices, freelancerServices, t]);
 
   // Reset state when popup opens/closes
   useEffect(() => {
