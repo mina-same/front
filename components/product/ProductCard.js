@@ -151,7 +151,7 @@ const ProductCard = ({ product, viewMode }) => {
         } finally {
             setIsWishlistLoading(false); // Clear wishlist-specific loading
         }
-    }, [currentUserId, isWishlisted, product.id, router]);
+    }, [currentUserId, isWishlisted, product.id, router, t]);
 
     const handleAddToCart = useCallback(
         async (rentalDates = null) => {
@@ -207,7 +207,7 @@ const ProductCard = ({ product, viewMode }) => {
                 setIsLoading(false); // Clear cart-specific loading
             }
         },
-        [currentUserId, product, router]
+        [currentUserId, product, router, t]
     );
 
     const handleButtonClick = useCallback(() => {

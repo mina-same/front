@@ -24,6 +24,7 @@ import Layout from "components/layout/Layout";
 import Preloader from "components/elements/Preloader";
 import { fetchCountries, fetchGovernorates, fetchCities, urlFor } from "@/lib/sanity";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const Index = () => {
   const { locale } = useParams();
@@ -242,7 +243,7 @@ const Index = () => {
         {/* Image header */}
         <div className="relative h-40 w-full overflow-hidden">
           {imageSrc ? (
-            <img src={imageSrc} alt={competition.nameEn || competition.nameAr} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <Image src={imageSrc} alt={competition.nameEn || competition.nameAr} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" width={100} height={100} />
           ) : (
             <div className="h-full w-full flex items-center justify-center bg-gradient-to-r from-gray-100 to-gray-200 text-5xl">🐎</div>
           )}

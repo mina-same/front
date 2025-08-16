@@ -15,7 +15,7 @@ import {
   MapPin,
   Video,
   User,
-  Image,
+  ImageIcon,
   Crown,
   Star,
   Gift,
@@ -31,6 +31,7 @@ import { toast } from "@/hooks/use-toast";
 import Layout from "components/layout/Layout";
 import Preloader from "components/elements/Preloader";
 import { fetchCountries, fetchGovernorates, fetchCities } from "@/lib/sanity";
+import Image from "next/image";
 
 // Layout: Clean white background, minimal color, matches site base layout.
 // For all Card, div, and Button backgrounds, use bg-white or no background color (remove gradients and colored backgrounds). Keep borders and text as neutral (gray) as possible.
@@ -535,9 +536,11 @@ const CreateCompetition = () => {
                               >
                                 <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                                   {user.image ? (
-                                    <img
+                                    <Image
                                       src={user.image}
                                       alt={user.userName}
+                                      width={8}
+                                      height={8}
                                       className="w-8 h-8 rounded-full object-cover"
                                       onError={(e) => {
                                         e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.userName || user.fullName)}&size=200&background=e5e7eb&color=374151`;
@@ -580,9 +583,11 @@ const CreateCompetition = () => {
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                                   {user.image ? (
-                                    <img
+                                    <Image
                                       src={user.image}
                                       alt={user.userName}
+                                      width={8}
+                                      height={8}
                                       className="w-8 h-8 rounded-full object-cover"
                                       onError={(e) => {
                                         e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.userName || user.fullName)}&size=200&background=e5e7eb&color=374151`;
@@ -923,7 +928,7 @@ const CreateCompetition = () => {
                       </div>
                       <div>
                         <Label className="text-gray-900 mb-2 block flex items-center gap-2">
-                          <Image className="w-4 h-4" />
+                          <ImageIcon className="w-4 h-4" />
                           {t("form.horseInfo.image")}
                         </Label>
                         <div className="relative">
