@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,7 +31,7 @@ const EditServiceForm = ({
         initializedServiceTypes.current.add(serviceType);
       }
     }
-  }, [serviceType, handleNestedChange]); // Include handleNestedChange as a dependency
+  }, [serviceType, handleNestedChange, formData.service_details]); // Include all dependencies
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -42,7 +42,7 @@ const EditServiceForm = ({
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleNestedChange = (section, field, value) => {
+  const handleNestedChange = useCallback((section, field, value) => {
     setFormData((prev) => ({
       ...prev,
       service_details: {
@@ -54,7 +54,7 @@ const EditServiceForm = ({
       },
     }));
     setErrors((prev) => ({ ...prev, [`${section}.${field}`]: "" }));
-  };
+  }, []);
 
   const handleNestedArrayChange = (path, index, field, value) => {
     const [section, arrayField] = path.split(".");

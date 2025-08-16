@@ -28,7 +28,7 @@ const ServiceFieldsFactory = ({
   errors,
   isRTL
 }) => {
-  const serviceDetailKeyMap = {
+  const serviceDetailKeyMap = React.useMemo(() => ({
     horse_stable: 'horseStabelDetails',
     veterinary: 'VeterinaryDetails',
     competitions: 'competitions',
@@ -46,7 +46,7 @@ const ServiceFieldsFactory = ({
     consulting_services: 'consultingServicesDetails',
     photography_services: 'photographyServicesDetails',
     suppliers: 'supplierDetails'
-  };
+  }), []);
 
   // Initialize service_details for the selected service type
   React.useEffect(() => {

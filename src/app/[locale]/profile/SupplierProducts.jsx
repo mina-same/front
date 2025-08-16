@@ -125,7 +125,7 @@ const SupplierProducts = ({ userId }) => {
     return `${defaultClasses} ${isRTL ? "rtl" : "ltr"}`;
   };
 
-  const fetchProductOrders = async (productId) => {
+  const fetchProductOrders = React.useCallback(async (productId) => {
     if (ordersByProduct[productId]) return;
     try {
       const query = `*[_type == "orderProduct" && product._ref == $productId]{
@@ -151,7 +151,7 @@ const SupplierProducts = ({ userId }) => {
     } catch (error) {
       console.error("Error fetching product orders:", error);
     }
-  };
+  }, [ordersByProduct]);
 
   const toggleProductExpansion = async (productId) => {
     if (expandedProductId === productId) {

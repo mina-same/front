@@ -503,10 +503,12 @@ const FormStepContent = ({
                 >
                   {imagePreview ? (
                     <div className="relative w-full h-full">
-                      <img
+                      <Image
                         src={imagePreview}
                         alt="Profile Preview"
                         className="w-full h-full object-cover rounded-md"
+                        width={128}
+                        height={128}
                       />
                       <button
                         type="button"
@@ -557,10 +559,12 @@ const FormStepContent = ({
                     key={index}
                     className="relative w-full h-24 border rounded-md overflow-hidden"
                   >
-                    <img
+                    <Image
                       src={preview}
                       alt={`Additional ${index + 1}`}
                       className="w-full h-full object-cover"
+                      width={96}
+                      height={96}
                     />
                     <button
                       type="button"

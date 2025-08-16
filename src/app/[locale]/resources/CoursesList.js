@@ -1,4 +1,4 @@
-  "use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -136,9 +136,9 @@ import { v4 as uuidv4 } from "uuid";
       toast.error(
         <div>
           {t("authRequired.message")} {" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <Link href="/login" className="text-blue-600 hover:underline">
             {t("authRequired.loginLink")}
-          </a>
+          </Link>
         </div>
       );
       router.push("/login");

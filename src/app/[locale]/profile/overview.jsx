@@ -131,7 +131,7 @@ const Overview = ({ userData }) => {
     } finally {
       setLoadingInvitations(false);
     }
-  }, []);
+  }, [userData?._id, userData?.id]);
 
   // Fetch invitations when component mounts
   useEffect(() => {

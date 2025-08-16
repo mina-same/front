@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import {
@@ -31,6 +32,7 @@ import Layout from "components/layout/Layout";
 import ProductsList from "../../../../../../components/product/ProductsList";
 import RentalDatePopup from "../../../../../../components/product/RentalDatePopup";
 import { v4 as uuidv4 } from "uuid"; // Import uuid for generating unique keys
+import Image from "next/image";
 
 // Category and rental unit mappings
 const categoryNames = {
@@ -148,9 +150,9 @@ const ProductCard = React.memo(({ product, index }) => {
       toast.error(
         <div>
           You must be logged in to manage your wishlist.{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline">
             Log in here
-          </a>
+          </Link>
         </div>
       );
       router.push("/login");
@@ -220,12 +222,14 @@ const ProductCard = React.memo(({ product, index }) => {
     >
       <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="aspect-square relative">
-          <img
+          <Image
             src={getProductImage()}
             alt={product.name_en}
             className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
               imageLoaded ? "opacity-100" : "opacity-0"
             }`}
+            width={100}
+            height={100}
             onLoad={() => setImageLoaded(true)}
             loading="lazy"
           />
@@ -331,12 +335,12 @@ const ProductCard = React.memo(({ product, index }) => {
           {product.supplier?.name && (
                 <p className="text-sm text-gray-600 mt-2">
                   {t('productView:productDetails.contactSupplier')}{" "}
-                  <a
-                    href={`tel:${product.supplier.phone}`}
+                  <Link
+                    to={`tel:${product.supplier.phone}`}
                     className="text-[#d4af37] hover:underline"
                   >
                     {product.supplier.userName}
-                  </a>
+                  </Link>
                 </p>
               )}
         </div>
@@ -644,9 +648,9 @@ const CombinedProductPage = () => {
       toast.error(
         <div>
           You must be logged in to manage your wishlist.{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline">
             Log in here
-          </a>
+          </Link>
         </div>
       );
       router.push("/login");
@@ -708,9 +712,9 @@ const CombinedProductPage = () => {
         toast.error(
           <div>
             You must be logged in to add items to your cart.{" "}
-            <a href="/login" className="text-blue-600 hover:underline">
+            <Link href="/login" className="text-blue-600 hover:underline">
               Log in here
-            </a>
+            </Link>
           </div>
         );
         router.push("/login");
@@ -810,9 +814,9 @@ const CombinedProductPage = () => {
       toast.error(
         <div>
           You must be logged in to rate this product.{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline">
             Log in here
-          </a>
+          </Link>
         </div>
       );
       setIsSubmitting(false);
@@ -968,14 +972,14 @@ const CombinedProductPage = () => {
             {error || "Product Not Found"}
           </h3>
           <p className="text-gray-600 mb-6">
-            We couldn't find the product you're looking for.
+            We couldn&apos;t find the product you&apos;re looking for.
           </p>
-          <a
+          <Link
             href="/products"
             className="bg-[#d4af37] text-white px-6 py-3 rounded-xl hover:bg-yellow-600"
           >
             Browse All Products
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -987,20 +991,20 @@ const CombinedProductPage = () => {
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className={`flex items-center gap-2 text-sm text-gray-600 ${isRTL ? '' : ''}`}>
-            <a href="/" className="hover:text-[#d4af37] cursor-pointer">
+            <Link href="/" className="hover:text-[#d4af37] cursor-pointer">
               {t('productView:breadcrumb.home')}
-            </a>
+            </Link>
             <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-            <a href="/products" className="hover:text-[#d4af37] cursor-pointer">
+            <Link href="/products" className="hover:text-[#d4af37] cursor-pointer">
               {t('productView:breadcrumb.products')}
-            </a>
+            </Link>
             <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-            <a
+            <Link
               href={`/products?category=${product.category}`}
               className="hover:text-[#d4af37] cursor-pointer"
             >
               {getTranslatedCategory(product.category, t, isRTL)}
-            </a>
+            </Link>
             <ChevronRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
             <span className="text-[#d4af37] font-medium">{isRTL ? product?.name_ar : summarizedName}</span>
           </div>
@@ -1013,12 +1017,14 @@ const CombinedProductPage = () => {
             <div className="lg:col-span-2 sticky top-[80px] self-start">
               <div className="space-y-4">
                 <div className="relative group bg-gray-50 rounded-xl overflow-hidden">
-                  <img
+                  <Image
                     src={
                       product.images[activeImage] ||
                       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop"
                     }
                     alt={product.name_en}
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <button
@@ -1045,10 +1051,12 @@ const CombinedProductPage = () => {
                           : "border-gray-200 hover:border-[#d4af37]"
                       }`}
                     >
-                      <img
+                      <Image
                         src={img}
                         alt={`${product.name_en} view ${index + 1}`}
                         className="w-full h-full object-fill"
+                        width={100}
+                        height={100}
                       />
                     </button>
                   ))}
@@ -1122,12 +1130,12 @@ const CombinedProductPage = () => {
                 </p>
                 <p className="text-sm text-gray-600 mt-2">
                   Contact supplier:{" "}
-                  <a
+                  <Link
                     href={`tel:${product.supplier.phone}`}
                     className="text-[#d4af37] hover:underline"
                   >
                     {product.supplier.userName}
-                  </a>
+                  </Link>
                 </p>
               </div>
 
@@ -1271,7 +1279,7 @@ const CombinedProductPage = () => {
               <div className="space-y-1">
                 {Object.keys(categoryNames).map((key, index) => (
                   <div key={index} className="group">
-                    <a
+                    <Link
                       href={`/products?category=${key}`}
                       className="flex items-center justify-between rounded-lg hover:bg-[#d4af37]/10 cursor-pointer transition-colors p-2"
                     >
@@ -1279,7 +1287,7 @@ const CombinedProductPage = () => {
                         {getTranslatedCategory(key, t, isRTL)}
                       </span>
                       <ChevronDown className="w-4 h-4 text-gray-500 group-hover:text-[#d4af37]" />
-                    </a>
+                    </Link>
                   </div>
                 ))}
               </div>
@@ -1411,10 +1419,12 @@ const CombinedProductPage = () => {
                                 <div className="flex items-start gap-4">
                                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden">
                                     {review.user.image?.asset?.url ? (
-                                      <img
+                                      <Image
                                         src={review.user.image.asset.url}
                                         alt={review.user.userName}
                                         className="w-full h-full object-cover"
+                                        width={100}
+                                        height={100}
                                       />
                                     ) : (
                                       <div className="w-full h-full bg-gradient-to-br from-[#d4af37] to-yellow-600 flex items-center justify-center text-white font-semibold text-sm">

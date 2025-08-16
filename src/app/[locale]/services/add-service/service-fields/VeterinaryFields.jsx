@@ -17,7 +17,7 @@ const VeterinaryFields = ({
     if (!formData.service_details.VeterinaryDetails) {
       handleNestedChange('VeterinaryDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.VeterinaryDetails, handleNestedChange]);
 
   const veterinaryDetails = formData.service_details.VeterinaryDetails || {};
   const additionalServices = veterinaryDetails.additionalServices || [];

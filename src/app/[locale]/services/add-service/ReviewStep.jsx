@@ -1,6 +1,7 @@
 'use client';
 
 import { FaClipboardList, FaInfoCircle, FaAlignLeft, FaMapMarkerAlt, FaCog, FaImages, FaLink, FaPhone, FaEnvelope, FaGlobe, FaMap, FaClock, FaCalendarAlt, FaTag, FaCheck, FaTimes } from 'react-icons/fa';
+import Image from 'next/image';
 
 const InfoRow = ({ label, value, icon: Icon }) => (
   <div className="flex items-start gap-3 py-2 border-b border-gray-100 last:border-0">
@@ -205,10 +206,12 @@ const ReviewStep = ({ formData }) => {
                 {formData.images.map((image, index) => (
                   image && (
                     <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <img
+                      <Image
                         src={image}
                         alt={`Service image ${index + 1}`}
                         className="w-full h-full object-cover"
+                        width={200}
+                        height={200}
                       />
                     </div>
                   )
@@ -248,4 +251,4 @@ const ReviewStep = ({ formData }) => {
   );
 };
 
-export default ReviewStep; 
+export default ReviewStep;

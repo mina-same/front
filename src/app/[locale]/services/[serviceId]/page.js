@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   MapPin, Phone, Mail, Calendar, Clock, Award, Users, Heart, Share2, Star, Shield, ChevronLeft, ChevronRight,
-  CheckCircle, AlertTriangle, X, Link2, Instagram, Facebook, Youtube, Twitter, Linkedin, TikTok
+  CheckCircle, AlertTriangle, X, Link2, Instagram, Facebook, Youtube, Twitter, Linkedin, TikTok, Info
 } from 'lucide-react';
 import { FaPinterest, FaInstagram, FaFacebook, FaYoutube, FaLinkedin, FaTwitter, FaTiktok } from "react-icons/fa";
 import { client, urlFor } from '../../../../lib/sanity';

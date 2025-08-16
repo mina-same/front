@@ -7,7 +7,6 @@ import { Star, Book, User, Heart, Loader2 } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { client } from "../../../lib/sanity";
-import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
@@ -138,9 +137,9 @@ import { v4 as uuidv4 } from "uuid";
       toast.error(
         <div>
           {t("authRequired.message")} {" "}
-          <a href="/login" className="text-blue-600 hover:underline">
+          <Link href="/login" className="text-blue-600 hover:underline">
             {t("authRequired.loginLink")}
-          </a>
+          </Link>
         </div>
       );
       router.push("/login");
