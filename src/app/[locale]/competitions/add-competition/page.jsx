@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -138,7 +138,7 @@ const CreateCompetition = () => {
     loadCities();
   }, [selectedGovernorate]);
 
-  const verifyAuth = async () => {
+  const verifyAuth = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify', {
         method: 'GET',
@@ -170,7 +170,7 @@ const CreateCompetition = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router, toast, t]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

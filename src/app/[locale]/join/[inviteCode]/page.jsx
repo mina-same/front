@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +41,7 @@ const InvitationPage = () => {
 
   useEffect(() => {
     verifyAuth();
-  }, [router]);
+  }, [verifyAuth]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -49,7 +49,7 @@ const InvitationPage = () => {
     }
   }, [isAuthenticated, inviteCode, fetchInvitation]);
 
-  const verifyAuth = async () => {
+  const verifyAuth = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/verify', {
         method: 'GET',
@@ -72,9 +72,9 @@ const InvitationPage = () => {
       // Still try to fetch invitation even if auth fails
       fetchInvitation();
     }
-  };
+  }, [fetchInvitation]);
 
-  const fetchInvitation = async () => {
+  const fetchInvitation = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/invitations/${inviteCode}`);
@@ -96,7 +96,7 @@ const InvitationPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [inviteCode]);
 
   const handleAccept = async () => {
     if (!horseName.trim() || !surpriseHorseName.trim()) {

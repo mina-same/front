@@ -1,7 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from 'react-i18next';
+import Image from "next/image";
 import Layout from "components/layout/Layout";
 import Preloader from "components/elements/Preloader";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,26 @@ const EditCompetitionPage = () => {
     addressDetails: ""
   });
 
+  const loadManagementData = useCallback(async (userId) => {
+    try {
+      const response = await fetch(`/api/competitions/${id}/manage?userId=${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCompetitors(data.competitors || []);
+        setInvitations(data.invitations || []);
+      }
+
+      // Load invite link
+      const linkResponse = await fetch(`/api/competitions/${id}/invite-link?userId=${userId}`);
+      if (linkResponse.ok) {
+        const linkData = await linkResponse.json();
+        setInviteLink(linkData.inviteLink || "");
+      }
+    } catch (error) {
+      console.error("Error loading management data:", error);
+    }
+  }, [id]);
+
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -130,27 +151,7 @@ const EditCompetitionPage = () => {
         setLoading(false);
       }
     })();
-  }, [id, locale, router]);
-
-  const loadManagementData = async (userId) => {
-    try {
-      const response = await fetch(`/api/competitions/${id}/manage?userId=${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setCompetitors(data.competitors || []);
-        setInvitations(data.invitations || []);
-      }
-
-      // Load invite link
-      const linkResponse = await fetch(`/api/competitions/${id}/invite-link?userId=${userId}`);
-      if (linkResponse.ok) {
-        const linkData = await linkResponse.json();
-        setInviteLink(linkData.inviteLink || "");
-      }
-    } catch (error) {
-      console.error("Error loading management data:", error);
-    }
-  };
+  }, [id, locale, router, loadManagementData]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -623,13 +624,13 @@ const EditCompetitionPage = () => {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
                             {user.imageUrl ? (
-                              <img src={user.imageUrl} alt={user.name} className="w-full h-full object-cover" />
+                              <Image src={user.imageUrl} alt={user.name} width={40} height={40} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-500">
                                 <Users className="w-5 h-5" />
                               </div>
                             )}
-              </div>
+                          </div>
               <div>
                             <p className="font-medium">{user.fullName || user.name}</p>
                             <p className="text-sm text-gray-500">{user.userName || user.email}</p>
@@ -668,13 +669,13 @@ const EditCompetitionPage = () => {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                           {competitor.user?.imageUrl ? (
-                            <img src={competitor.user.imageUrl} alt={competitor.user.name} className="w-full h-full object-cover" />
+                            <Image src={competitor.user.imageUrl} alt={competitor.user.name} width={48} height={48} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-500">
                               <Users className="w-6 h-6" />
                             </div>
                           )}
-              </div>
+                        </div>
               <div>
                           <p className="font-medium">{competitor.user?.fullName || competitor.user?.name}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500">

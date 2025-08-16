@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import Layout from "components/layout/Layout";
 import Preloader from "components/elements/Preloader";
+import EditHorseModal from "@/components/ui/EditHorseModal";
 
 const EnhancedCompetitionPage = () => {
   const { competitionsId: id, locale } = useParams();
@@ -62,11 +64,7 @@ const EnhancedCompetitionPage = () => {
   const [editHorseModal, setEditHorseModal] = useState({ open: false, competitorId: null, surpriseHorseName: '', activeHorse: 'main' });
 
   // Fetch competition data
-  useEffect(() => {
-    fetchCompetitionData();
-  }, [id, fetchCompetitionData]);
-
-  const fetchCompetitionData = async () => {
+  const fetchCompetitionData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -160,7 +158,12 @@ const EnhancedCompetitionPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, router, toast]);
+
+  useEffect(() => {
+    fetchCompetitionData();
+  }, [fetchCompetitionData]);
+
   const canEditParticipants = () => {
     if (!competition?.date || !currentUserId) return false;
     const startsAt = new Date(competition.date);
@@ -563,7 +566,7 @@ const EnhancedCompetitionPage = () => {
           <div className="text-center">
             <div className="text-6xl mb-4">🏇</div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">Competition Not Found</h3>
-            <p className="text-gray-600 mb-6">The competition you're looking for doesn't exist.</p>
+            <p className="text-gray-600 mb-6">The competition you&apos;re looking for doesn&apos;t exist.</p>
             <Button onClick={() => router.push('/competitions')}>
               Back to Competitions
             </Button>
@@ -1153,13 +1156,12 @@ const GiftSelectionModal = ({
                 <div className="flex items-center justify-center gap-4 bg-gradient-to-r from-white/60 via-gray-50/60 to-white/60 backdrop-blur-sm rounded-2xl p-4 border border-amber-500/30 shadow-xl">
                   <div className="relative group">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-amber-400/70 shadow-2xl shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <img
-                        src={selectedCompetitor.image}
+                      <Image
+                        src={selectedCompetitor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompetitor.horseName)}&size=200&background=f59e0b&color=ffffff`}
                         alt={selectedCompetitor.horseName}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        onError={(e) => {
-                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompetitor.horseName)}&size=200&background=f59e0b&color=ffffff`;
-                        }}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="64px"
                       />
                     </div>
                     <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full p-1 shadow-lg animate-bounce">
@@ -1471,13 +1473,12 @@ const CompetitorProfile = ({
             </div>
           ) : (
             <>
-              <img
-                src={competitor.image}
+              <Image
+                src={competitor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(competitor.horseName || competitor.name)}&size=300&background=e5e7eb&color=374151`}
                 alt={`${competitor.horseName || competitor.name} profile`}
-                className="w-full h-full object-cover group-hover/image:scale-110 transition-transform duration-700"
-                onError={(e) => {
-                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(competitor.horseName || competitor.name)}&size=300&background=e5e7eb&color=374151`;
-                }}
+                fill
+                className="object-cover group-hover/image:scale-110 transition-transform duration-700"
+                sizes="300px"
               />
               <div
                 className={`absolute inset-0 bg-gradient-to-t ${isChampion ? "from-amber-500/10 to-transparent" : "from-purple-500/10 to-transparent"}`}
@@ -1608,11 +1609,13 @@ const CompetitorProfile = ({
                     <div className={`absolute inset-0 bg-gradient-to-r ${colors.gradient} blur-xl opacity-30 rounded-xl animate-pulse`}></div>
                     <div className={`relative flex items-center gap-3 bg-white/80 backdrop-blur-sm p-3 rounded-xl border-2 ${colors.border} shadow-lg`}>
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg">
-                          <img 
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg relative">
+                          <Image 
                             src={competitor.topGiftGiver.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(competitor.topGiftGiver.name)}&size=100&background=f59e0b&color=ffffff`}
                             alt={competitor.topGiftGiver.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="48px"
                           />
                         </div>
                         <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full p-1 shadow-lg">
@@ -1639,11 +1642,13 @@ const CompetitorProfile = ({
                   .slice(0, 8)
                   .map((giver) => (
                     <div key={giver.id} className="relative group/giver" title={giver.name}>
-                      <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-300 shadow-md group-hover/giver:scale-110 transition-transform duration-300">
-                        <img 
+                      <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-300 shadow-md group-hover/giver:scale-110 transition-transform duration-300 relative">
+                        <Image 
                           src={giver.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(giver.name)}&size=100&background=e5e7eb&color=374151`}
                           alt={giver.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="32px"
                         />
                       </div>
                       <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full p-0.5 shadow-sm hidden group-hover/giver:block transition-all duration-300">

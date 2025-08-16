@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
@@ -45,8 +45,41 @@ const Index = () => {
   const [selectedCity, setSelectedCity] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
 
+  // Fetch competitions when filters change
   useEffect(() => {
-    fetchCompetitions();
+    (async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (selectedCountry) params.append('country', selectedCountry);
+        if (selectedGovernorate) params.append('governorate', selectedGovernorate);
+        if (selectedCity) params.append('city', selectedCity);
+        
+        const res = await fetch(`/api/competitions?${params.toString()}`);
+        const data = await res.json();
+        setCompetitions(data.competitions || []);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [selectedCountry, selectedGovernorate, selectedCity]);
+
+  const fetchCompetitions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/competitions');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch competitions');
+      }
+
+      const data = await response.json();
+      setCompetitions(data.competitions || []);
+    } catch (error) {
+      console.error('Error fetching competitions:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   // Verify auth to know current user
@@ -145,24 +178,6 @@ const Index = () => {
       }
     })();
   }, [selectedCity]);
-
-  const fetchCompetitions = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/competitions');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch competitions');
-      }
-
-      const data = await response.json();
-      setCompetitions(data.competitions || []);
-    } catch (error) {
-      console.error('Error fetching competitions:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
