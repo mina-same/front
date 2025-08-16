@@ -5,6 +5,7 @@ import Layout from '../../../../../../components/layout/Layout';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
 import { client } from '@/lib/sanity';
+import Preloader from '../../../../../../components/elements/Preloader';
 import imageUrlBuilder from '@sanity/image-url'; // Added for image URLs
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';

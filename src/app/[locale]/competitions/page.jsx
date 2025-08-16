@@ -93,7 +93,7 @@ const Index = () => {
         setLoading(false);
       }
     })();
-  }, [selectedCountry]);
+  }, [selectedCountry, fetchCompetitions]);
 
   useEffect(() => {
     if (!selectedGovernorate) {
@@ -128,7 +128,7 @@ const Index = () => {
         setLoading(false);
       }
     })();
-  }, [selectedGovernorate]);
+  }, [selectedGovernorate, selectedCountry]);
 
   useEffect(() => {
     if (!selectedCity) return;

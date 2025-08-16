@@ -159,9 +159,9 @@ const ProductCard = ({ product, viewMode }) => {
                 toast.error(
                     <div>
                         You must be logged in to add items to your cart.{" "}
-                        <a href="/login" className="text-blue-600 hover:underline">
+                        <Link href="/login" className="text-blue-600 hover:underline">
                             Log in here
-                        </a>
+                        </Link>
                     </div>
                 );
                 router.push("/login");

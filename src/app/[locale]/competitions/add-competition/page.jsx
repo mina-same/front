@@ -78,7 +78,7 @@ const CreateCompetition = () => {
 
   useEffect(() => {
     verifyAuth();
-  }, []);
+  }, [verifyAuth, router]);
 
   // Fetch countries once
   useEffect(() => {

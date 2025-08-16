@@ -81,7 +81,7 @@ const StableClient = () => {
     };
 
     verifyAuth();
-  }, [router, t]);
+  }, [router, t, hasStable]);
 
   const handleSubmit = async (formData) => {
     try {

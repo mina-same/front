@@ -41,13 +41,13 @@ const InvitationPage = () => {
 
   useEffect(() => {
     verifyAuth();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchInvitation();
     }
-  }, [isAuthenticated, inviteCode]);
+  }, [isAuthenticated, inviteCode, fetchInvitation]);
 
   const verifyAuth = async () => {
     try {

@@ -165,6 +165,8 @@ function ProductFilter({
     initialProducts,
     onFilterChange,
     maxPrice,
+    CATEGORY_OPTIONS,
+    LISTING_TYPE_OPTIONS
   ]);
 
   const resetFilters = () => {

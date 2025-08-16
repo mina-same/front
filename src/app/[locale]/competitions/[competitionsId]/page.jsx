@@ -64,7 +64,7 @@ const EnhancedCompetitionPage = () => {
   // Fetch competition data
   useEffect(() => {
     fetchCompetitionData();
-  }, [id]);
+  }, [id, fetchCompetitionData]);
 
   const fetchCompetitionData = async () => {
     try {

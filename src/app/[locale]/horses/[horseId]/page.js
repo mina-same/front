@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Preloader from 'components/elements/Preloader';
 
 const Alert = ({ message, isVisible, onClose, type }) => (
     <AnimatePresence>
