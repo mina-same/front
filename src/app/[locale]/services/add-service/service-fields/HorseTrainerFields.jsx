@@ -16,7 +16,7 @@ const HorseTrainerFields = ({
     if (!formData.service_details.horse_trainer) {
       handleNestedChange('horse_trainer', '', {});
     }
-  }, []);
+  }, [formData.service_details.horse_trainer, handleNestedChange]);
 
   const trainerDetails = formData.service_details.horse_trainer || {};
   const additionalServices = trainerDetails.additionalServices || [];

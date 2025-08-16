@@ -13,7 +13,7 @@ const ConsultingServicesFields = ({
     if (!formData.service_details.consultingServicesDetails) {
       handleNestedChange('consultingServicesDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.consultingServicesDetails, handleNestedChange]);
 
   const inputClass = (errorField) => `
     w-full p-4 pt-3 pb-3 rounded-xl transition-all duration-200

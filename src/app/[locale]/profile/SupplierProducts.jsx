@@ -102,7 +102,7 @@ const SupplierProducts = ({ userId }) => {
     if (products.length > 0) {
       fetchAllProductOrders();
     }
-  }, [products]);
+  }, [products, fetchProductOrders, ordersByProduct]);
 
   useEffect(() => {
     let filtered = [...products];

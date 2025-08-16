@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   User,
   Edit,
@@ -49,12 +49,7 @@ const Overview = ({ userData }) => {
   const locale = i18n.language;
   const isRTL = locale === "ar";
 
-  // Fetch invitations when component mounts
-  useEffect(() => {
-    fetchUserInvitations();
-  }, []);
-
-  const fetchUserInvitations = async () => {
+  const fetchUserInvitations = useCallback(async () => {
     try {
       setLoadingInvitations(true);
       
@@ -136,7 +131,12 @@ const Overview = ({ userData }) => {
     } finally {
       setLoadingInvitations(false);
     }
-  };
+  }, []);
+
+  // Fetch invitations when component mounts
+  useEffect(() => {
+    fetchUserInvitations();
+  }, [fetchUserInvitations]);
 
   const handleJoinCompetition = (inviteLink) => {
     const inviteCode = inviteLink.split('/').pop();

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   User,
@@ -50,7 +50,7 @@ const Profile = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const validTabs = [
+  const validTabs = useMemo(() => [
     "overview",
     "settings",
     "billing",
@@ -63,7 +63,7 @@ const Profile = () => {
     "supplier_products",
     "stable_owner",
     "signout",
-  ];
+  ], []);
 
   useEffect(() => {
     const tabFromQuery = searchParams.get("tab");

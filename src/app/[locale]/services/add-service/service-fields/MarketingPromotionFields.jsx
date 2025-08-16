@@ -17,7 +17,7 @@ const MarketingPromotionFields = ({
     if (!formData.service_details.marketing_promotion) {
       handleNestedChange('marketing_promotion', '', {});
     }
-  }, []);
+  }, [formData.service_details.marketing_promotion, handleNestedChange]);
 
   const marketingDetails = formData.service_details.marketing_promotion || {};
   const portfolioLinks = marketingDetails.portfolioLinks || [];

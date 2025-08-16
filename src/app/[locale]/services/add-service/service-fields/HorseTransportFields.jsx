@@ -13,7 +13,7 @@ const HorseTransportFields = ({
     if (!formData.service_details.transportDetails) {
       handleNestedChange('transportDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.transportDetails, handleNestedChange]);
 
   const transportDetails = formData.service_details.transportDetails || {};
 

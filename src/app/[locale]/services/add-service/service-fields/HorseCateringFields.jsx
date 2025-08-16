@@ -16,7 +16,7 @@ const HorseCateringFields = ({
     if (!formData.service_details.horse_catering) {
       handleNestedChange('horse_catering', '', {});
     }
-  }, []);
+  }, [formData.service_details.horse_catering, handleNestedChange]);
 
   const cateringDetails = formData.service_details.horse_catering || {};
   const additionalServices = cateringDetails.additionalServices || [];

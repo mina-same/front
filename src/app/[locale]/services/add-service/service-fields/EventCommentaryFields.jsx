@@ -13,7 +13,7 @@ const EventCommentaryFields = ({
     if (!formData.service_details.eventCommentaryDetails) {
       handleNestedChange('eventCommentaryDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.eventCommentaryDetails, handleNestedChange]);
 
   const commentaryDetails = formData.service_details.eventCommentaryDetails || {};
   const portfolioLink = commentaryDetails.portfolioLink || {};

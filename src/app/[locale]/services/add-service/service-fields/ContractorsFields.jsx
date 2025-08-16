@@ -13,7 +13,7 @@ const ContractorsFields = ({
     if (!formData.service_details.contractorsDetails) {
       handleNestedChange('contractorsDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.contractorsDetails, handleNestedChange]);
 
   const contractorsDetails = formData.service_details.contractorsDetails || {};
   const serviceTypes = contractorsDetails.serviceTypes || [];

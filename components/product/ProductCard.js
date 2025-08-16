@@ -97,9 +97,9 @@ const ProductCard = ({ product, viewMode }) => {
             toast.error(
                 <div>
                     {t('productCard.loginRequired')}{" "}
-                    <a href="/login" className="text-blue-600 hover:underline">
+                    <Link href="/login" className="text-blue-600 hover:underline">
                         {t('productCard.loginHere')}
-                    </a>
+                    </Link>
                 </div>
             );
             router.push("/login");

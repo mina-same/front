@@ -12,7 +12,7 @@ const HousingFields = ({
     if (!formData.service_details.housingDetails) {
       handleNestedChange('housingDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.housingDetails, handleNestedChange]);
 
   const housingDetails = formData.service_details.housingDetails || {};
   

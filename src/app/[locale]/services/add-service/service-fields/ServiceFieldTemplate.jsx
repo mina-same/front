@@ -12,7 +12,7 @@ const ServiceFieldTemplate = ({
     if (!formData.service_details.templateDetails) {
       handleNestedChange('templateDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.templateDetails, handleNestedChange]);
 
   const templateDetails = formData.service_details.templateDetails || {};
   

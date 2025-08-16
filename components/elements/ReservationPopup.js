@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import Image from 'next/image';
+import Link from 'next/link';
 import { client } from "@/lib/sanity";
 import imageUrlBuilder from "@sanity/image-url";
 import { X, Calendar, User, Star, ChevronRight, ChevronLeft, Plus, Minus, Loader2, CheckCircle, AlertTriangle, Award, Tag } from "lucide-react";
@@ -621,10 +623,12 @@ const ReservationPopup = ({
           >
             <div className="flex items-center p-4">
               {service.images && service.images[0] && service.images[0].asset ? (
-                <img
+                <Image
                   src={urlFor(service.images[0]).width(64).height(64).url()}
                   alt={isRTL ? service.name_ar : service.name_en}
                   className="w-16 h-16 object-cover rounded-lg mr-4"
+                  width={64}
+                  height={64}
                 />
               ) : (
                 <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg flex items-center justify-center mr-4">
@@ -910,10 +914,12 @@ const ReservationPopup = ({
             >
               <div className="flex items-center p-4">
                 {service.images && service.images[0] && service.images[0].asset ? (
-                  <img
+                  <Image
                     src={urlFor(service.images[0]).width(48).height(48).url()}
                     alt={isRTL ? service.name_ar : service.name_en}
                     className="w-12 h-12 object-cover rounded-lg mr-4"
+                    width={48}
+                    height={48}
                   />
                 ) : (
                   <div className="w-12 h-12 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg flex items-center justify-center mr-4">
@@ -1100,13 +1106,13 @@ const ReservationPopup = ({
         <AlertTriangle size={20} className="mr-2" />
         <p>
           {t("reservationPopup:noHorsesMessage")}{" "}
-          <a
+          <Link
             href="/profile?tab=horses"
             className="text-yellow-600 underline hover:text-yellow-700"
             onClick={onClose}
           >
             {t("reservationPopup:addHorseLink")}
-          </a>
+          </Link>
         </p>
       </div>
       <motion.button

@@ -119,7 +119,7 @@ const FavoritesPage = ({ userId }) => {
     } finally {
       setLoading(false);
     }
-  }, [filter, userId]);
+  }, [filter, userId, t]);
 
   useEffect(() => {
     fetchFavorites();

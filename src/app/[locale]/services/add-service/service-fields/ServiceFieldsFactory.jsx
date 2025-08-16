@@ -56,7 +56,7 @@ const ServiceFieldsFactory = ({
         handleNestedChange(serviceDetailKey, '', {});
       }
     }
-  }, [serviceType, formData, handleNestedChange]);
+  }, [serviceType, formData, handleNestedChange, serviceDetailKeyMap]);
 
   // Define props for child components
   const componentProps = {

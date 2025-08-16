@@ -16,7 +16,7 @@ const SuppliersFields = ({
     if (!formData.service_details.suppliers) {
       handleNestedChange('suppliers', '', {});
     }
-  }, []);
+  }, [formData.service_details.suppliers, handleNestedChange]);
 
   const supplierDetails = formData.service_details.suppliers || {};
   const products = supplierDetails.products || [];

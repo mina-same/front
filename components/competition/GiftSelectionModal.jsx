@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Image from 'next/image';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "../../src/components/ui/button";
 import { Badge } from "../../src/components/ui/badge";
@@ -150,12 +151,18 @@ const GiftSelectionModal = ({
                 <div className="flex items-center justify-center gap-6 bg-gradient-to-r from-white/60 via-gray-50/60 to-white/60 backdrop-blur-sm rounded-3xl p-6 border border-amber-500/30 shadow-xl hover:shadow-2xl transition-all duration-500">
                   <div className="relative group">
                     <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-amber-400/70 shadow-2xl shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
-                      <img
-                        src={selectedCompetitor.image}
+                      <Image
+                        src={selectedCompetitor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompetitor.horseName)}&size=200&background=f59e0b&color=ffffff`}
                         alt={selectedCompetitor.horseName}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        width={200}
+                        height={200}
                         onError={(e) => {
-                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompetitor.horseName)}&size=200&background=f59e0b&color=ffffff`;
+                          // Handle error by setting fallback image
+                          const fallbackSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCompetitor.horseName)}&size=200&background=f59e0b&color=ffffff`;
+                          if (e.target.src !== fallbackSrc) {
+                            e.target.src = fallbackSrc;
+                          }
                         }}
                       />
                     </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Badge } from "../../src/components/ui/badge";
 import { Button } from "../../src/components/ui/button";
 import { Crown, Star, Gift, Zap, Flame, Trophy, Medal } from "lucide-react";
@@ -98,12 +99,18 @@ const CompetitorProfile = ({
             </div>
           ) : (
             <>
-              <img 
-                src={competitor.image} 
+              <Image 
+                src={competitor.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(competitor.horseName || competitor.name)}&size=300&background=e5e7eb&color=374151`}
                 alt={`${competitor.horseName || competitor.name} profile`}
                 className="w-full h-full object-cover group-hover/image:scale-110 transition-transform duration-700"
+                width={300}
+                height={300}
                 onError={(e) => {
-                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(competitor.horseName || competitor.name)}&size=300&background=e5e7eb&color=374151`;
+                  // Handle error by setting fallback image
+                  const fallbackSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(competitor.horseName || competitor.name)}&size=300&background=e5e7eb&color=374151`;
+                  if (e.target.src !== fallbackSrc) {
+                    e.target.src = fallbackSrc;
+                  }
                 }}
               />
               

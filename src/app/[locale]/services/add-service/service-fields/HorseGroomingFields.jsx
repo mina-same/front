@@ -17,7 +17,7 @@ const HorseGroomingFields = ({
     if (!formData.service_details.horseGroomingDetails) {
       handleNestedChange('horseGroomingDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.horseGroomingDetails, handleNestedChange]);
 
   const groomingDetails = formData.service_details.horseGroomingDetails || {};
   const additionalServices = groomingDetails.additionalServices || [];

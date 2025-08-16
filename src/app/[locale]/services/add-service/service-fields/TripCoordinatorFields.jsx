@@ -16,7 +16,7 @@ const TripCoordinatorFields = ({
     if (!formData.service_details.tripCoordinator) {
       handleNestedChange('tripCoordinator', '', {});
     }
-  }, []);
+  }, [formData.service_details.tripCoordinator, handleNestedChange]);
 
   const meals = formData.service_details?.tripCoordinator?.meals || [];
   const labelClass = "absolute -top-2.5 left-4 bg-white px-2 text-xs font-medium text-black rounded-md";

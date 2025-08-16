@@ -1,7 +1,8 @@
-  "use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Star, Book, User, Heart, Loader2 } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";

@@ -13,7 +13,7 @@ const PhotographyServicesFields = ({
     if (!formData.service_details.photography_services) {
       handleNestedChange('photography_services', '', {});
     }
-  }, []);
+  }, [formData.service_details.photography_services, handleNestedChange]);
 
   const photographyDetails = formData.service_details.photography_services || {};
   const portfolioLink = photographyDetails.portfolioLink || {};

@@ -14,7 +14,7 @@ const EventJudgingFields = ({
     if (!formData.service_details.eventJudgingDetails) {
       handleNestedChange('eventJudgingDetails', '', {});
     }
-  }, []);
+  }, [formData.service_details.eventJudgingDetails, handleNestedChange]);
 
   const eventJudgingDetails = formData.service_details.eventJudgingDetails || {};
   const eventTypes = eventJudgingDetails.eventTypes || [];
